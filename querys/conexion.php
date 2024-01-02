@@ -14,13 +14,13 @@ $databaseR = "servico1_digitapp2024"; // Change to your database name
 
 
 // Create a connection local
-$conexion = new mysqli($servername, $username, $password, $database);
+// $conexion = new mysqli($servername, $username, $password, $database);
 
 
 
 
 // Create a connection Remota
-// $conexion = new mysqli($servernameR, $usernameR, $passwordR, $databaseR);
+$conexion = new mysqli($servernameR, $usernameR, $passwordR, $databaseR);
 
 // Check the connection
 // if ($conexion->connect_error) {
