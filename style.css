@@ -1,0 +1,23 @@
+
+body{
+    margin-top: 90px;
+    color: azure;
+    background-image: linear-gradient(to top, #1e3c72 0%, #1e3c72 1%, #2a5298 100%);
+    background-size: cover; /* La imagen se ajustará al tamaño del contenedor */
+    background-position: center;
+    /* height: 300vh; */
+    
+}
+
+.contain{
+    /* background-color: rgba(240, 248, 255, 0.229); */
+    background-color: rgba(70, 70, 70, 0.5);
+    
+}
+
+.select2-results__option{
+    color: black;
+}
+
+
+

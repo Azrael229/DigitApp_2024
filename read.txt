@@ -1,0 +1,18 @@
+2023/12/25
+
+crear search empresas para pagina contactos
+
+
+Crear FPDF del Informe metrologico con margenes y campo de trabajo
+
+crear FPDF de la Cotizacion con margenes y campo de trabajo
+
+-----En FPDF el ancho utilizable es de 196
+-----En FPDF el alto utilizable es de 349
+
+coordenadas :
+top horizontal
+$fpdf-> Line(10,10,206,10);
+bottom horizontal
+$fpdf-> Line(10,270,206,270);
+
