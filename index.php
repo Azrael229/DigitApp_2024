@@ -15,7 +15,7 @@
     </div>
     <!-- row de titulo -->
 
-    <!-- row de Tabla -->
+    <!-- row de Tabla cotizaciones -->
     <div class="row border-top justify-content-center ">
         <!-- titulo de tabla  -->
         <div class="row">
@@ -61,7 +61,7 @@
         </div>
         <!-- tabla  -->
     </div>
-    <!-- row de Tabla -->
+    <!-- row de Tabla cotizaciones -->
 
     <!--Seccion calendario -->
     <div class="row border-top mt-4 justify-content-center">
@@ -72,43 +72,65 @@
         <!-- titulo -->
 
         <!-- calendario cuadricula -->
-        <div class="col mt-5  mb-5">
-            <div class="calendar">
-                <div class="month">
-                    <h4>Enero</h4>
+        <h1 class="text-center mt-4 mb-3">Meses del Año</h1>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+            <div class="col">
+                <div class="month">Enero
                     <?php foreach($res_notas_enero as $nota_enero): ?>
                         <p><i class="bi bi-record-fill" id="dot"></i> <?php echo $nota_enero['registro']   ?>    </p>
                     <?php endforeach; ?>
                 </div>
-                <div class="month">
-                    Febrero
-                    <!-- <a href="docs/" download>hola</a> -->
-                </div>
+            </div>
+            <div class="col">
+                <div class="month">Febrero</div>
+            </div>
+            <div class="col">
                 <div class="month">Marzo</div>
+            </div>
+            <div class="col">
                 <div class="month">Abril</div>
+            </div>
+            <div class="col">
                 <div class="month">Mayo</div>
+            </div>
+            <div class="col">
                 <div class="month">Junio</div>
+            </div>
+            <div class="col">
                 <div class="month">Julio</div>
+            </div>
+            <div class="col">
                 <div class="month">Agosto</div>
+            </div>
+            <div class="col">
                 <div class="month">Septiembre</div>
+            </div>
+            <div class="col">
                 <div class="month">Octubre</div>
+            </div>
+            <div class="col">
                 <div class="month">Noviembre</div>
+            </div>
+            <div class="col">
                 <div class="month">Diciembre</div>
-            </div>  
+            </div>
         </div>
         <!-- calendario cuadricula -->
 
+        
+
+
         <!--Seccion Inputs -->
-        <div class="row mb-5">
+        <div class="row mt-5 mb-5">
 
             <!-- col SUBIR NOTAS Y ARCHIVOS -->
-            <div class=" col-lg-4  p-4 shadow-lg rounded" id="card_subir_archivos">
+            <div class="col col-lg-4  p-4 shadow-lg rounded" id="card_subir_archivos">
                 <!-- formulario para subir notas a los meses del calendario -->
                 <!-- action="querys/add_nota_calendar.php" method="POST" enctype="multipart/form-data" -->
                 <form id="form_notas_calendar" >
                     <!-- fila del SELECT             -->
                     <div class="row mb-4 justify-content-center">
-                        <div class="col-10">
+                        <div class="col col-lg-10">
                             <label for="">Selccionar Mes</label>
                             <select name="sel_id_mes" id="" class="form-control">
                                 <option value="">Mes</option>

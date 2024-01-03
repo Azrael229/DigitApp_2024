@@ -16,7 +16,7 @@
     <!-- boton submit del formulario -->
     <div class="row">
         <div class="d-grid gap-2 col-4 mx-auto mb-4 ">
-            <button name="" id="btn_guardar"  type="submit" class="btn btn-success"> GUARDAR COTIZACION Y VER PDF</button>                
+            <button name="" id="btn_guardar"  type="submit" class="btn btn-success"> GUARDAR Y VER PDF</button>                
         </div>
     </div>
     <!-- boton submit del formulario -->
@@ -25,20 +25,34 @@
     <!-- Sección Control de Cotizacion -->
     <div class="row">
         <div class="col border-top ">
-            <div class="row mt-5 mb-5">
-                <div class="col-lg-4 mb-4">
-                    <label >No. de Cotización</label>
-                    <input type="text" id="numero_coti" name="numero_coti">
+            <!-- fila de No cotizacion -->
+                <div class="row mt-5 mb-4">
+                    <div class="col col-lg-2 ">
+                        <label >No. Cotización</label>
+                    </div>
+                    <div class="col ">
+                        <input type="text" id="numero_coti" name="numero_coti">
+                    </div>
                 </div>
-                <div class="col-4">
-                    <label >Fecha</label>
-                    <input type="date" name="coti_fecha">
+            <!-- fila de fecha de cotizacion -->
+                <div class="row mb-4">
+                    <div class="col col-lg-2 ">
+                        <label >Fecha</label>
+                    </div>
+                    <div class="col  ">
+                        <input type="date" name="coti_fecha">
+                    </div>
                 </div>
-                <div class="col-4">
-                    <label >Fecha Vigencia</label>
-                    <input type="date" name="coti_vigencia">
+            <!-- fila de vigencia de cotizacion -->
+                <div class="row mb-5">
+                    <div class="col col-lg-2 ">
+                        <label >Fecha Vigencia</label>
+                    </div>
+                    <div class="col ">
+                        <input type="date" name="coti_vigencia">
+                    </div>
                 </div>
-            </div>
+            <!-- fin de las filas -->
         </div>
     </div>
     <!-- Sección Control de Cotizacion -->
@@ -52,8 +66,8 @@
 
         <!-- Select Contacto -->
         <div class="row text-center mb-3">
-            <div class="col-5 mb-4">
-                <select class="select form-control" name="select_contacto" id="select_contacto" onchange="selectContacto()">
+            <div class="col col-lg-5 mb-4">
+                <select class=" form-control" name="select_contacto" id="select_contacto" onchange="selectContacto()">
 
                     <option value"">Seleccionar Contacto</option>
                     <?php foreach($result_contactos as $fila):  ?>
@@ -314,11 +328,11 @@
                         <label class="form-check-label" for=""> No incluye costos de envío. </label>
                     </div>
                     
-                    <!-- nota 7 -->
+                    <!-- nota 7 text area-->
                     <div class="form-check mb-5 col-sm-8 col-lg-12">
                         <!-- <input class="form-check-input" type="checkbox" value="" id="" /> -->
                         <label class="form-check-label" for="">Ingresar Texto (máximo 85 caracteres)</label><br>
-                        <textarea name="notas7" id="notas7" cols="50" rows="3" style="resize: none;" maxlength="85"></textarea>
+                        <textarea class="col-12" name="notas7" id="notas7" cols="50" rows="3" style="resize: none;" maxlength="85"></textarea>
                     </div>
                 
                     <div class="form-check mb-4 ">

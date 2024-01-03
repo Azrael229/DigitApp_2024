@@ -123,7 +123,7 @@
           <!--Fila Tabla Data Table -->
           <div class="row">
                <!-- col Tabla -->
-               <div class="col p-5 border-top">
+               <div class="col  p-5 table-responsive border-top">
                     <!-- tabla -->
                     <table id="example" class="table table-secondary table-striped" style="width:100%;">
                          <thead>
