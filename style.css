@@ -43,6 +43,14 @@ body{
 }
 
 
+  
+.month {
+    color:black;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
 
 #card_subir_archivos{
     background-color: rgba(102, 102, 102, 0.316);

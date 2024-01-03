@@ -73,7 +73,7 @@
 
         <!-- calendario cuadricula -->
         <h1 class="text-center mt-4 mb-3">Meses del Año</h1>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mb-5" >
             <div class="col">
                 <div class="month">Enero
                     <?php foreach($res_notas_enero as $nota_enero): ?>
