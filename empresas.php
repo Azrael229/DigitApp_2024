@@ -119,41 +119,43 @@
           <!-- fila de datos de empresa -->
 
           
-          <!--Fila Tabla Data Table -->
+          <!--Fila Tabla Empresas Data Table -->
           <div class="row">
-               <!-- col Tabla -->
-               <div class="col p-5 table-responsive border-top">
-                    <!-- tabla -->
-                    <table id="example" class="table table-secondary table-striped" style="width:100%;">
-                         <thead>
-                              <tr>
-                                   <th>Nombre</th>
-                                   <th>Dirección de Entrega</th>
-                                   <th>Rfc</th>
-                                   <th>Rol</th>                                  
-                                   <th></th>
-                                   
-                              </tr>
-                         </thead>
-                         <tbody>
-
-                              <?php  foreach ($result_empresas as $row): ?>
+               <div class="col">
+                    <!-- col Tabla -->
+                    <div class="col p-5 table-responsive border-top" style="white-space: nowrap; " >
+                         <!-- tabla -->
+                         <table id="example" class="table table-secondary table-striped">
+                              <thead>
                                    <tr>
-                                        <td><?php echo $row['empresa'] ?></td>
-                                        <td><?php echo $row['dir_entrega'] ?></td>
-                                        <td><?php echo $row['rfc'] ?></td>
-                                        <td><?php echo $row['rol'] ?></td>
-                                        <td onclick="editar(<?php echo $row['id_e'] ?>)" style="cursor: pointer;">Editar</td>
+                                        <th>Nombre</th>
+                                        <th>Dirección de Entrega</th>
+                                        <th>Rfc</th>
+                                        <th>Rol</th>                                  
+                                        <th></th>
                                         
                                    </tr>
-                              <?php  endforeach;    ?>
+                              </thead>
+                              <tbody>
+
+                                   <?php  foreach ($result_empresas as $row): ?>
+                                        <tr>
+                                             <td><?php echo $row['empresa'] ?></td>
+                                             <td><?php echo $row['dir_entrega'] ?></td>
+                                             <td><?php echo $row['rfc'] ?></td>
+                                             <td><?php echo $row['rol'] ?></td>
+                                             <td onclick="editar(<?php echo $row['id_e'] ?>)" style="cursor: pointer;">Editar</td>
+                                             
+                                        </tr>
+                                   <?php  endforeach;    ?>
+                                   
+                              </tbody>
                               
-                         </tbody>
-                         
-                    </table>
-                    <!-- tabla -->
+                         </table>
+                         <!-- tabla -->
+                    </div>
+                    <!-- col Tabla -->
                </div>
-               <!-- col Tabla -->
           </div>
           <!-- Fila Tabla Data TAble -->
           

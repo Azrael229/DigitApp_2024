@@ -60,82 +60,84 @@
 
     <!-- Seccion datos del cliente -->
     <div class="row">
-        <div class="row text-center mb-3">
-            <h3>Datos del Cliente</h3>
+        <div class="col">
+            <div class="row text-center mb-3">
+                <h3>Datos del Cliente</h3>
+            </div>
+
+            <!-- Select Contacto -->
+            <div class="row text-center mb-3">
+                <div class="col col-lg-5 mb-4">
+                    <select class=" form-control" name="select_contacto" id="select_contacto" onchange="selectContacto()">
+
+                        <option value"">Seleccionar Contacto</option>
+                        <?php foreach($result_contactos as $fila):  ?>
+                        <option value="<?php echo $fila['id']; ?>"> <?php echo $fila['nombre']; ?>  </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <!-- Select Contacto -->
+
+
+            <!-- Datos contacto -->
+            <div class="col-lg-6">
+                <div class="row ">
+                    <div class="col-3">
+                        <label>Nombre</label>
+                    </div>
+                    <div class="col">
+                        <textarea name="nombre_contacto" id="nombre_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 ">
+                        <label>Teléfono</label>
+                    </div>
+                    <div class="col">
+                        <textarea name="cel_contacto" id="cel_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 ">
+                        <label>Correo</label>
+                    </div>
+                    <div class="col">
+                        <textarea name="correo_contacto" id="correo_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-3 ">
+                        <label>Departamento</label>
+                    </div>
+                    <div class="col">
+                        <textarea name="depto_contacto" id="depto_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
+                    </div>
+                </div>
+            </div>
+            <!-- Datos contacto -->
+
+            <!-- Datos Empresa -->
+            <div class="col-lg-6 ">
+                <div class="row">
+                    <div class="col-3 ">
+                        <label>Empresa</label>
+                    </div>
+                    <div class="col">
+                        <textarea name="nombre_empresa" id="nombre_empresa" cols="40" rows="1" style="resize: none;" ></textarea>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-3 ">
+                        <label>Dirección</label>
+                    </div>
+                    <div class="col">
+                        <textarea name="dir_empresa" id="dir_empresa" cols="40" rows="3" style="resize: none;" ></textarea>
+                    </div>
+                </div>
+            </div>
+            <!-- Datos Empresa -->
         </div>
-
-        <!-- Select Contacto -->
-        <div class="row text-center mb-3">
-            <div class="col col-lg-5 mb-4">
-                <select class=" form-control" name="select_contacto" id="select_contacto" onchange="selectContacto()">
-
-                    <option value"">Seleccionar Contacto</option>
-                    <?php foreach($result_contactos as $fila):  ?>
-                    <option value="<?php echo $fila['id']; ?>"> <?php echo $fila['nombre']; ?>  </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-        </div>
-        <!-- Select Contacto -->
-
-
-        <!-- Datos contacto -->
-        <div class="col-lg-6">
-            <div class="row ">
-                <div class="col-3">
-                    <label>Nombre</label>
-                </div>
-                <div class="col">
-                    <textarea name="nombre_contacto" id="nombre_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-3 ">
-                    <label>Teléfono</label>
-                </div>
-                <div class="col">
-                    <textarea name="cel_contacto" id="cel_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-3 ">
-                    <label>Correo</label>
-                </div>
-                <div class="col">
-                    <textarea name="correo_contacto" id="correo_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
-                </div>
-            </div>
-            <div class="row mb-4">
-                <div class="col-3 ">
-                    <label>Departamento</label>
-                </div>
-                <div class="col">
-                    <textarea name="depto_contacto" id="depto_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
-                </div>
-            </div>
-        </div>
-        <!-- Datos contacto -->
-
-        <!-- Datos Empresa -->
-        <div class="col-lg-6 ">
-            <div class="row">
-                <div class="col-3 ">
-                    <label>Empresa</label>
-                </div>
-                <div class="col">
-                    <textarea name="nombre_empresa" id="nombre_empresa" cols="40" rows="1" style="resize: none;" ></textarea>
-                </div>
-            </div>
-            <div class="row mb-4">
-                <div class="col-3 ">
-                    <label>Dirección</label>
-                </div>
-                <div class="col">
-                    <textarea name="dir_empresa" id="dir_empresa" cols="40" rows="3" style="resize: none;" ></textarea>
-                </div>
-            </div>
-        </div>
-        <!-- Datos Empresa -->
     </div>
     <!-- Seccion datos del cliente -->
                         

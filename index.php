@@ -25,26 +25,26 @@
         </div>
         <!-- titulo de tabla  -->
         <!-- tabla  -->
-        <div class="col-12 p-3">
-            <div class="table-responsive mb-5">
-                <table id="example" class="table table-secondary table-striped" style="width:100%">
+        <div class="row">
+            <div class="col  table-responsive" style="white-space: nowrap; " >
+                <table id="example" class="table table-secondary table-striped" >
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>FECHA</th>
-                            <th>EMPRESA</th>
-                            <th>CONTACTO</th>
-                            <th>IMPORTE</th>
-                            <th>DESCARGAR PDF</th>
-                            <th>NUMERO</th>
-                            <th>VIGENCIA</th>
+                            <th scope="col">ID</th>
+                            <th scope="col">FECHA</th>
+                            <th scope="col">EMPRESA</th>
+                            <th scope="col">CONTACTO</th>
+                            <th scope="col">IMPORTE</th>
+                            <th scope="col">DESCARGAR PDF</th>
+                            <th scope="col">NUMERO</th>
+                            <th scope="col">VIGENCIA</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach($result_cotizaciones as $row_coti): ?>
                         <tr>
                             <td><?php echo $row_coti['id_coti'] ?></td>
-                            <td><?php echo $row_coti['cot_fecha'] ?></td>
+                            <td ><?php echo $row_coti['cot_fecha'] ?></td>
                             <td><?php echo $row_coti['cot_empresa'] ?></td>
                             <td><?php echo $row_coti['cot_contacto'] ?></td>
                             <td>$ <?php echo $row_coti['cot_total'] ?></td>
@@ -124,7 +124,7 @@
         <div class="row mt-5 mb-5">
 
             <!-- col SUBIR NOTAS Y ARCHIVOS -->
-            <div class="col col-lg-4  p-4 shadow-lg rounded" id="card_subir_archivos">
+            <div class="col col-lg-5  p-4 shadow-lg rounded" id="card_subir_archivos">
                 <!-- formulario para subir notas a los meses del calendario -->
                 <!-- action="querys/add_nota_calendar.php" method="POST" enctype="multipart/form-data" -->
                 <form id="form_notas_calendar" >
@@ -151,16 +151,17 @@
                     </div>
                     <!-- fila del input nota  -->
                     <div class="row mb-4 justify-content-center">
-                        <div class="col-10">
+                        <div class="col col-lg-10">
                             <label for="">Ingresar Nota</label>
                             <input type="text" name="input_nota" class="col-12" >
                         </div>
                     </div>
                     <!-- fila del input file -->
                     <div class="row mb-4 justify-content-center">
-                        <div class="col-10">
-                            <label for="">Cargar archivos</label>
-                            <input type="file" name="input_file">
+                        <div class="col col-lg-10"  >
+                            <label for="" >Cargar archivos
+                            <input type="file" name="input_file" class="col-12 ">
+                            </label>
                         </div>
                     </div>
                     <!-- fila del boton -->
