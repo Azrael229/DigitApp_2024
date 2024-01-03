@@ -8,6 +8,7 @@
         <!-- titulo  -->
             <div class="row">
                 <div class="col text-center mt-3 mb-5">
+                    <h3><i class="bi bi-patch-check" id="ico_informe"></i></h3>
                     <h1>Informe de Pruebas Metrológicas</h1>
                 </div>
             </div>

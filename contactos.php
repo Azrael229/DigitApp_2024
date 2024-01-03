@@ -18,8 +18,9 @@
                     <!-- col datos del contacto -->
                          <div class="col-12  border-top p-3">
                                    <!-- titulo -->
-                                   <div class="row text-center p-3">
-                                             <h5>Contacto</h5>
+                                   <div class="row text-center p-3 mb-3">
+                                             <h5><i class="bi bi-person-fill" id="ico_contacto"></i></h5>
+                                             <h5>Contactos</h5>
                                    </div>
 
                                    <!-- formulario contacto -->

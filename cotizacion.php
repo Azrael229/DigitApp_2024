@@ -6,6 +6,7 @@
      <!-- titulo  -->
      <div class="row">
         <div class="col text-center mt-3 mb-5">
+            <h5><i class="bi bi-cash-coin" id="ico_coti"></i></h5>
             <h1>Cotizaciones</h1>
         </div>  
     </div>

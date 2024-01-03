@@ -18,8 +18,9 @@
                          <div class="col-12 border-top p-3" >
 
                                    <!-- titulo -->
-                                   <div class="row text-center p-3">
-                                             <h5>Empresa</h5>
+                                   <div class="row text-center p-3 mb-3">
+                                             <h5><i class="bi bi-buildings" id="ico_buildings"></i></h5>
+                                             <h5> Empresas</h5>
                                    </div>
                                    <!-- formulario Empresa -->
                                    <form action="querys/add_empresa.php" method="POST">
