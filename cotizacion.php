@@ -171,6 +171,7 @@
                     <tr>
                         <!-- ingresar Cantidad -->
                         <td scope="row"><input name="f1_cant" id="f1_cant" type="number" Class="col-9" oninput="operacionTotalF1()"></td>
+
                         <!-- ingresar Unidad -->
                         <td>
                             <select class="form-select form-select-sm" name="f1_unidad"id="">
@@ -179,19 +180,41 @@
                                 <option value="Pieza">Pieza</option>
                             </select>
                         </td>
+
                         <!-- ingresar Descripcion -->
-                        <td><textarea name="f1_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260"></textarea></td>
+                        <td><textarea  name="f1_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260"></textarea></td>
+
                         <!-- ingresar Valor Unitario -->
-                        <td><input type="number" step="0.01" name="f1_valUnit" id="f1_valUnit" oninput="operacionTotalF1()"></td>
+                        <td>
+                            <!-- input valor unitario cliente -->
+                            <label for="f1_valUnit">Precio Cliente</label>
+                            <input type="number"  step="0.01" name="f1_valUnit" id="f1_valUnit" oninput="operacionTotalF1()"> <br> 
+
+                            <!-- input vslor unitario distribuidor -->
+                            <label for="f1_unitario_dist">Precio Distribuidor</label>
+                            <input type="number" step="0.01" name="f1_unitario_dist" id="f1_unitario_dist" oninput="operacionTotalF1()">  
+                        </td>
+
                         <!-- ingresar Total -->
-                        <td><input type="number" step="0.01" name="f1_total" id="f1_total"></td>
+                        <td>
+                            <!-- input total cliente -->
+                            <label for="f1_total">Total Cliente</label>
+                            <input type="number" step="0.01" name="f1_total" id="f1_total"> <br> 
+
+                            <!-- input total distribuidor -->
+                            <label for="f1_total_dist">Total Distribuidor</label>
+                            <input type="number" step="0.01" name="f1_total_dist" id="f1_total_dist">  
+                        </td>
                     </tr>
                     <!-- fila 1 -->
 
                     <!-- fila 2 -->
                     <tr>
                         <!-- ingresar Cantidad -->
-                        <td scope="row"><input name="f2_cant" id="f2_cant"  type="number" Class="col-9" oninput="operacionTotalF2()"></td>
+                        <td scope="row">
+                            <input name="f2_cant" id="f2_cant"  type="number" Class="col-9" oninput="operacionTotalF2()">
+                        </td>
+
                         <!-- ingresar Unidad -->
                         <td>
                             <select class="form-select form-select-sm" name="f2_unidad"id="">       
@@ -200,19 +223,43 @@
                                 <option value="Pieza">Pieza</option>
                             </select>
                         </td>
+
                         <!-- ingresar Descripcion -->
-                        <td><textarea name="f2_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260"></textarea></td>
+                        <td>
+                            <textarea name="f2_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260"></textarea>
+                        </td>
+
                         <!-- ingresar Valor Unitario -->
-                        <td><input type="number" step="0.01" name="f2_valUnit" id="f2_valUnit" oninput="operacionTotalF2()"></td>
+                        <td>
+                            <!-- input valor unitario Cliente -->
+                            <label for="f2_valUnit">Precio Cliente</label>
+                            <input type="number" step="0.01" name="f2_valUnit" id="f2_valUnit" oninput="operacionTotalF2()"> <br>
+
+                            <!-- input valor unitario distribuidor -->
+                            <label for="f2_unitario_dist">Precio Distribuidor</label>
+                            <input type="number" step="0.01" name="f2_unitario_dist" id="f2_unitario_dist" oninput="operacionTotalF2()"> 
+                        </td>
+
                         <!-- ingresar Total -->
-                        <td><input type="number" step="0.01" name="f2_total" id="f2_total"></td>
+                        <td>
+                            <!-- input total cliente -->
+                            <label for="f2_total">Total Cliente</label>
+                            <input type="number" step="0.01" name="f2_total" id="f2_total"> <br> 
+
+                            <!-- input total distribuidor -->
+                            <label for="f2_total_dist">Total Distribuidor</label>
+                            <input type="number" step="0.01" name="f2_total_dist" id="f2_total_dist"> 
+                        </td>
                     </tr>
                     <!-- fila 2 -->
 
                     <!-- fila 3 -->
                     <tr>
                         <!-- ingresar Cantidad -->
-                        <td scope="row"><input name="f3_cant" id="f3_cant" type="number" Class="col-9" oninput="operacionTotalF3()"></td>
+                        <td scope="row">
+                            <input name="f3_cant" id="f3_cant" type="number" Class="col-9" oninput="operacionTotalF3()">
+                        </td>
+
                         <!-- ingresar Unidad -->
                         <td>
                             <select class="form-select form-select-sm" name="f3_unidad"id="">
@@ -221,19 +268,43 @@
                                 <option value="Pieza">Pieza</option>
                             </select>
                         </td>
+
                         <!-- ingresar Descripcion -->
-                        <td><textarea name="f3_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260"></textarea></td>
+                        <td>
+                            <textarea name="f3_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260"></textarea>
+                        </td>
+
                         <!-- ingresar Valor Unitario -->
-                        <td><input type="number" step="0.01" name="f3_valUnit" id="f3_valUnit" oninput="operacionTotalF3()"></td>
+                        <td>
+                            <!-- input valor unitario Cliente -->
+                            <label for="f3_valUnit">Precio Cliente</label>
+                            <input type="number" step="0.01" name="f3_valUnit" id="f3_valUnit" oninput="operacionTotalF3()"> <br>
+
+                            <!-- input valor unitario distribuidor -->
+                            <label for="f3_unitario_dist">Precio Distribuidor</label>
+                            <input type="number" step="0.01" name="f3_unitario_dist" id="f3_unitario_dist" oninput="operacionTotalF3()">
+                        </td>
+
                         <!-- ingresar Total -->
-                        <td><input type="number" step="0.01" name="f3_total" id="f3_total" ></td>
+                        <td>
+                            <!-- input total cliente -->
+                            <label for="f3_total">Total Cliente</label>
+                            <input type="number" step="0.01" name="f3_total" id="f3_total"> <br> 
+
+                            <!-- input total distribuidor -->
+                            <label for="f3_total_dist">Total Distribuidor</label>
+                            <input type="number" step="0.01" name="f3_total_dist" id="f3_total_dist">
+                        </td>
                     </tr>
                     <!-- fila 3 -->
 
                     <!-- fila 4 -->
                     <tr>
                         <!-- ingresar Cantidad -->
-                        <td scope="row"><input name="f4_cant" id="f4_cant" type="number" Class="col-9" oninput="operacionTotalF4()"></td>
+                        <td scope="row">
+                            <input name="f4_cant" id="f4_cant" type="number" Class="col-9" oninput="operacionTotalF4()">
+                        </td>
+
                         <!-- ingresar Unidad -->
                         <td>
                             <select class="form-select form-select-sm" name="f4_unidad"id=""> 
@@ -243,11 +314,31 @@
                             </select>
                         </td>
                         <!-- ingresar Descripcion -->
-                        <td><textarea name="f4_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260"></textarea></td>
+                        <td>
+                            <textarea name="f4_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260"></textarea>
+                        </td>
+
                         <!-- ingresar Valor Unitario -->
-                        <td><input type="number" step="0.01" name="f4_valUnit" id="f4_valUnit" oninput="operacionTotalF4()"></td>
+                        <td>
+                            <!-- input valor unitario Cliente -->
+                            <label for="f4_valUnit">Precio Cliente</label>
+                            <input type="number" step="0.01" name="f4_valUnit" id="f4_valUnit" oninput="operacionTotalF4()"> <br>
+
+                            <!-- input valor unitario distribuidor -->
+                            <label for="f4_unitario_dist">Precio Distribuidor</label>
+                            <input type="number" step="0.01" name="f4_unitario_dist" id="f4_unitario_dist" oninput="operacionTotalF4()">
+                        </td>
+
                         <!-- ingresar Total -->
-                        <td><input type="text" step="0.01" name="f4_total" id="f4_total"></td>
+                        <td>
+                            <!-- input total cliente -->
+                            <label for="f4_total">Total Cliente</label>
+                            <input type="number" step="0.01" name="f4_total" id="f4_total"> <br> 
+
+                            <!-- input total distribuidor -->
+                            <label for="f4_total_dist">Total Distribuidor</label>
+                            <input type="number" step="0.01" name="f4_total_dist" id="f4_total_dist">
+                        </td>
                     </tr>
                     <!-- fila 4 -->
                                                                                  
@@ -256,21 +347,93 @@
         </div>
         <!-- Tabla articulos -->
 
-        <!-- Totales -->
-        <div class="row  mt-5 justify-content-end ">
 
-            <!-- tiempo de entrga -->
-            <div class="col-lg-6">
-                <div class="row mb-5 ">
+        <!--seccion tiempo de entrga -->
+        <div class="row">
+            <div class="col col-lg-3">
+                <div class="row mb-5 p-2">
                     <label for="tiempo_entrega">Tiempo de entrega (días habiles):</label>
-                    <input type="number" name="tiempo_entrega" id="tiempo_entrega"class="col-8 col-lg-3">
+                    <input type="number" name="tiempo_entrega" id="tiempo_entrega"class="col-8 col-lg-10">
                 </div>
             </div>
-            <!-- tiempo de entrga -->
+        </div>
+        <!--seccion tiempo de entrga -->
 
-            <div class="col-lg-4 ">
-                <div class="table-responsive text-end ">
-                    <table class="table table-secondary table-sm ">
+
+        <!-- Totales -->
+        <div class="row  mt-5 ">
+
+            <!--Tabla de Utilidad -->
+            <div class="col-lg-4  shadow-lg p-4  totales">
+                <div class="row">
+                    <div class="col text-center">
+                        <h3>Utilidad</h3>
+                    </div>
+                </div>
+                <div class=" text-center ">
+                    <table class="text-center">
+                        <tbody>
+                            <tr class="">
+                                <td scope="row">SUBUTILIDAD</td>
+                                <td><input type="number" step="0.01" name="subutilidad" id="subutilidad"></td>
+                            </tr>
+                            <tr class="">
+                                <td scope="row">OPERACIÓN</td>
+                                <td><input type="number" step="0.01" name="gastos_operacion" id="gastos_operacion" oninput="resultUtilidad()"></td>
+                            </tr>
+                            <tr class="">
+                                <td scope="row">TOTAL</td>
+                                <td><input type="number" step="0.01" name="total_utilidad" id="total_utilidad"></td>
+                            </tr>
+                            <tr class="">
+                                <td scope="row">COSTOS</td>
+                                <td><input type="number" step="0.01" name="costos" id="costos"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!--Tabla de Utilidad -->
+            
+
+            <!-- Tabla de Totales Distribuidor -->
+            <div class="col-lg-4  shadow-lg p-4  totales"  >
+                <div class="row">
+                    <div class="col text-center">
+                        <h3>Totales Distribuidor</h3>
+                    </div>
+                </div>
+                <div class=" text-center ">
+                    <table class="text-center">
+                        <tbody>
+                            <tr class="">
+                                <td scope="row">SUBTOTAL</td>
+                                <td><input type="number" step="0.01" name="subtotal_dist" id="subtotal_dist"></td>
+                            </tr>
+                            <tr class="">
+                                <td scope="row">IVA</td>
+                                <td><input type="number" step="0.01" name="iva_dist" id="iva_dist"></td>
+                            </tr>
+                            <tr class="">
+                                <td scope="row">TOTAL</td>
+                                <td><input type="number" step="0.01" name="total_dist" id="total_dist"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Tabla de Totales Distribuidor -->
+
+
+            <!-- Tabla de Totales Cliente -->
+            <div class="col-lg-4  shadow-lg p-4  totales"  >
+                <div class="row">
+                    <div class="col text-center">
+                        <h3>Totales Cliente</h3>
+                    </div>
+                </div>
+                <div class=" text-center ">
+                    <table class="text-center">
                         <tbody>
                             <tr class="">
                                 <td scope="row">SUBTOTAL</td>
@@ -288,6 +451,10 @@
                     </table>
                 </div>
             </div>
+            <!-- Tabla de Totales Cliente -->
+
+            
+
         </div>
         <!-- Totales --> 
     </div>

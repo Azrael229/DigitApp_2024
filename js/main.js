@@ -19,8 +19,12 @@ let table = new DataTable('#example', {
     })
     .then(response => response.json())
     .then(resp => { 
-            
-        location.reload();       
+        if (resp == "ok"){
+
+            location.reload();       
+        }else{
+            alert('Selecciona un Mes');
+        }       
     
     })
 

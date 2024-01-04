@@ -61,3 +61,11 @@ body{
     color: rgb(8, 8, 123);
 
 }
+
+.totales{
+    color:rgb(255, 255, 255);
+    /* background-color: #fff; */
+    background-color: rgba(102, 102, 102, 0.316);
+
+    border-radius: 5px;
+}

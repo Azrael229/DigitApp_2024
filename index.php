@@ -35,6 +35,8 @@
                             <th scope="col">EMPRESA</th>
                             <th scope="col">CONTACTO</th>
                             <th scope="col">IMPORTE</th>
+                            <th scope="col">UTILIDAD</th>
+                            <th scope="col">COSTOS</th>
                             <th scope="col">DESCARGAR PDF</th>
                             <th scope="col">NUMERO</th>
                             <th scope="col">VIGENCIA</th>
@@ -48,6 +50,8 @@
                             <td><?php echo $row_coti['cot_empresa'] ?></td>
                             <td><?php echo $row_coti['cot_contacto'] ?></td>
                             <td>$ <?php echo $row_coti['cot_total'] ?></td>
+                            <td>$ <?php echo $row_coti['cot_utilidad'] ?></td>
+                            <td>$ <?php echo $row_coti['cot_costos'] ?></td>
                             <td><a href="filesPDF/<?php echo $row_coti['cot_archivo'] ?>" download><?php echo $row_coti['cot_archivo'] ?></a></td>
                             <td><?php echo $row_coti['cot_numero'] ?></td>
                             <td><?php echo $row_coti['cot_vigencia'] ?></td>
@@ -132,7 +136,7 @@
                     <div class="row mb-4 justify-content-center">
                         <div class="col col-lg-10">
                             <label for="">Selccionar Mes</label>
-                            <select name="sel_id_mes" id="" class="form-control">
+                            <select name="sel_id_mes" id="" class="form-control" required>
                                 <option value="">Mes</option>
                                 <option value="1">Enero</option>
                                 <option value="2">Febrero</option>

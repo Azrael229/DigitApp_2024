@@ -10,6 +10,8 @@ $contacto_nombre = $_POST['nombre_contacto'];
 $empresa_nombre = $_POST['nombre_empresa'];
 $total_cot = $_POST['total'];
 $cot_archivo = 'COT SERVICOM '.$num_unico.'.pdf';
+$utilidad = $_POST['total_utilidad'];
+$costos = $_POST['costos'];
 
 // echo json_encode ($cot_nombre);
 // echo json_encode ($num_cot);
@@ -17,7 +19,7 @@ $cot_archivo = 'COT SERVICOM '.$num_unico.'.pdf';
 
 require ('conexion.php');
 
-$sql = "INSERT INTO cotizaciones (cot_fecha, cot_empresa, cot_contacto, cot_total, cot_archivo, cot_numero, cot_vigencia) VALUES ('$fecha_cot', '$empresa_nombre', '$contacto_nombre', '$total_cot', '$cot_archivo', '$num_unico', '$vigencia_cot')";
+$sql = "INSERT INTO cotizaciones (cot_fecha, cot_empresa, cot_contacto, cot_total, cot_archivo, cot_numero, cot_vigencia, cot_utilidad, cot_costos) VALUES ('$fecha_cot', '$empresa_nombre', '$contacto_nombre', '$total_cot', '$cot_archivo', '$num_unico', '$vigencia_cot', '$utilidad', '$costos')";
 
 mysqli_query($conexion, $sql);
 
