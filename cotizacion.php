@@ -59,86 +59,134 @@
     
 
     <!-- Seccion datos del cliente -->
-    <div class="row">
-        <div class="col">
-            <div class="row text-center mb-3">
-                <h3>Datos del Cliente</h3>
-            </div>
+        <div class="row">
 
-            <!-- Select Contacto -->
-            <div class="row text-center mb-3">
-                <div class="col col-lg-5 mb-4">
-                    <select class=" form-control" name="select_contacto" id="select_contacto" onchange="selectContacto()">
+            <!-- col de datos cliente -->
+                <div class="col-12 col-lg-6 ">
+                    <div class="row text-center mb-3">
+                        <h3>Datos del Cliente</h3>
+                    </div>
 
-                        <option value"">Seleccionar Contacto</option>
-                        <?php foreach($result_contactos as $fila):  ?>
-                        <option value="<?php echo $fila['id']; ?>"> <?php echo $fila['nombre']; ?>  </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
-            <!-- Select Contacto -->
+                    <!-- Select Contacto -->
+                    <div class="row text-center mb-3">
+                        <div class="col  mb-4 ">
+                            <select class=" form-control" name="select_contacto" id="select_contacto" onchange="selectContacto()">
+
+                                <option value"">Seleccionar Contacto</option>
+                                <?php foreach($result_contactos as $fila):  ?>
+                                <option value="<?php echo $fila['id']; ?>"> <?php echo $fila['nombre']; ?>  </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Select Contacto -->
 
 
-            <!-- Datos contacto -->
-            <div class="col-lg-6">
-                <div class="row ">
-                    <div class="col-3">
-                        <label>Nombre</label>
-                    </div>
-                    <div class="col">
-                        <textarea name="nombre_contacto" id="nombre_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-3 ">
-                        <label>Teléfono</label>
-                    </div>
-                    <div class="col">
-                        <textarea name="cel_contacto" id="cel_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-3 ">
-                        <label>Correo</label>
-                    </div>
-                    <div class="col">
-                        <textarea name="correo_contacto" id="correo_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
-                    </div>
-                </div>
-                <div class="row mb-4">
-                    <div class="col-3 ">
-                        <label>Departamento</label>
-                    </div>
-                    <div class="col">
-                        <textarea name="depto_contacto" id="depto_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
-                    </div>
-                </div>
-            </div>
-            <!-- Datos contacto -->
+                    <!-- Datos contacto -->
+                        <div class="col ">
+                            <div class="row ">
+                                <div class="col-3">
+                                    <label>Nombre</label>
+                                </div>
+                                <div class="col">
+                                    <textarea name="nombre_contacto" id="nombre_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3 ">
+                                    <label>Teléfono</label>
+                                </div>
+                                <div class="col">
+                                    <textarea name="cel_contacto" id="cel_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3 ">
+                                    <label>Correo</label>
+                                </div>
+                                <div class="col">
+                                    <textarea name="correo_contacto" id="correo_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-3 ">
+                                    <label>Departamento</label>
+                                </div>
+                                <div class="col">
+                                    <textarea name="depto_contacto" id="depto_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    <!-- Datos contacto -->
 
-            <!-- Datos Empresa -->
-            <div class="col-lg-6 ">
-                <div class="row">
-                    <div class="col-3 ">
-                        <label>Empresa</label>
-                    </div>
-                    <div class="col">
-                        <textarea name="nombre_empresa" id="nombre_empresa" cols="40" rows="1" style="resize: none;" ></textarea>
-                    </div>
+                    <!-- Datos Empresa -->
+                        <div class="col ">
+                            <div class="row">
+                                <div class="col-3 ">
+                                    <label>Empresa</label>
+                                </div>
+                                <div class="col">
+                                    <textarea name="nombre_empresa" id="nombre_empresa" cols="40" rows="1" style="resize: none;" ></textarea>
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-3 ">
+                                    <label>Dirección</label>
+                                </div>
+                                <div class="col">
+                                    <textarea name="dir_empresa" id="dir_empresa" cols="40" rows="3" style="resize: none;" ></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    <!-- Datos Empresa -->
                 </div>
-                <div class="row mb-4">
-                    <div class="col-3 ">
-                        <label>Dirección</label>
+            <!-- col de datos cliente -->
+
+            <!-- col de tabla productos -->
+                <div class="col-12 col-lg-6">
+
+                    <div class="row text-center mb-4">
+                        <h3>Tabla de Productos y Servicios</h3>
                     </div>
-                    <div class="col">
-                        <textarea name="dir_empresa" id="dir_empresa" cols="40" rows="3" style="resize: none;" ></textarea>
-                    </div>
-                </div>
-            </div>
-            <!-- Datos Empresa -->
+
+                    <div class="row " >
+                        <div class="col p-3" >
+                             <div class="col" style="overflow-x: auto; overflow-y: auto;">
+                                <table class="table" style="width: 900px;" >
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Descripción</th>
+                                            <th scope="col">Precio Distribuidor</th>
+                                            <th scope="col">Precio Público</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="">
+                                            <td scope="row">Reparación y Ajuste con pesas patrón a básculas de mediano alcance en Cerro El Gavilán 302-12 col. Ex Hacienda Santan querétaro Qro. El equipo de entrega al día siguiente. Las refacciones se cotizan por separado.</td>
+                                            <td>0</td>
+                                            <td>$ 950.00</td>
+                                        </tr>
+                                        <tr class="">
+                                            <td scope="row">Reparación y Ajuste con pesas patrón a básculas de mediano alcance en instalaciones del cliente. Las refacciones se cotizan por separado.</td>
+                                            <td>0</td>
+                                            <td>$ 1300.00</td>
+                                        </tr>
+                                        <tr class="">
+                                            <td scope="row">Mantenimiento preventivo y ajuste con pesas patrón para básculas de mediano alcance. Realizamos pruebas de funcionamiento y pesaje, medición de batería, revisión del adaptador de corriente y ajuste de topes de seguridad. Incluye informe de pruebas metrológicas en PDF y la instalación de componentes.</td>
+                                            <td>0</td>
+                                            <td>$ 1300.00</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                             </div>
+                                    
+                        </div>
+                    </div> 
+                                
+                </div>                                                                                                              
+            <!-- col de tabla productos -->
+
         </div>
-    </div>
     <!-- Seccion datos del cliente -->
                         
 
@@ -182,7 +230,7 @@
                         </td>
 
                         <!-- ingresar Descripcion -->
-                        <td><textarea  name="f1_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260"></textarea></td>
+                        <td><textarea  name="f1_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260" placeholder="Máximo 250 caracteres"></textarea></td>
 
                         <!-- ingresar Valor Unitario -->
                         <td>
@@ -226,7 +274,7 @@
 
                         <!-- ingresar Descripcion -->
                         <td>
-                            <textarea name="f2_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260"></textarea>
+                            <textarea name="f2_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260" placeholder="Máximo 250 caracteres"></textarea>
                         </td>
 
                         <!-- ingresar Valor Unitario -->
@@ -271,7 +319,7 @@
 
                         <!-- ingresar Descripcion -->
                         <td>
-                            <textarea name="f3_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260"></textarea>
+                            <textarea name="f3_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260" placeholder="Máximo 250 caracteres"></textarea>
                         </td>
 
                         <!-- ingresar Valor Unitario -->
@@ -315,7 +363,7 @@
                         </td>
                         <!-- ingresar Descripcion -->
                         <td>
-                            <textarea name="f4_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260"></textarea>
+                            <textarea name="f4_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260" placeholder="Máximo 250 caracteres"></textarea>
                         </td>
 
                         <!-- ingresar Valor Unitario -->
