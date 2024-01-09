@@ -31,6 +31,8 @@
                     <thead>
                         <tr>
                             <th scope="col">ID</th>
+                            <th scope="col"></th>
+                            <th scope="col">ESTATUS</th>
                             <th scope="col">FECHA</th>
                             <th scope="col">EMPRESA</th>
                             <th scope="col">CONTACTO</th>
@@ -46,6 +48,15 @@
                         <?php foreach($result_cotizaciones as $row_coti): ?>
                         <tr>
                             <td><?php echo $row_coti['id_coti'] ?></td>
+                            <td><?php echo $row_coti['cot_status'] ?></td>
+                            <td> 
+                                <select name="sel_status_coti" id="sel_status_coti" onchange="selStatus(<?php echo $row_coti['id_coti'] ?>)">
+                                    <option >Seleccionar</option>   
+                                    <option value="1" >Espera</option>   
+                                    <option value="2" >Aceptada</option>   
+                                    <option value="3" >Cancelada</option> 
+                                </select>  
+                            </td>
                             <td ><?php echo $row_coti['cot_fecha'] ?></td>
                             <td><?php echo $row_coti['cot_empresa'] ?></td>
                             <td><?php echo $row_coti['cot_contacto'] ?></td>

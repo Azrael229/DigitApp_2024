@@ -13,6 +13,8 @@
     <!-- titulo  -->
 
     <form action="fpdf/cotizacionPDF.php" method="POST" target="_blank" id="form_cotizacion">
+    
+    
     <!-- boton submit del formulario -->
     <div class="row">
         <div class="d-grid gap-2 col-4 mx-auto mb-4 ">

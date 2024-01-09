@@ -1,3 +1,12 @@
+<option value="" style="background-color: rgba(11, 26, 165, 0.877);">Espera</option>   
+<option value="" style="background-color: rgba(11, 201, 11, 0.795);">Aceptada</option>   
+<option value="" style="background-color: rgba(201, 11, 11, 0.795);">Cancelada</option>
+
+
+
+
+
+
 <!-- Encabezados -->
 <div class="row text-center mb-3">
             <div class="col-1 border">
