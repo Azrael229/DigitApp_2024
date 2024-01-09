@@ -50,7 +50,7 @@
                             <td><?php echo $row_coti['id_coti'] ?></td>
                             <td><?php echo $row_coti['cot_status'] ?></td>
                             <td> 
-                                <select name="sel_status_coti" id="sel_status_coti" onchange="selStatus(<?php echo $row_coti['id_coti'] ?>)">
+                                <select name="sel_status_coti" onchange="selStatus(this,<?php echo $row_coti['id_coti'] ?>)">
                                     <option >Seleccionar</option>   
                                     <option value="1" >Espera</option>   
                                     <option value="2" >Aceptada</option>   

@@ -18,7 +18,7 @@ $costos = $_POST['costos'];
 
 if($fecha_cot == "" || $vigencia_cot == "" || $contacto_nombre == "" || $empresa_nombre == "" || $total_cot == ""){
 
-  $cot_status = '<i class="bi bi-circle-fill" style="color: black;"> Vacia </i>';
+  $cot_status = '<i class="bi bi-circle-fill" style="color: black;"> Vacía </i>';
 
   require ('conexion.php');
 
