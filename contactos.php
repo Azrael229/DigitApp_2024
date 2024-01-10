@@ -73,7 +73,7 @@
                                              <!-- select Empresas -->
                                              <select class="form-control" name="contacto_nombre_empresa" id="contacto_nombre_empresa" >
 
-                                                       <option value"6" selected>Sin Empresa Asociada</option>
+                                                       <option value="6" selected>Sin Empresa Asociada</option>
                                                        <?php foreach($result_empresas as $fila):  ?>
                                                        <option value="<?php echo $fila['id_e']; ?>"> <?php echo $fila['empresa']; ?>  </option>
                                                        <?php endforeach; ?>
