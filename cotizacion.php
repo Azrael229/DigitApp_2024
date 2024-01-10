@@ -153,30 +153,46 @@
 
                     <div class="row " >
                         <div class="col p-3" >
-                             <div class="col" style="overflow-x: auto; overflow-y: auto;">
+                             <div class="col" style="overflow-x: auto; overflow-y: auto; height: 400px;">
                                 <table class="table" style="width: 900px;" >
                                     <thead>
                                         <tr>
+                                            <th scope="col">Producto</th>
                                             <th scope="col">Descripción</th>
-                                            <th scope="col">Precio Distribuidor</th>
-                                            <th scope="col">Precio Público</th>
+                                            <th scope="col" width="120">Precio Distribuidor</th>
+                                            <th scope="col" width="120">Precio Público</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr class="">
+                                            <td>Servicio</td>
                                             <td scope="row">Reparación y Ajuste con pesas patrón a básculas de mediano alcance en Cerro El Gavilán 302-12 col. Ex Hacienda Santan querétaro Qro. El equipo de entrega al día siguiente. Las refacciones se cotizan por separado.</td>
                                             <td>0</td>
                                             <td>$ 950.00</td>
                                         </tr>
                                         <tr class="">
+                                            <td>Servicio</td>
                                             <td scope="row">Reparación y Ajuste con pesas patrón a básculas de mediano alcance en instalaciones del cliente. Las refacciones se cotizan por separado.</td>
                                             <td>0</td>
-                                            <td>$ 1300.00</td>
+                                            <td>$ 1 300.00</td>
                                         </tr>
                                         <tr class="">
+                                            <td>Servicio</td>
                                             <td scope="row">Mantenimiento preventivo y ajuste con pesas patrón para básculas de mediano alcance. Realizamos pruebas de funcionamiento y pesaje, medición de batería, revisión del adaptador de corriente y ajuste de topes de seguridad. Incluye informe de pruebas metrológicas en PDF y la instalación de componentes.</td>
                                             <td>0</td>
-                                            <td>$ 1300.00</td>
+                                            <td>$ 1 300.00</td>
+                                        </tr>
+                                        <tr class="">
+                                            <td>Servicio</td>
+                                            <td scope="row">Calibración a báscula de alto alcance de medición, utilizando 20 ton en pesas patron y cargas de sustitución para alcanzar 40 ton (carga aproximada) Certificado de Calibración Ofical ante EMA.</td>
+                                            <td>0</td>
+                                            <td>$ 12 724.2</td>
+                                        </tr>
+                                        <tr class="">
+                                            <td>Servicio</td>
+                                            <td scope="row">Calibración a báscula de alto alcance de medición, utilizando 10 ton en pesas patron y cargas de sustitución para alcanzar 20 ton (carga aproximada) Certificado de Calibración Ofical ante EMA.</td>
+                                            <td>0</td>
+                                            <td >$ 22 285.50</td>
                                         </tr>
                                     </tbody>
                                 </table>
