@@ -161,7 +161,7 @@
                         </div>
                         <div class="col">
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="unidad" id="unidadeskg" value="kg" checked>
+                                <input class="form-check-input" type="radio" name="unidad" id="unidadeskg" value="kg">
                                 <label class="form-check-label" for="unidadeskg">kg</label>
                             </div>
                             <div class="form-check form-check-inline mb-5">
@@ -238,38 +238,54 @@
 
                             <div class="row">
                                 <div class="col p-5 ">
+                                    <!-- ENCABEZADOS TABLA EMT -->
                                     <div class="row text-center border">
                                         <div class="col-8 border">
-                                            <h4>Intervalos</h4>
+                                            <h4>Intervalos (<span class="unidades"></span>)</h4>
                                         </div>
                                         <div class="col">
-                                            <h4>EMT ±</h4>
+                                            <h4>EMT ± (<span class="unidades"></span>)</h4>
                                         </div>
                                     </div>
+                                    <!-- PRIMER INTERVAOL -->
                                     <div class="row text-center border">
                                         <div class="col-8 border">
-                                            <p>0 a 500</p>
+                                            <p>
+                                                0 a 
+                                                <span id="sp_interv1_col2"></span>
+                                            </p>
                                         </div>
                                         <div class="col">
-                                            <p>0.5</p>
+                                            <p><span id="emt_1"></span></p>
                                         </div>
                                     </div>
+                                    <!-- SEGUNDO INTERVALO -->
                                     <div class="row text-center border">
                                         <div class="col-8 border">
-                                            <p>0 a 500</p>
+                                            <p>
+                                                <span id="sp_interv2_col1"></span>
+                                                 a 
+                                                <span id="sp_interv2_col2"></span>
+                                            </p>
                                         </div>
                                         <div class="col">
-                                            <p>0.5</p>
+                                            <p><span id="emt_2"></span></p>
                                         </div>
                                     </div>
+                                    <!-- TERCER INTERVALO -->
                                     <div class="row text-center border">
                                         <div class="col-8 border">
-                                            <p>0 a 500</p>
+                                            <p>
+                                                <span id="sp_interv3_col1"></span>
+                                                a 
+                                                <span id="sp_interv3_col2"></span>
+                                            </p>
                                         </div>
                                         <div class="col">
-                                            <p>0.5</p>
+                                            <p><span id="emt_3"></span></p>
                                         </div>
                                     </div>
+                                    <!-- FIN DE LA TABLA EMT -->
                                 </div>
                             </div>
 
@@ -328,7 +344,13 @@
                     <div class="col-12 col-md-6 border-top">
 
                         <div class="row mb-2 mt-3 text-center">
+                            <!-- titulo -->
                             <h3>Repetibilidad</h3>
+
+                            <!-- Cargas -->
+                            <h5>50% de MAX = <span id="sp_repe"></span> ( <span class="unidades"></span> )</h5>
+
+                            
                         </div>
 
                         <!-- puntos -->
@@ -369,9 +391,24 @@
                                         <input type="number">
                                     </div>
                                 </div>
+
+                                <div class="row">
+                                    <div class="col-3 text-center">
+                                        <h4>5</h4>
+                                    </div>
+                                    <div class="col">
+                                        <input type="number">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- puntos -->
+
+                        <div class="row text-center">
+                            <div class="col mb-5">
+                                <button class="btn btn-primary col-5">Evaluar</button>
+                            </div>
+                        </div>
             
                     </div>
                 <!-- Repetibilidad -->
@@ -381,6 +418,15 @@
                     <div class="col-12 col-md-6 border-top">
                         <div class="row mb-5 mt-3 text-center">
                             <h3>Excentricidad</h3>
+                            <h5>1/3 de MAX = <span id="sp_exce"></span> ( <span class="unidades"></span> )</h5>
+
+                            <div class="row">
+                                <div class="col">
+                                    <label for="">Valor de Carga:
+                                    <input type="text" class="col-5">
+                                    </label>
+                                </div>                               
+                            </div>
                         </div>
 
                         <!-- puntos -->
@@ -422,6 +468,15 @@
                                     </div>
                                 </div>
 
+                                <div class="row">
+                                    <div class="col-2 text-center">
+                                        <h4>5</h4>
+                                    </div>
+                                    <div class="col text-start">
+                                        <input type="number">
+                                    </div>
+                                </div>
+
                             </div>
 
                             <div class="col-12 col-xl-6 p-3 text-center">
@@ -451,7 +506,7 @@
                                         <h4>1</h4>
                                     </div>
                                     <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number">
+                                        <input class="col-12 col-md-6" type="number" id="exact1">
                                     </div>
                                     <div class="col-3 col-md-2">
                                         <input class="col-12 col-md-6" type="number">
@@ -466,7 +521,7 @@
                                         <h4>2</h4>
                                     </div>
                                     <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number">
+                                        <input class="col-12 col-md-6" type="number" id="exact2">
                                     </div>
                                     <div class="col-3 col-md-2">
                                         <input class="col-12 col-md-6" type="number">
@@ -481,7 +536,7 @@
                                         <h4>3</h4>
                                     </div>
                                     <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number">
+                                        <input class="col-12 col-md-6" type="number" id="exact3">
                                     </div>
                                     <div class="col-3 col-md-2">
                                         <input class="col-12 col-md-6" type="number">
@@ -496,7 +551,7 @@
                                         <h4>4</h4>
                                     </div>
                                     <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number">
+                                        <input class="col-12 col-md-6" type="number" id="exact4">
                                     </div>
                                     <div class="col-3 col-md-2">
                                         <input class="col-12 col-md-6" type="number">
@@ -511,7 +566,7 @@
                                         <h4>5</h4>
                                     </div>
                                     <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number">
+                                        <input class="col-12 col-md-6" type="number" id="exact5">
                                     </div>
                                     <div class="col-3 col-md-2">
                                         <input class="col-12 col-md-6" type="number">
