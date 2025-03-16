@@ -3,7 +3,7 @@
 $servername = "localhost";  // Change to your database server
 $username = "root";     // Change to your database username
 $password = "";     // Change to your database password
-$database = "digitapp2024"; // Change to your database name
+$database = "servico1_digitapp2024"; // Change to your database name
 
 //datos remotos
 $servernameR = "localhost";  // Change to your database server
