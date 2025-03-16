@@ -26,14 +26,14 @@
         <!-- titulo de tabla  -->
         <!-- tabla  -->
         <div class="row">
-            <div class="col  table-responsive">
+            <div class="col table-responsive" >
                 <table id="example" class="table table-secondary table-striped" >
                     <thead>
                         <tr>
                             <th scope="col">ID</th>
                             <th scope="col">FECHA</th>
-                            <th scope="col" style="width: 220px;">EMPRESA</th>
-                            <th scope="col" style="width: 180px;">CONTACTO</th>
+                            <th scope="col">EMPRESA</th>
+                            <th scope="col">CONTACTO</th>
                             <th scope="col">IMPORTE</th>
                             <th scope="col">DESCARGAR PDF</th>
                         </tr>
@@ -42,7 +42,7 @@
                         <?php foreach($result_cotizaciones as $row_coti): ?>
                         <tr>
                             <td><?php echo $row_coti['id_coti'] ?></td>
-                            <td ><?php echo $row_coti['cot_fecha'] ?></td>
+                            <td><?php echo $row_coti['cot_fecha'] ?></td>
                             <td><?php echo $row_coti['cot_empresa'] ?></td>
                             <td><?php echo $row_coti['cot_contacto'] ?></td>
                             <td>$ <?php echo $row_coti['cot_total'] ?></td>

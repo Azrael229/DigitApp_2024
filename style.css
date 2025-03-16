@@ -70,3 +70,14 @@ body{
 
     border-radius: 5px;
 }
+
+.no-wrap {
+    white-space: nowrap;
+}
+
+.min-width-contacto {
+    min-width: 150px; /* Define el ancho máximo */
+    /* overflow: hidden; /* Oculta el texto que exceda el tamaño */
+    /* text-overflow: ellipsis; Agrega "..." si el texto es muy largo */
+    /* white-space: nowrap; Evita que el texto se divida en varias líneas */ 
+}
