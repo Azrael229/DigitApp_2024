@@ -26,14 +26,14 @@
         <!-- titulo de tabla  -->
         <!-- tabla  -->
         <div class="row">
-            <div class="col  table-responsive" style="white-space: nowrap; " >
+            <div class="col  table-responsive">
                 <table id="example" class="table table-secondary table-striped" >
                     <thead>
                         <tr>
                             <th scope="col">ID</th>
                             <th scope="col">FECHA</th>
-                            <th scope="col">EMPRESA</th>
-                            <th scope="col">CONTACTO</th>
+                            <th scope="col" style="width: 220px;">EMPRESA</th>
+                            <th scope="col" style="width: 180px;">CONTACTO</th>
                             <th scope="col">IMPORTE</th>
                             <th scope="col">DESCARGAR PDF</th>
                         </tr>
