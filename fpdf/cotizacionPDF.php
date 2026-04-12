@@ -399,7 +399,7 @@ $fpdf-> AddPage();
      $fpdf-> SetFont('arial', 'B', 8);
      $fpdf-> Cell(20,5, 'CUENTA:', $bordesDatosBanco,0,'L',0);//borde
      $fpdf-> SetFont('arial', '', 8);
-     $fpdf-> Cell(140,5, '499161497', $bordesDatosBanco,0,'L',0);//borde
+     $fpdf-> Cell(140,5, '0499161497', $bordesDatosBanco,0,'L',0);//borde
 
      $fpdf-> SetXY(12,242);
      $fpdf-> SetFont('arial', 'B', 8);
