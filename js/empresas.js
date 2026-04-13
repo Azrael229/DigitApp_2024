@@ -3,6 +3,8 @@ let table = new DataTable('#example', {
      responsive: true,
 });
 
+applyColumnFilters(table);
+
 var inputNombre = document.getElementById('empresa_nombre');
 var inputDirEntrega = document.getElementById('emp_dir_entrega');
 var inputRazonSoc = document.getElementById('emp_razon_soc');

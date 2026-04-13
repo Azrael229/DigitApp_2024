@@ -86,6 +86,7 @@
 <!-- Data Tables 1.13.7 boostrap5 -->
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
+<script src="js/datatable-filters.js"></script>
 <script src="js/main.js"></script>
 <script src="js/tablaCotizacion.js"></script>
 

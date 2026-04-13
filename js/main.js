@@ -31,6 +31,8 @@
      }
 });
 
+applyColumnFilters(table);
+
 function parseValue(value) {
     if (typeof value === 'string') {
         return parseFloat(value.replace(/,/g, '')) || 0;

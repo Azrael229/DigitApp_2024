@@ -5,6 +5,8 @@ let table = new DataTable('#example', {
     responsive: true,
 });
 
+applyColumnFilters(table);
+
 
 $('#contacto_nombre_empresa').select2({
 });
