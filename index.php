@@ -20,17 +20,46 @@
     </div>
     <!-- row de titulo -->
 
+    <!-- row de Dashboard de Graficos -->
+    <div class="row" id="zonaGraficas">
+        <div class="col-12 text-center mt-3 mb-5">
+            <div class="dashboard-hero" id="dashbord-hero-top10" style="position: relative; height: 500px;">
+
+               <canvas id="chartClientes"></canvas>
+                
+            </div>
+        </div>
+        <div class="col text-center mt-3 mb-5">
+            <div class="dashboard-hero" style="position: relative; height: 300px;">
+
+                <canvas id="chartMeses"></canvas>
+
+            </div>
+        </div>
+        <div class="col text-center mt-3 mb-5">
+            <div class="dashboard-hero">
+                <span class="dashboard-kicker">DigitApp</span>
+                <h1>Panel de Administrador</h1>
+                <p class="dashboard-subtitle mb-0">Tabla de facturación CFDI</p>
+            </div>
+        </div>
+    </div>
+    <!-- row de Dashboard de Graficos -->
+
+
         <!-- row de Tabla facturacion -->
     <div class="row mb-4">
         <div class="col section-shell">
-            <div class="row p-3 mt-2 gy-3">
-                <div class="col-12">
+            
+            <!-- row de Seccion Icono y botones de carga xml y PDF -->
+            <div class="row p-3 mt-2 gy-3 ">                
+                <div class="col-12 ">
                     <div class="d-flex flex-column align-items-center justify-content-center text-center h-100">
                         <h5 class="mb-2"><i class="bi bi-receipt-cutoff" id="ico_coti"></i></h5>
                         <h5 class="mb-0">Facturación CFDI</h5>
                     </div>
                 </div>
-                <div class="col-12">
+                <div class="col-12 ">
                     <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-end align-items-center gap-2 pt-2">
                         <button type="button" class="btn btn-outline-success" onclick="abrirSelectorXml()">
                             Cargar XML
@@ -43,6 +72,7 @@
                     <input type="file" id="input-pdf-cfdi" class="d-none" accept=".pdf,application/pdf">
                 </div>
             </div>
+            <!-- row de Seccion Icono y botones de carga xml y PDF -->
 
             <div class="col p-4 factura-table-wrap">
                 <?php if (empty($facturas)): ?>
@@ -50,6 +80,8 @@
                         No se encontraron archivos XML.
                     </div>
                 <?php else: ?>
+
+                    <!-- row de CARDS Registros Sutotales Total -->
                     <div class="factura-resumen mb-4">
                         <div class="factura-resumen-item">
                             <span class="factura-resumen-label">Registros</span>
@@ -68,7 +100,9 @@
                             <strong id="card-total"><?= htmlspecialchars(formatAmount((string) array_sum(array_map(static fn(array $factura): float => (float) ($factura['total'] ?: 0), $facturas))), ENT_QUOTES, 'UTF-8') ?></strong>
                         </div>
                     </div>
+                    <!-- row de CARDS Registros Sutotales Total -->
 
+                    <!-- row de TABLA -->
                     <table id="example" class="table table-secondary table-striped align-middle mb-0">
                         <thead>
                             <tr>
@@ -109,14 +143,14 @@
                             </tr>
                         </tfoot>
                     </table>
+                    <!-- row de TABLA -->
+
                 <?php endif; ?>
             </div>
         </div>
     </div>
     <!-- row de Tabla facturacion -->
 
-    <!--Seccion calendario -->                  
-    <!--Seccion calendario -->
 </div>
 <!-- container -->
 
@@ -141,7 +175,8 @@
 <script src="js/datatable-filters.js"></script>
 <script src="js/main.js"></script>
 <script src="js/tablaFacturacion.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/facturacion-charts.js"></script>
 
 <?php  require ("construct/footer.html")   ?>
 

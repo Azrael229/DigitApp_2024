@@ -14,7 +14,7 @@ $databaseR = "servico1_digitapp2024"; // Change to your database name
 
 
 // Create a connection local
-//onexion = new mysqli($servername, $username, $password, $database);
+//$conexion = new mysqli($servername, $username, $password, $database);
 
 
 
