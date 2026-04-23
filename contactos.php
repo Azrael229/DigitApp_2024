@@ -133,7 +133,7 @@
                                              <td><?php echo $row['celular'] ?></td>
                                              <td><?php echo $row['correo'] ?></td>
                                              <td><?php echo $row['depto'] ?></td>
-                                             <td onclick="editar(<?php echo $row['id'] ?>)" style="cursor: pointer;">Editar</td>
+                                             <td class="table-action" onclick="editar(<?php echo $row['id'] ?>)">Editar</td>
                                         </tr>
                                    <?php  endforeach;    ?>
                                    

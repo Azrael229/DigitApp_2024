@@ -144,7 +144,7 @@
                                              <td><?php echo $row['dir_entrega'] ?></td>
                                              <td><?php echo $row['rfc'] ?></td>
                                              <td><?php echo $row['rol'] ?></td>
-                                             <td onclick="editar(<?php echo $row['id_e'] ?>)" style="cursor: pointer;">Editar</td>
+                                             <td class="table-action" onclick="editar(<?php echo $row['id_e'] ?>)">Editar</td>
                                              
                                         </tr>
                                    <?php  endforeach;    ?>

@@ -3,6 +3,7 @@
 <?php  require ("querys/query_all_cotizaciones.php")   ?>
 <?php  require ("querys/query_all_notas.php")   ?>
 
+
   
 <!-- container -->
 <div class="container mt-5 mb-5 contain shadow-lg" ">
@@ -27,30 +28,36 @@
         <!-- tabla  -->
         <div class="row">
             <div class="col table-responsive" >
-                <table id="example" class="table table-secondary table-striped" >
+                <table id="example" class="table table-secondary table-striped w-100" >
                     <thead>
                         <tr>
-                            <th scope="col">ID</th>
                             <th scope="col">FECHA</th>
                             <th scope="col">EMPRESA</th>
                             <th scope="col">CONTACTO</th>
                             <th scope="col">IMPORTE</th>
                             <th scope="col">DESCARGAR PDF</th>
-                            <th></th>
-                            <th></th>
+                            <th scope="col"></th>
+                            <th scope="col"></th>
+                            <th scope="col"></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach($result_cotizaciones as $row_coti): ?>
                         <tr>
-                            <td><?php echo $row_coti['id_coti'] ?></td>
                             <td><?php echo $row_coti['cot_fecha'] ?></td>
                             <td><?php echo $row_coti['cot_empresa'] ?></td>
                             <td><?php echo $row_coti['cot_contacto'] ?></td>
                             <td>$ <?php echo $row_coti['cot_total'] ?></td>
                             <td><a href="filesPDF/<?php echo $row_coti['cot_archivo'] ?>" download><?php echo $row_coti['cot_archivo'] ?></a></td>
-                            <td onclick="editar(<?php echo $row_coti['id_coti'] ?>)" style="cursor: pointer;">Editar</td>
-                            <td onclick="eliminar(<?php echo $row_coti['id_coti'] ?>)" style="cursor: pointer;">Eliminar</td>
+                            <td class="table-action" onclick="editar(<?php echo $row_coti['id_coti'] ?>)">Editar</td>
+                            <td class="table-action" onclick="eliminar(<?php echo $row_coti['id_coti'] ?>)">Eliminar</td>
+                            <td class="table-action">
+                                    <button 
+                                        class="btn btn-success btn-sm btnGenerarOS" 
+                                        data-id-coti="<?= $row_coti['id_coti'] ?>">
+                                        Generar_O.S.
+                                    </button>
+                            </td>
                         </tr>
                         <?php endforeach;  ?>
                         
@@ -63,8 +70,7 @@
     </div>
     <!-- row de Tabla cotizaciones -->
 
-    <!--Seccion calendario -->                  
-    <!--Seccion calendario -->
+    
 </div>
 <!-- container -->
 

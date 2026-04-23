@@ -265,6 +265,21 @@ button,
     transform: translateY(-1px);
 }
 
+/* estilo para las acciones de editar y eliminar en la tabla de cotizaciones */
+.table-action,
+.table-action a {
+    color: #ffffff !important;
+    cursor: pointer;
+    transition: color 0.18s ease, text-shadow 0.18s ease;
+}
+
+.table-action:hover,
+.table-action:hover a,
+.table-action a:hover {
+    color: #21e64c !important;
+    text-shadow: 0 0 10px rgba(80, 200, 120, 0.45);
+}
+
 .dataTables_wrapper .dataTables_paginate .paginate_button,
 .dataTables_wrapper .dataTables_paginate .paginate_button:hover,
 .dataTables_wrapper .dataTables_info,

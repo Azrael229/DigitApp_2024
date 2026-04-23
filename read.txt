@@ -16,3 +16,4 @@ $fpdf-> Line(10,10,206,10);
 bottom horizontal
 $fpdf-> Line(10,270,206,270);
 
+border border-danger
