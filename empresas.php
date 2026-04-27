@@ -89,12 +89,26 @@
                               <tbody>
 
                                    <?php  foreach ($result_empresas as $row): ?>
+                                        <?php
+                                             $estadoMostrar = trim((string)($row['estado_fiscal'] ?? ''));
+                                             if ($estadoMostrar === '') {
+                                                  $estadoMostrar = 'Sin dato';
+                                             }
+
+                                             $ciudadMostrar = trim((string)($row['ciudad_fiscal'] ?? ''));
+                                             if ($ciudadMostrar === '') {
+                                                  $ciudadMostrar = trim((string)($row['municipio_fiscal'] ?? ''));
+                                             }
+                                             if ($ciudadMostrar === '') {
+                                                  $ciudadMostrar = 'Sin dato';
+                                             }
+                                        ?>
                                         <tr>
                                              <td><?php echo $row['empresa'] ?></td>
                                              <td><?php echo $row['razon_social'] ?></td>
                                              <td><?php echo $row['rfc'] ?></td>
-                                             <td><?= $row['estado'] ?? 'Sin dato' ?></td>
-                                             <td><?= $row['ciudad'] ?? 'Sin dato' ?></td>
+                                             <td><?= htmlspecialchars($estadoMostrar, ENT_QUOTES, 'UTF-8') ?></td>
+                                             <td><?= htmlspecialchars($ciudadMostrar, ENT_QUOTES, 'UTF-8') ?></td>
                                              <td><?php echo $row['rol'] ?></td>
                                              <td><?php echo $row['mercado'] ?></td>
                                              <td><?php echo $row['estatus'] ?></td>

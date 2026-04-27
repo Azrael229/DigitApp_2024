@@ -1,40 +1,41 @@
-<?php  require ("construct/header.html")   ?>
+<?php
+require("querys/conexion.php");
 
-<style>
-    #constancia_pdf {
-        background: rgba(4, 22, 52, 0.98) !important;
-        border-color: rgba(89, 182, 255, 0.26) !important;
-        color: #ffffff !important;
-    }
+$empresaEdicion = [];
+$direccionFiscalEdicion = [];
+$modoFormulario = 'crear';
+$idEmpresaEdicion = isset($_GET['id_e']) ? (int) $_GET['id_e'] : 0;
 
-    #constancia_pdf::file-selector-button {
-        background: linear-gradient(135deg, rgba(13, 71, 138, 0.95), rgba(8, 31, 70, 0.98));
-        color: #ffffff;
-        border: 1px solid rgba(89, 182, 255, 0.22);
-        border-radius: 10px;
-        margin-right: 12px;
-        padding: 0.55rem 0.9rem;
-    }
+if ($idEmpresaEdicion > 0) {
+    $stmtEmpresa = $conexion->prepare("SELECT * FROM empresas WHERE id_e = ? LIMIT 1");
+    $stmtEmpresa->bind_param("i", $idEmpresaEdicion);
+    $stmtEmpresa->execute();
+    $resultadoEmpresa = $stmtEmpresa->get_result();
+    $empresaEdicion = $resultadoEmpresa->fetch_assoc() ?: [];
+    $stmtEmpresa->close();
 
-    #mensajeConstancia .alert {
-        background: linear-gradient(135deg, rgba(6, 24, 55, 0.98), rgba(10, 35, 76, 0.98)) !important;
-        border: 1px solid rgba(89, 182, 255, 0.22) !important;
-        color: #ffffff !important;
-        box-shadow: 0 18px 36px rgba(1, 10, 28, 0.24);
-    }
+    if (!empty($empresaEdicion)) {
+        $modoFormulario = 'editar';
 
-    #mensajeConstancia .alert-info {
-        border-color: rgba(89, 182, 255, 0.34) !important;
+        $stmtDireccion = $conexion->prepare(
+            "SELECT * FROM empresa_direcciones
+             WHERE empresa_id = ? AND tipo_direccion = ?
+             ORDER BY es_principal DESC, id ASC
+             LIMIT 1"
+        );
+        $tipoDireccionFiscal = 'fiscal';
+        $stmtDireccion->bind_param("is", $idEmpresaEdicion, $tipoDireccionFiscal);
+        $stmtDireccion->execute();
+        $resultadoDireccion = $stmtDireccion->get_result();
+        $direccionFiscalEdicion = $resultadoDireccion->fetch_assoc() ?: [];
+        $stmtDireccion->close();
     }
+}
 
-    #mensajeConstancia .alert-warning {
-        border-color: rgba(255, 193, 7, 0.38) !important;
-    }
+$conexion->close();
 
-    #mensajeConstancia .alert-danger {
-        border-color: rgba(228, 0, 124, 0.38) !important;
-    }
-</style>
+require("construct/header.html");
+?>
 
 <!-- container -->
 <div class="container mt-5 mb-5 contain shadow-lg" ">
@@ -42,11 +43,28 @@
     <!-- row de titulo -->
     <div class="row">
         <div class="col text-center mt-3 mb-5">
-            <h1><span>Nueva Empresa</span></h1>
+            <h1><span><?= $modoFormulario === 'editar' ? 'Editar Empresa' : 'Nueva Empresa' ?></span></h1>
         </div>
     </div>
+
+    <?php if (isset($_GET['guardado'])): ?>
+        <div class="alert alert-success" role="alert">
+            Empresa y dirección fiscal guardadas correctamente.
+        </div>
+    <?php endif; ?>
+    <?php if (isset($_GET['actualizado'])): ?>
+        <div class="alert alert-success" role="alert">
+            Empresa y dirección fiscal actualizadas correctamente.
+        </div>
+    <?php endif; ?>
+    <?php if (!empty($_GET['error'])): ?>
+        <div class="alert alert-danger" role="alert">
+            <?= htmlspecialchars((string) $_GET['error'], ENT_QUOTES, 'UTF-8') ?>
+        </div>
+    <?php endif; ?>
     <!-- row de titulo -->
 
+    <form id="formEmpresa" action="querys/add_empresa.php" method="POST" data-modo-formulario="<?= $modoFormulario ?>">
     <!-- row de botones de formulario empresas  -->
     <div class="row border-top justify-content-center">
         <!-- bloque de botones -->
@@ -54,12 +72,12 @@
             <div class="col mt-4 mb-4">
                 <!-- crear aqui los botones-->
                 <div class="d-flex flex-column flex-md-row justify-content-md-end gap-2">
-                    <button type="button" class="btn btn-outline-success px-4">
+                    <button type="submit" class="btn btn-outline-success btn-empresa-guardar px-4">
                         Guardar
                     </button>
-                    <button type="button" class="btn btn-danger px-4">
+                    <a href="empresas.php" class="btn btn-danger px-4">
                         Cancelar
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -74,40 +92,53 @@
         <div class="row">
             <div class="col text-center mt-3 mb-5">
                 <!-- crear aqui -->
-                <form>
                     <div class="d-flex flex-column gap-4 text-start">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body p-4 rounded-4" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(110, 181, 255, 0.18);">
-                                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
-                                    <div>
-                                        <h2 class="h4 mb-1">Carga de constancia fiscal PDF</h2>
-                                        <p class="text-body-secondary mb-1">El procesamiento automatico de la constancia fiscal se implementara con el nuevo metodo.</p>
-                                        <p class="text-body-secondary mb-0">El PDF se valida de forma temporal y no se guarda en el servidor.</p>
-                                    </div>
+                        <div class="card border-0 shadow-sm empresa-form-card">
+                            <div class="card-header empresa-card-header">
+                                Carga inteligente de datos de empresa
+                            </div>
+
+                            <div class="card-body p-4 empresa-card-body">
+                                <label for="archivo_empresa_ai" class="form-label fw-semibold">
+                                    Archivo
+                                </label>
+
+                                <input
+                                    type="file"
+                                    id="archivo_empresa_ai"
+                                    name="archivo_empresa_ai"
+                                    class="form-control"
+                                    accept=".pdf,.jpg,.jpeg,.png,.webp,.txt,.xml,.json,.doc,.docx,.rtf,.csv">
+
+                                <div class="form-text">
+                                    Puedes cargar constancia fiscal, PDF, imagen, archivo TXT, XML o documento compatible.
+                                    El archivo se usara solo para extraer datos y no se guardara en el servidor.
                                 </div>
-                                <div class="row g-4 align-items-end">
-                                    <div class="col-12 col-lg-8">
-                                        <label for="constancia_pdf" class="form-label fw-semibold">Constancia de situacion fiscal</label>
-                                        <input type="file" class="form-control" id="constancia_pdf" name="constancia_pdf" accept="application/pdf">
-                                    </div>
-                                    <div class="col-12 col-lg-4">
-                                        <label for="constancia_fiscal_pdf_nombre" class="form-label fw-semibold">Archivo seleccionado</label>
-                                        <input type="text" class="form-control" id="constancia_fiscal_pdf_nombre" name="constancia_fiscal_pdf_nombre" value="Ningun archivo seleccionado" readonly>
-                                    </div>
-                                    <div class="col-12 col-lg-4">
-                                        <button type="button" id="btnLeerConstancia" class="btn btn-secondary px-4 w-100">
-                                            Leer constancia y llenar datos
-                                        </button>
-                                    </div>
-                                    <div class="col-12 col-lg-8">
-                                        <div id="mensajeConstancia"></div>
-                                    </div>
-                                </div>
+
+                                <label for="texto_empresa_ai" class="form-label fw-semibold mt-3">
+                                    O pegar texto manualmente
+                                </label>
+
+                                <textarea
+                                    id="texto_empresa_ai"
+                                    name="texto_empresa_ai"
+                                    class="form-control"
+                                    rows="4"
+                                    placeholder="Pega aqui datos fiscales, texto de una constancia, correo, mensaje o informacion de cliente..."></textarea>
+
+                                <button
+                                    type="button"
+                                    id="btnProcesarEmpresaAI"
+                                    class="btn btn-primary mt-3">
+                                    Detectar datos de empresa
+                                </button>
+
+                                <div id="mensajeEmpresaAI" class="mt-3"></div>
                             </div>
                         </div>
 
                         <div class="card border-0 shadow-sm">
-                            <div class="card-body p-4 rounded-4" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(110, 181, 255, 0.18);">
+                            <div class="card-body p-4 rounded-4 empresa-card-body">
                                 <div class="mb-4">
                                     <h2 class="h4 mb-1">Datos principales</h2>
                                     <p class="text-body-secondary mb-0">Captura manual base para el alta de la empresa.</p>
@@ -145,7 +176,7 @@
                         </div>
 
                         <div class="card border-0 shadow-sm">
-                            <div class="card-body p-4 rounded-4" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(110, 181, 255, 0.18);">
+                            <div class="card-body p-4 rounded-4 empresa-card-body">
                                 <div class="mb-4">
                                     <h2 class="h4 mb-1">Datos fiscales</h2>
                                     <p class="text-body-secondary mb-0">Informacion fiscal principal de la empresa.</p>
@@ -176,7 +207,7 @@
                         </div>
 
                         <div class="card border-0 shadow-sm">
-                            <div class="card-body p-4 rounded-4" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(110, 181, 255, 0.18);">
+                            <div class="card-body p-4 rounded-4 empresa-card-body">
                                 <div class="mb-4">
                                     <h2 class="h4 mb-1">Direccion fiscal</h2>
                                     <p class="text-body-secondary mb-0">Seccion visual para captura de la direccion fiscal que despues se almacenara en empresa_direcciones.</p>
@@ -253,7 +284,7 @@
                         </div>
 
                         <div class="card border-0 shadow-sm">
-                            <div class="card-body p-4 rounded-4" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(110, 181, 255, 0.18);">
+                            <div class="card-body p-4 rounded-4 empresa-card-body">
                                 <div class="mb-4">
                                     <h2 class="h4 mb-1">Clasificacion comercial</h2>
                                     <p class="text-body-secondary mb-0">Datos internos para clasificacion de negocio.</p>
@@ -272,7 +303,7 @@
                         </div>
 
                         <div class="card border-0 shadow-sm">
-                            <div class="card-body p-4 rounded-4" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(110, 181, 255, 0.18);">
+                            <div class="card-body p-4 rounded-4 empresa-card-body">
                                 <div class="mb-4">
                                     <h2 class="h4 mb-1">Contacto general</h2>
                                     <p class="text-body-secondary mb-0">Canales principales de contacto de la empresa.</p>
@@ -295,7 +326,7 @@
                         </div>
 
                         <div class="card border-0 shadow-sm">
-                            <div class="card-body p-4 rounded-4" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(110, 181, 255, 0.18);">
+                            <div class="card-body p-4 rounded-4 empresa-card-body">
                                 <div class="mb-4">
                                     <h2 class="h4 mb-1">Control interno</h2>
                                     <p class="text-body-secondary mb-0">Campos operativos para seguimiento del registro.</p>
@@ -333,7 +364,7 @@
                         </div>
 
                         <div class="card border-0 shadow-sm">
-                            <div class="card-body p-4 rounded-4" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(110, 181, 255, 0.18);">
+                            <div class="card-body p-4 rounded-4 empresa-card-body">
                                 <div class="mb-4">
                                     <h2 class="h4 mb-1">Informacion del registro</h2>
                                     <p class="text-body-secondary mb-0">Campos informativos no editables.</p>
@@ -355,15 +386,78 @@
                             </div>
                         </div>
                     </div>
-                </form>
             </div>
         </div>
     </div>
+    </form>
     <!-- formulario empresa -->
 
 </div>
 <!-- container -->
 
+<?php
+$valoresInicialesFormulario = [
+    'id_e' => $empresaEdicion['id_e'] ?? '',
+    'empresa' => $empresaEdicion['empresa'] ?? '',
+    'razon_social' => $empresaEdicion['razon_social'] ?? '',
+    'rfc' => $empresaEdicion['rfc'] ?? '',
+    'rol' => $empresaEdicion['rol'] ?? '',
+    'actividad_economica' => $empresaEdicion['actividad_economica'] ?? '',
+    'regimen_fiscal_codigo' => $empresaEdicion['regimen_fiscal_codigo'] ?? '',
+    'regimen_fiscal_descripcion' => $empresaEdicion['regimen_fiscal_descripcion'] ?? '',
+    'regimen_capital' => $empresaEdicion['regimen_capital'] ?? '',
+    'tipo_persona' => $empresaEdicion['tipo_persona'] ?? '',
+    'giro_mercantil' => $empresaEdicion['giro_mercantil'] ?? '',
+    'mercado' => $empresaEdicion['mercado'] ?? '',
+    'telefono_principal' => $empresaEdicion['telefono_principal'] ?? '',
+    'email_principal' => $empresaEdicion['email_principal'] ?? '',
+    'pagina_web' => $empresaEdicion['pagina_web'] ?? '',
+    'estatus' => $empresaEdicion['estatus'] ?? '',
+    'origen_registro' => $empresaEdicion['origen_registro'] ?? '',
+    'observaciones' => $empresaEdicion['observaciones'] ?? '',
+    'created_at' => $empresaEdicion['created_at'] ?? '',
+    'updated_at' => $empresaEdicion['updated_at'] ?? '',
+
+    'tipo_direccion' => $direccionFiscalEdicion['tipo_direccion'] ?? 'fiscal',
+    'tipo_direccion_visible' => $direccionFiscalEdicion['tipo_direccion'] ?? 'fiscal',
+    'alias' => $direccionFiscalEdicion['alias'] ?? 'Fiscal',
+    'calle' => $direccionFiscalEdicion['calle'] ?? '',
+    'numero_exterior' => $direccionFiscalEdicion['numero_exterior'] ?? '',
+    'numero_interior' => $direccionFiscalEdicion['numero_interior'] ?? '',
+    'colonia' => $direccionFiscalEdicion['colonia'] ?? '',
+    'localidad' => $direccionFiscalEdicion['localidad'] ?? '',
+    'municipio' => $direccionFiscalEdicion['municipio'] ?? '',
+    'ciudad' => $direccionFiscalEdicion['ciudad'] ?? '',
+    'estado' => $direccionFiscalEdicion['estado'] ?? '',
+    'codigo_postal' => $direccionFiscalEdicion['codigo_postal'] ?? '',
+    'pais' => $direccionFiscalEdicion['pais'] ?? 'Mexico',
+    'enlace_maps' => $direccionFiscalEdicion['enlace_maps'] ?? '',
+    'referencia' => $direccionFiscalEdicion['referencia'] ?? '',
+    'entre_calles' => $direccionFiscalEdicion['entre_calles'] ?? '',
+    'es_principal' => isset($direccionFiscalEdicion['es_principal']) ? (string) $direccionFiscalEdicion['es_principal'] : '1',
+    'es_principal_visible' => isset($direccionFiscalEdicion['es_principal']) ? (string) $direccionFiscalEdicion['es_principal'] : '1',
+    'es_principal_resumen' => isset($direccionFiscalEdicion['es_principal']) ? (string) $direccionFiscalEdicion['es_principal'] : '1',
+];
+?>
+
+<script>
+    (function () {
+        const valoresIniciales = <?= json_encode($valoresInicialesFormulario, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+        Object.keys(valoresIniciales).forEach(function (id) {
+            const elemento = document.getElementById(id);
+            if (!elemento) {
+                return;
+            }
+            const valor = valoresIniciales[id];
+            if (valor === null || valor === undefined) {
+                return;
+            }
+            if (Object.prototype.hasOwnProperty.call(elemento, 'value')) {
+                elemento.value = String(valor);
+            }
+        });
+    })();
+</script>
 
 
 
@@ -382,7 +476,7 @@
 
 <script src="js/datatable-filters.js"></script>
 <script src="js/main.js"></script>
-<script src="js/empresas_constancia.js"></script>
+<script src="js/empresas_ai.js?v=20260425_6"></script>
 
 
 <?php  require ("construct/footer.html")   ?>

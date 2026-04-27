@@ -1,0 +1,4 @@
+config/openai_config.php
+.env
+.env.local
+.env.production

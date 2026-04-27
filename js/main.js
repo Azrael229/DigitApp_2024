@@ -55,8 +55,25 @@ function setText(id, value) {
 }
 
 function getColumnTotal(api, columnIndex) {
-    return api.column(columnIndex, { search: 'applied' }).nodes().reduce((total, cell) => {
-        return total + parseValue(cell.getAttribute('data-value'));
+    const totalColumnas = typeof api.columns === 'function' ? api.columns().count() : 0;
+    if (columnIndex < 0 || columnIndex >= totalColumnas) {
+        return 0;
+    }
+
+    const columnNodes = api.column(columnIndex, { search: 'applied' }).nodes();
+    const nodes = Array.isArray(columnNodes)
+        ? columnNodes
+        : (columnNodes && typeof columnNodes.toArray === 'function' ? columnNodes.toArray() : []);
+
+    if (!Array.isArray(nodes) || nodes.length === 0) {
+        return 0;
+    }
+
+    return nodes.reduce((total, cell) => {
+        const value = cell && typeof cell.getAttribute === 'function'
+            ? (cell.getAttribute('data-value') || cell.textContent || '')
+            : '';
+        return total + parseValue(value);
     }, 0);
 }
 
