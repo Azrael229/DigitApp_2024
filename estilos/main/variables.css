@@ -1,0 +1,34 @@
+:root {
+    --bg-deep: #03152f;
+    --bg-mid: #0a2d5e;
+    --bg-soft: #134e8f;
+    --surface: rgba(8, 31, 70, 0.72);
+    --surface-strong: rgba(8, 34, 78, 0.9);
+    --surface-light: rgba(13, 47, 100, 0.88);
+    --border-soft: rgba(110, 181, 255, 0.2);
+    --border-strong: rgba(228, 0, 124, 0.36);
+    --text-main: #ffffff;
+    --text-soft: rgba(255, 255, 255, 0.72);
+    --accent: #59b6ff;
+    --accent-strong: #2389e8;
+    --accent-mint: #6cd3ff;
+    --accent-contrast: #e4007c;
+    --accent-contrast-soft: rgba(228, 0, 124, 0.18);
+    --shadow-lg: 0 28px 80px rgba(1, 10, 28, 0.45);
+    --shadow-md: 0 18px 36px rgba(1, 10, 28, 0.3);
+    --radius-lg: 28px;
+    --radius-md: 18px;
+    --bs-body-color: #ffffff;
+    --bs-body-bg: #03152f;
+    --bs-emphasis-color: #ffffff;
+    --bs-secondary-color: rgba(255, 255, 255, 0.72);
+    --bs-border-color: rgba(110, 181, 255, 0.2);
+    --bs-primary: #59b6ff;
+    --bs-primary-rgb: 89, 182, 255;
+    --bs-link-color: #ffffff;
+    --bs-link-hover-color: #59b6ff;
+    --bs-table-color: #ffffff;
+    --bs-table-bg: transparent;
+    --bs-table-striped-color: #ffffff;
+    --bs-table-hover-color: #ffffff;
+}

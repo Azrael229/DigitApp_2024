@@ -1,0 +1,29 @@
+@import url("./main/variables.css");
+@import url("./main/base.css");
+@import url("./main/layout.css");
+@import url("./main/navbar.css");
+@import url("./main/typography.css");
+@import url("./main/forms.css");
+
+@import url("./selects/native-selects.css");
+@import url("./selects/select2.css");
+
+@import url("./main/buttons.css");
+
+@import url("./tables/base.css");
+@import url("./tables/datatables.css");
+@import url("./tables/facturacion.css");
+@import url("./tables/cotizacion.css");
+
+@import url("./components/icons.css");
+@import url("./components/cards.css");
+@import url("./components/dashboard.css");
+@import url("./components/alerts.css");
+
+@import url("./main/utilities.css");
+@import url("./main/responsive.css");
+
+@import url("./pages/cotizaciones.css");
+@import url("./pages/contactos.css");
+@import url("./pages/empresas.css");
+@import url("./pages/informe.css");

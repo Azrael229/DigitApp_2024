@@ -1,0 +1,41 @@
+.navbar.bg-dark {
+    background: rgba(2, 16, 39, 0.88) !important;
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(89, 182, 255, 0.2);
+}
+
+.navbar-brand,
+.nav-link,
+.dropdown-item {
+    color: var(--text-main) !important;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-link:hover,
+.navbar-brand:hover {
+    color: var(--accent) !important;
+}
+
+.dropdown-menu {
+    background: rgba(4, 22, 52, 0.98);
+    border: 1px solid rgba(89, 182, 255, 0.18);
+    border-radius: 14px;
+    box-shadow: var(--shadow-md);
+}
+
+.dropdown-item:hover {
+    background: linear-gradient(90deg, rgba(89, 182, 255, 0.12), rgba(228, 0, 124, 0.12));
+    color: #ffffff !important;
+}
+
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.24);
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(228, 0, 124, 0.18);
+}
+
+.dropdown-divider {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}

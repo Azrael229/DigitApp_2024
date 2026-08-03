@@ -1,0 +1,38 @@
+.contain {
+    width: min(1520px, calc(100vw - 32px));
+    max-width: 1520px;
+    margin-inline: auto;
+    padding: 26px 28px 34px;
+    background: linear-gradient(180deg, rgba(11, 41, 92, 0.9) 0%, rgba(6, 24, 55, 0.95) 100%);
+    border: 1px solid rgba(110, 181, 255, 0.22);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(18px);
+    position: relative;
+    overflow: hidden;
+}
+
+.contain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at top right, rgba(228, 0, 124, 0.12), transparent 20%),
+        linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.02) 45%, transparent 100%);
+    pointer-events: none;
+}
+
+.section-shell {
+    border-top: 1px solid rgba(110, 181, 255, 0.18);
+    padding-top: 10px;
+}
+
+.section-shell #ico_coti {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.section-shell .btn {
+    min-width: 150px;
+}

@@ -1,0 +1,109 @@
+.factura-table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+}
+
+.factura-table-wrap .dt-top,
+.factura-table-wrap .dt-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.factura-table-wrap .dt-bottom {
+    margin-top: 18px;
+    margin-bottom: 0;
+}
+
+.factura-table-wrap .dataTables_filter label,
+.factura-table-wrap .dataTables_length label,
+.factura-table-wrap .dataTables_info {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.factura-table-wrap .dataTables_filter input,
+.factura-table-wrap .dataTables_length select {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(89, 182, 255, 0.24);
+    border-radius: 10px;
+    color: #ffffff;
+    min-height: 40px;
+    padding: 6px 12px;
+}
+
+.factura-table-wrap table tfoot th {
+    background: linear-gradient(135deg, rgba(228, 0, 124, 0.9), rgba(13, 105, 194, 0.92)) !important;
+    color: #ffffff !important;
+    border-top: 2px solid rgba(255, 255, 255, 0.12);
+}
+
+.factura-resumen {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+}
+
+.factura-resumen-item {
+    background: linear-gradient(160deg, rgba(17, 70, 132, 0.88), rgba(8, 31, 70, 0.9));
+    border: 1px solid rgba(89, 182, 255, 0.18);
+    border-radius: 18px;
+    padding: 16px 20px;
+    color: #ffffff;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.factura-resumen-item::after {
+    content: "";
+    position: absolute;
+    inset: auto -30px -40px auto;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.factura-resumen-item strong {
+    display: block;
+    font-size: 1.35rem;
+    margin-top: 4px;
+}
+
+.factura-resumen-label {
+    color: var(--text-soft);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.factura-resumen-total {
+    background: linear-gradient(135deg, rgba(228, 0, 124, 0.9), rgba(15, 84, 171, 0.95));
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.factura-table-wrap {
+    overflow-x: visible;
+    background: rgba(4, 22, 52, 0.52);
+}
+
+.factura-table-wrap table {
+    width: 100% !important;
+}
+
+.factura-table-wrap th,
+.factura-table-wrap td {
+    white-space: normal;
+    vertical-align: middle;
+}
+
+.factura-table-wrap .factura-wrap {
+    white-space: normal !important;
+    word-break: break-word;
+}

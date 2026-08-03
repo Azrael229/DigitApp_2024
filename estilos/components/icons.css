@@ -1,0 +1,12 @@
+#ico_buildings,
+#ico_contacto,
+#ico_informe,
+#ico_coti {
+    font-size: 50px;
+    color: var(--accent-contrast);
+    filter: drop-shadow(0 8px 22px rgba(228, 0, 124, 0.28));
+}
+
+#dot {
+    color: var(--accent-contrast);
+}

@@ -1,0 +1,76 @@
+.select2-container {
+    color: #ffffff;
+}
+
+.select2-container--default .select2-selection--single {
+    min-height: 40px;
+    background: linear-gradient(135deg, rgba(13, 47, 100, 0.92), rgba(8, 31, 70, 0.94)) !important;
+    border: 1px solid rgba(89, 182, 255, 0.28) !important;
+    border-radius: 12px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #ffffff !important;
+    line-height: 38px;
+    padding-left: 14px;
+    padding-right: 34px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: rgba(255, 255, 255, 0.68) !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 38px;
+    right: 8px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: rgba(255, 255, 255, 0.78) transparent transparent transparent;
+}
+
+.select2-container--default.select2-container--open .select2-selection--single,
+.select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: rgba(228, 0, 124, 0.68) !important;
+    box-shadow: 0 0 0 0.22rem rgba(228, 0, 124, 0.16) !important;
+}
+
+.select2-dropdown {
+    background: linear-gradient(180deg, rgba(8, 34, 78, 0.98), rgba(4, 22, 52, 0.98)) !important;
+    border: 1px solid rgba(89, 182, 255, 0.28) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+
+.select2-search--dropdown {
+    padding: 10px;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(89, 182, 255, 0.28) !important;
+    border-radius: 10px !important;
+    color: #ffffff !important;
+    outline: none;
+}
+
+.select2-results__options {
+    scrollbar-color: rgba(89, 182, 255, 0.7) rgba(4, 22, 52, 0.98);
+}
+
+.select2-container--default .select2-results__option {
+    color: #ffffff;
+    padding: 10px 14px;
+}
+
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+    background: linear-gradient(90deg, rgba(35, 137, 232, 0.92), rgba(228, 0, 124, 0.74)) !important;
+    color: #ffffff !important;
+}
+
+.select2-container--default .select2-results__option--selected {
+    background: rgba(89, 182, 255, 0.18) !important;
+    color: #ffffff !important;
+}

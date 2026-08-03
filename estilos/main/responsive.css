@@ -1,0 +1,20 @@
+@media (max-width: 991px) {
+    .contain {
+        width: min(100vw - 18px, 100%);
+        padding: 20px 16px 24px;
+        border-radius: 22px;
+    }
+
+    body {
+        margin-top: 82px;
+    }
+
+    .table td,
+    .table th {
+        padding: 12px 10px;
+    }
+
+    .dashboard-hero {
+        padding: 22px 18px;
+    }
+}

@@ -1,0 +1,19 @@
+.month,
+#card_subir_archivos {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+}
+
+.month {
+    color: #ffffff;
+    background-color: rgba(10, 35, 76, 0.82);
+    padding: 20px;
+    border-radius: 18px;
+    box-shadow: var(--shadow-md);
+}
+
+#card_subir_archivos {
+    background-color: rgba(10, 35, 76, 0.7);
+}

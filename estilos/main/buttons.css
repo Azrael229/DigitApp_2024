@@ -1,0 +1,30 @@
+button,
+.btn {
+    border-radius: 12px !important;
+}
+
+.btn-secondary,
+.btn-outline-success {
+    border: 1px solid transparent;
+    box-shadow: var(--shadow-md);
+    color: #ffffff !important;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #1787ea, #0f4ea8);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #34a1ff, #1560bf);
+}
+
+.btn-outline-success {
+    border-color: rgba(228, 0, 124, 0.5);
+    background: rgba(228, 0, 124, 0.08);
+    color: #ffffff;
+}
+
+.btn-outline-success:hover {
+    background: linear-gradient(135deg, rgba(228, 0, 124, 0.9), rgba(174, 0, 100, 0.95));
+    color: #ffffff;
+}

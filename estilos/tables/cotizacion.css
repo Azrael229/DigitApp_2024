@@ -1,0 +1,9 @@
+.totales {
+    color: var(--text-main);
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    background-color: rgba(10, 35, 76, 0.7);
+    border-radius: 18px;
+}

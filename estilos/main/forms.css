@@ -1,0 +1,27 @@
+input,
+textarea,
+select,
+.form-control,
+.form-select,
+.select2-selection {
+    border-radius: 12px !important;
+    border: 1px solid rgba(89, 182, 255, 0.24) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.form-control:focus,
+.form-select:focus {
+    border-color: rgba(228, 0, 124, 0.68) !important;
+    box-shadow: 0 0 0 0.22rem rgba(228, 0, 124, 0.16) !important;
+}
+
+input::placeholder,
+textarea::placeholder,
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.62) !important;
+}
