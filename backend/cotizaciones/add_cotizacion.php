@@ -20,7 +20,7 @@ if($fecha_cot == "" || $vigencia_cot == "" || $contacto_nombre == "" || $empresa
 
   $cot_status = '<i class="bi bi-circle-fill" style="color: black;"> Vacía </i>';
 
-  require ('conexion.php');
+  require (__DIR__ . "/../../config/conexion.php");
 
   $sql = "INSERT INTO cotizaciones (cot_fecha, cot_empresa, cot_contacto, cot_total, cot_archivo, cot_numero, cot_vigencia, cot_utilidad, cot_costos, cot_status) VALUES ('$fecha_cot', '$empresa_nombre', '$contacto_nombre', '$total_cot', '$cot_archivo', '$num_unico', '$vigencia_cot', '$utilidad', '$costos', '$cot_status')";
 
@@ -35,7 +35,7 @@ if($fecha_cot == "" || $vigencia_cot == "" || $contacto_nombre == "" || $empresa
 
 
 
-  require ('conexion.php');
+  require (__DIR__ . "/../../config/conexion.php");
 
   $sql = "INSERT INTO cotizaciones (cot_fecha, cot_empresa, cot_contacto, cot_total, cot_archivo, cot_numero, cot_vigencia, cot_utilidad, cot_costos, cot_status) VALUES ('$fecha_cot', '$empresa_nombre', '$contacto_nombre', '$total_cot', '$cot_archivo', '$num_unico', '$vigencia_cot', '$utilidad', '$costos', '$cot_status')";
 

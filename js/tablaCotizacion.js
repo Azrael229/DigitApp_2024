@@ -9,5 +9,5 @@ function eliminar(id) {
         return;
     }
 
-    window.location.href = `querys/delete_id_cotizacion.php?id_coti=${encodeURIComponent(id)}`;
+    window.location.href = `../backend/cotizaciones/delete_id_cotizacion.php?id_coti=${encodeURIComponent(id)}`;
 }

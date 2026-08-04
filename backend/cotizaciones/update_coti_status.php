@@ -8,7 +8,7 @@ if($id_status == "2"){
   
   $cot_status = '<i class="bi bi-circle-fill" style="color: green;"> Aceptada </i>';
 
-  require ('conexion.php');
+  require (__DIR__ . "/../../config/conexion.php");
 
   $sql = "UPDATE cotizaciones
   SET cot_status = '$cot_status'
@@ -25,7 +25,7 @@ if($id_status == "3"){
   
   $cot_status = '<i class="bi bi-circle-fill" style="color: red;"> Cancelada </i>';
 
-  require ('conexion.php');
+  require (__DIR__ . "/../../config/conexion.php");
 
   $sql = "UPDATE cotizaciones
   SET cot_status = '$cot_status'
@@ -42,7 +42,7 @@ if($id_status == "1"){
   
   $cot_status = '<i class="bi bi-circle-fill" style="color: blue;"> Esperar </i>';
 
-  require ('conexion.php');
+  require (__DIR__ . "/../../config/conexion.php");
 
   $sql = "UPDATE cotizaciones
   SET cot_status = '$cot_status'

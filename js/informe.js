@@ -27,7 +27,7 @@ function selectEmpresa(){
      // console.log(selectNombEmpresa.value);
     let id = selectNombEmpresa.value;
 
-     fetch('querys/query_id_empresa.php',{
+     fetch('../backend/empresas/query_id_empresa.php',{
 
           method: 'POST', 
           body: id
@@ -43,7 +43,7 @@ function selectEmpresa(){
           
      })
 
-     fetch('querys/query_contacto_id_emp.php',{
+     fetch('../backend/contactos/query_contacto_id_emp.php',{
 
           method: 'POST', 
           body: id

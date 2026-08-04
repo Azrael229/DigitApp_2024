@@ -14,7 +14,7 @@ $id_empresa = $_POST['contacto_nombre_empresa'];
 
 if ($id == "" || $id == NULL){
 
-          require ("conexion.php");
+          require (__DIR__ . "/../../config/conexion.php");
           
           $sql = "INSERT INTO contactos  (nombre,	celular,	correo,	depto,	id_empresa)  VALUES ('$nombre', '$cel', '$email', '$depto', '$id_empresa')";
           
@@ -26,7 +26,7 @@ if ($id == "" || $id == NULL){
 
 } else {
 
-          require ("conexion.php");
+          require (__DIR__ . "/../../config/conexion.php");
 
           $sql = "UPDATE contactos SET 
           nombre = '$nombre', 

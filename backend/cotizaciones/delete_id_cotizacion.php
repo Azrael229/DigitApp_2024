@@ -1,10 +1,10 @@
 <?php
-require ("conexion.php");
+require (__DIR__ . "/../../config/conexion.php");
 
 $id = $_GET['id_coti'] ?? '';
 $pdfPath = '';
 $status = 'ok';
-$redirectUrl = $_SERVER['HTTP_REFERER'] ?? '../tablaCotizaciones.php';
+$redirectUrl = $_SERVER['HTTP_REFERER'] ?? '../../paginas/tablaCotizaciones.php';
 
 if ($id === '') {
     mysqli_close($conexion);
@@ -20,8 +20,8 @@ if ($resultArchivo && mysqli_num_rows($resultArchivo) > 0) {
     $archivoPdf = trim((string) ($rowArchivo['cot_archivo'] ?? ''));
 
     if ($archivoPdf !== '') {
-        $basePdfDirectory = realpath(dirname(__DIR__) . DIRECTORY_SEPARATOR . 'filesPDF');
-        $candidatePath = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'filesPDF' . DIRECTORY_SEPARATOR . basename($archivoPdf);
+        $basePdfDirectory = realpath(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'filesPDF');
+        $candidatePath = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'filesPDF' . DIRECTORY_SEPARATOR . basename($archivoPdf);
         $resolvedCandidatePath = realpath($candidatePath);
 
         if (

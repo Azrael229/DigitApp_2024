@@ -1,6 +1,7 @@
-<?php  require ("construct/header.html")  ?>
-<?php  require ("querys/query_all_contactos.php")  ?>
-<?php  require ("querys/query_all_empresas.php")  ?>
+<?php $prefijoRuta = '../'; ?>
+<?php  require (__DIR__ . "/../construct/header.php")  ?>
+<?php  require (__DIR__ . "/../backend/contactos/query_all_contactos.php")  ?>
+<?php  require (__DIR__ . "/../backend/empresas/query_all_empresas.php")  ?>
 
 
 <!-- container -->
@@ -25,7 +26,7 @@
                                    </div>
 
                                    <!-- formulario contacto -->
-                                   <form action="querys/add_contacto.php" method="POST">
+                                   <form action="<?= $prefijoRuta ?>backend/contactos/add_contacto.php" method="POST">
 
                                    <div class="row">
                                              <div class="col-3  ">
@@ -164,7 +165,7 @@
 <!-- SELECT2 combobox -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-<script src="js/datatable-filters.js"></script>
-<script src="js/contactos.js"></script>
+<script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
+<script src="<?= $prefijoRuta ?>js/contactos.js"></script>
 
-<?php  require ("construct/footer.html")   ?>
+<?php  require (__DIR__ . "/../construct/footer.html")   ?>

@@ -4,7 +4,7 @@ $id_mes = $_POST['sel_id_mes'];
 $nota = $_POST['input_nota'];
 $file = $_FILES['input_file']['name'];
 
-$ruta = "../docs/";
+$ruta = "../../docs/";
 $file_tmp = $_FILES['input_file']['tmp_name'];
 
 move_uploaded_file($file_tmp, $ruta.$file);
@@ -12,7 +12,7 @@ move_uploaded_file($file_tmp, $ruta.$file);
 
 $link = '<a href="docs/' .$file. '" download> '.$file.'</a>' ;
 
-require('conexion.php');
+require(__DIR__ . "/../../config/conexion.php");
 
 if($id_mes){
 

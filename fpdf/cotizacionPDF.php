@@ -93,7 +93,7 @@ if($nota7==""){
 // print_r ($notas);
 
 
-require ('../funciones.php');
+require (__DIR__ . '/../paginas/funciones.php');
 require ('fpdf.php');
 
 $fpdf = new FPDF('P', 'mm', 'letter', true);

@@ -1,8 +1,9 @@
 ﻿
-<?php  require ("construct/header.html")   ?>
-<?php  require ("querys/query_all_cotizaciones.php")   ?>
-<?php  require ("querys/query_all_notas.php")   ?>
-<?php  require ("querys/query_xml_cfdi.php")   ?>
+<?php $prefijoRuta = ''; ?>
+<?php  require (__DIR__ . "/construct/header.php")   ?>
+<?php  require (__DIR__ . "/backend/cotizaciones/query_all_cotizaciones.php")   ?>
+<?php  require (__DIR__ . "/backend/notas/query_all_notas.php")   ?>
+<?php  require (__DIR__ . "/backend/facturacion/query_xml_cfdi.php")   ?>
 
   
 <!-- container -->

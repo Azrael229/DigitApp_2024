@@ -48,7 +48,7 @@ function selectContacto(){
      // console.log(selectNombContacto.value);
     let id = selectNombContacto.value;
 
-     fetch('querys/query_id_contacto.php',{
+     fetch('../backend/contactos/query_id_contacto.php',{
 
           method: 'POST', 
           body: id
@@ -259,7 +259,7 @@ btnGuardar.addEventListener('click', function() {
 
           const formData = new FormData(formulario);
      
-          fetch('querys/add_cotizacion.php',{
+          fetch('../backend/cotizaciones/add_cotizacion.php',{
      
           method: 'POST', 
           body: formData

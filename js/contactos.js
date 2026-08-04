@@ -29,7 +29,7 @@ function editar(id){
     // id del contacto
     console.log(id);
 
-    fetch('querys/query_id_contacto.php',{
+    fetch('../backend/contactos/query_id_contacto.php',{
 
         method: 'POST', 
         body: id

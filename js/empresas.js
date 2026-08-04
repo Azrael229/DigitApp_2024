@@ -19,7 +19,7 @@ function editar(id){
 
     // console.log(id);
 
-    fetch('querys/query_id_empresa.php',{
+    fetch('../backend/empresas/query_id_empresa.php',{
 
         method: 'POST', 
         body: id

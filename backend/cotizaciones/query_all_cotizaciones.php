@@ -1,6 +1,6 @@
 <?php
 
-require ('conexion.php');
+require (__DIR__ . "/../../config/conexion.php");
 
 $sql = "SELECT * FROM cotizaciones ORDER BY id_coti DESC";
 

@@ -1,5 +1,5 @@
 <?php
-    require ("conexion.php");
+    require (__DIR__ . "/../../config/conexion.php");
 
     $id = $_GET ['id'];
 

@@ -1,5 +1,6 @@
-<?php  require ("construct/header.html")   ?>
-<?php  require ("querys/query_all_contactos.php")  ?>
+<?php $prefijoRuta = '../'; ?>
+<?php  require (__DIR__ . "/../construct/header.php")   ?>
+<?php  require (__DIR__ . "/../backend/contactos/query_all_contactos.php")  ?>
 
 
 <div class="container mt-5 mb-5 contain shadow-lg">
@@ -12,7 +13,7 @@
     </div>
     <!-- titulo  -->
 
-    <form action="fpdf/cotizacionPDF.php" method="POST" target="_blank" id="form_cotizacion">
+    <form action="<?= $prefijoRuta ?>fpdf/cotizacionPDF.php" method="POST" target="_blank" id="form_cotizacion">
     
     
     <!-- boton submit del formulario -->
@@ -549,6 +550,6 @@
 <!-- SELECT2 combobox -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-<script src="js/cotizacion.js"></script>
+<script src="<?= $prefijoRuta ?>js/cotizacion.js"></script>
 
-<?php  require ("construct/footer.html")   ?>
+<?php  require (__DIR__ . "/../construct/footer.html")   ?>

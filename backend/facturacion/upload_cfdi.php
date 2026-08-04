@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-$uploadDirectory = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'global_xml' . DIRECTORY_SEPARATOR;
+$uploadDirectory = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'global_xml' . DIRECTORY_SEPARATOR;
 $allowedExtensions = ['xml', 'pdf'];
 
 // recepcion del archivo

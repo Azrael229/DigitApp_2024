@@ -1,5 +1,6 @@
-<?php  require ("construct/header.html")   ?>
-<?php  require ("querys/query_all_empresas.php")   ?>
+<?php $prefijoRuta = '../'; ?>
+<?php  require (__DIR__ . "/../construct/header.php")   ?>
+<?php  require (__DIR__ . "/../backend/empresas/query_all_empresas.php")   ?>
 
 
 <!-- container -->
@@ -23,7 +24,7 @@
                                              <h5> Empresas</h5>
                                    </div>
                                    <!-- formulario Empresa -->
-                                   <form action="querys/add_empresa.php" method="POST">
+                                   <form action="<?= $prefijoRuta ?>backend/empresas/add_empresa.php" method="POST">
 
                                         <!-- input oculto empresa id -->
                                         <input type="hidden" id="empresa_id" name="empresa_id">
@@ -173,7 +174,7 @@
 <!-- Data Tables 1.13.7 boostrap5 -->
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
-<script src="js/datatable-filters.js"></script>
-<script src="js/empresas.js"></script>
+<script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
+<script src="<?= $prefijoRuta ?>js/empresas.js"></script>
 
-<?php  require ("construct/footer.html")   ?>
+<?php  require (__DIR__ . "/../construct/footer.html")   ?>

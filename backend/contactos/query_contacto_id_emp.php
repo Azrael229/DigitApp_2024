@@ -4,7 +4,7 @@
 $id = file_get_contents('php://input');
 
 
-require ('conexion.php');
+require (__DIR__ . "/../../config/conexion.php");
 
 $sql = "SELECT * FROM contactos WHERE id_empresa = '$id'";
 

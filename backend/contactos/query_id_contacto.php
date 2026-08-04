@@ -3,7 +3,7 @@
 $id = file_get_contents('php://input');
 
 
-require ('conexion.php');
+require (__DIR__ . "/../../config/conexion.php");
 
 $sql = "SELECT * FROM contactos, empresas WHERE  id = $id AND contactos.id_empresa = empresas.id_e";
 

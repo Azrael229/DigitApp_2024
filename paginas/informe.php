@@ -1,10 +1,11 @@
-<?php  require ("construct/header.html")   ?>
-<?php  require ("querys/query_all_empresas.php")  ?>
+<?php $prefijoRuta = '../'; ?>
+<?php  require (__DIR__ . "/../construct/header.php")   ?>
+<?php  require (__DIR__ . "/../backend/empresas/query_all_empresas.php")  ?>
 
 
 
 <div class="container mt-5 mb-5 contain shadow-lg ">
-        <form action="fpdf/informePDF.php" target="_blank" method="post">
+        <form action="<?= $prefijoRuta ?>fpdf/informePDF.php" target="_blank" method="post">
         <!-- titulo  -->
             <div class="row">
                 <div class="col text-center mt-3 mb-5">
@@ -480,7 +481,7 @@
                             </div>
 
                             <div class="col-12 col-xl-6 p-3 text-center">
-                                <img src="imgs/El texto del párrafo.png" alt="" style="height: 200px;">
+                                <img src="<?= $prefijoRuta ?>imgs/El texto del párrafo.png" alt="" style="height: 200px;">
                             </div>
                         </div>
                         <!-- puntos -->
@@ -593,6 +594,6 @@
 <!-- SELECT2 combobox -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-<script src="js/informe.js"></script>
+<script src="<?= $prefijoRuta ?>js/informe.js"></script>
 
-<?php  require ("construct/footer.html")   ?>
+<?php  require (__DIR__ . "/../construct/footer.html")   ?>

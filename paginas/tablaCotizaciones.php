@@ -1,7 +1,8 @@
 
-<?php  require ("construct/header.html")   ?>
-<?php  require ("querys/query_all_cotizaciones.php")   ?>
-<?php  require ("querys/query_all_notas.php")   ?>
+<?php $prefijoRuta = '../'; ?>
+<?php  require (__DIR__ . "/../construct/header.php")   ?>
+<?php  require (__DIR__ . "/../backend/cotizaciones/query_all_cotizaciones.php")   ?>
+<?php  require (__DIR__ . "/../backend/notas/query_all_notas.php")   ?>
 
   
 <!-- container -->
@@ -48,7 +49,7 @@
                             <td><?php echo $row_coti['cot_empresa'] ?></td>
                             <td><?php echo $row_coti['cot_contacto'] ?></td>
                             <td>$ <?php echo $row_coti['cot_total'] ?></td>
-                            <td><a href="filesPDF/<?php echo $row_coti['cot_archivo'] ?>" download><?php echo $row_coti['cot_archivo'] ?></a></td>
+                            <td><a href="<?= $prefijoRuta ?>filesPDF/<?php echo $row_coti['cot_archivo'] ?>" download><?php echo $row_coti['cot_archivo'] ?></a></td>
                             <td onclick="editar(<?php echo $row_coti['id_coti'] ?>)" style="cursor: pointer;">Editar</td>
                             <td onclick="eliminar(<?php echo $row_coti['id_coti'] ?>)" style="cursor: pointer;">Eliminar</td>
                         </tr>
@@ -86,9 +87,9 @@
 <!-- Data Tables 1.13.7 boostrap5 -->
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
-<script src="js/datatable-filters.js"></script>
-<script src="js/main.js"></script>
-<script src="js/tablaCotizacion.js"></script>
+<script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
+<script src="<?= $prefijoRuta ?>js/main.js"></script>
+<script src="<?= $prefijoRuta ?>js/tablaCotizacion.js"></script>
 
 
-<?php  require ("construct/footer.html")   ?>
+<?php  require (__DIR__ . "/../construct/footer.html")   ?>

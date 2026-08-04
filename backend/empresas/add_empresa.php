@@ -12,7 +12,7 @@ $rol = $_POST['emp_rol'];
 
 if ($id == "" || $id == NULL){
 
-          require ("conexion.php");
+          require (__DIR__ . "/../../config/conexion.php");
           
           $sql = "INSERT INTO empresas  (empresa,	dir_entrega,	razon_social,	rfc,	dir_fiscal,	rol)  VALUES ('$nombre', '$dir_entrega', '$razon_social', '$rfc', '$dir_fiscal', '$rol')";
           
@@ -24,7 +24,7 @@ if ($id == "" || $id == NULL){
 
 } else {
 
-          require ("conexion.php");
+          require (__DIR__ . "/../../config/conexion.php");
 
           $sql = "UPDATE empresas SET 
           empresa = '$nombre', 

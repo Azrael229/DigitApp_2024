@@ -67,7 +67,7 @@ function guardarArchivoCfdi(file, tipo) {
     formData.append('cfdi_file', file);
 
     // envio al servidor
-    fetch('querys/upload_cfdi.php', {
+    fetch('backend/facturacion/upload_cfdi.php', {
         method: 'POST',
         body: formData
     })

@@ -1,5 +1,5 @@
 <?php
-$xmlDirectory = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'global_xml';
+$xmlDirectory = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'global_xml';
 $facturas = [];
 
 function toStringValue(mixed $value): string

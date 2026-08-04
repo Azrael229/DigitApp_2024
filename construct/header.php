@@ -1,3 +1,4 @@
+<?php $prefijoRuta = $prefijoRuta ?? ''; ?>
 <!doctype html>
 <html lang="en">
   <head>
@@ -5,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>DigitApp 2024</title>
 
-    <link rel="icon" href="imgs/LogoMakr_0mWRyT-1.png" type="image/x-icon">
-    <link rel="shortcut icon" href="imgs/LogoMakr_0mWRyT-1.png" type="image/x-icon">  
+    <link rel="icon" href="<?= $prefijoRuta ?>imgs/LogoMakr_0mWRyT-1.png" type="image/x-icon">
+    <link rel="shortcut icon" href="<?= $prefijoRuta ?>imgs/LogoMakr_0mWRyT-1.png" type="image/x-icon">
 
     <!-- bootstrap 5.3.2 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
@@ -21,7 +22,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- CSS personalizado: se carga al final para sobreescribir Bootstrap/plugins -->
-    <link rel="stylesheet" href="estilos/style.css?v=20260803">
+    <link rel="stylesheet" href="<?= $prefijoRuta ?>estilos/style.css?v=20260803">
 
 
   </head>
@@ -33,10 +34,10 @@
   
     <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
-        <a class="navbar-brand" href="index.php">
-          <img src="imgs/LogoMakr_0mWRyT-1.png" alt="Bootstrap" width="30" >
+        <a class="navbar-brand" href="<?= $prefijoRuta ?>index.php">
+          <img src="<?= $prefijoRuta ?>imgs/LogoMakr_0mWRyT-1.png" alt="Bootstrap" width="30" >
         </a>
-        <a class="navbar-brand" href="index.php">DigitApp</a>
+        <a class="navbar-brand" href="<?= $prefijoRuta ?>index.php">DigitApp</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -44,11 +45,11 @@
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="index.php">Panel Admin</a>
+              <a class="nav-link active" aria-current="page" href="<?= $prefijoRuta ?>index.php">Panel Admin</a>
             </li>
 
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="informe.php">Informe</a>
+              <a class="nav-link active" aria-current="page" href="<?= $prefijoRuta ?>paginas/informe.php">Informe</a>
             </li>
           
             <li class="nav-item dropdown">
@@ -56,8 +57,8 @@
                 Cotizaciones
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="tablaCotizaciones.php">Cotizaciones</a></li>
-                <li><a class="dropdown-item" href="nuevaCotizacion.php">Nueva cotización</a></li>
+                <li><a class="dropdown-item" href="<?= $prefijoRuta ?>paginas/tablaCotizaciones.php">Cotizaciones</a></li>
+                <li><a class="dropdown-item" href="<?= $prefijoRuta ?>paginas/nuevaCotizacion.php">Nueva cotización</a></li>
               </ul>
             </li>
             
@@ -66,8 +67,8 @@
                 Directorio Clientes
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="contactos.php">Contactos</a></li>
-                <li><a class="dropdown-item" href="empresas.php">Empresas</a></li>
+                <li><a class="dropdown-item" href="<?= $prefijoRuta ?>paginas/contactos.php">Contactos</a></li>
+                <li><a class="dropdown-item" href="<?= $prefijoRuta ?>paginas/empresas.php">Empresas</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="#">Something else here</a></li>
               </ul>
