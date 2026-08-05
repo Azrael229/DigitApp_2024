@@ -79,7 +79,7 @@ function formatCfdiDate(string $date): string
         return $date;
     }
 
-    return date('d/m/Y', $timestamp);
+    return date('Y-m-d', $timestamp);
 }
 
 if (is_dir($xmlDirectory)) {

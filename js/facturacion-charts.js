@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const datosGlobales = leerDatosGlobalesFacturas();
         console.log("Datos globales:", datosGlobales);
+
+        const ventasMensuales = obtenerVentasMensuales(datosGlobales);
+        actualizarGraficaVentasMensuales(ventasMensuales);
         
         const top10Clientes = obtenerTop10Clientes(datosGlobales);
         console.log("Top 10 clientes:", top10Clientes);
@@ -202,7 +205,7 @@ function formatoMonedaMXN(valor) {
     chartMeses = new Chart(canvasMeses, {
 
         // Tipo de gráfica
-        type: 'line',
+        type: 'bar',
 
         // Configuración inicial sin datos
         data: {
@@ -210,16 +213,15 @@ function formatoMonedaMXN(valor) {
 
             datasets: [{
                 // Título del dataset
-                label: 'Facturación por mes',
+                label: 'Ventas mensuales',
 
                 // Valores que se cargarán posteriormente
                 data: [],
-
-                /**
-                 * Suaviza la línea de la gráfica.
-                 * Valores cercanos a 0 generan líneas más rectas.
-                 */
-                tension: 0.3
+                backgroundColor: function(context) {
+                    const ultimoIndice = context.dataset.data.length - 1;
+                    return context.dataIndex === ultimoIndice ? 'rgba(228, 0, 124, 0.72)' : 'rgba(32, 141, 151, 0.78)';
+                },
+                borderRadius: 6
             }]
         },
 
@@ -230,7 +232,27 @@ function formatoMonedaMXN(valor) {
             responsive: true,
 
             // Permite manejar la altura mediante CSS
-            maintainAspectRatio: false
+            maintainAspectRatio: false,
+
+            scales: {
+                y: {
+                    ticks: {
+                        callback: function(value) {
+                            return formatoMonedaMXN(value);
+                        }
+                    }
+                }
+            },
+
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return formatoMonedaMXN(context.raw);
+                        }
+                    }
+                }
+            }
         }
 
     });
@@ -254,18 +276,11 @@ function leerDatosGlobalesFacturas() {
 
     tablaDataTable.rows().every(function () {
 
-        const fila = this.data();
+        const fila = this.node();
 
-        const fecha = fila[0] ? String(fila[0]).trim() : "";
-        const cliente = fila[1] ? String(fila[1]).trim() : "";
-        const totalTexto = fila[5] ? String(fila[5]).trim() : "0";
-
-        const total = parseFloat(
-            totalTexto
-                .replace(/\$/g, "")
-                .replace(/,/g, "")
-                .trim()
-        ) || 0;
+        const fecha = fila.cells[0]?.dataset.order || fila.cells[0]?.textContent.trim() || "";
+        const cliente = fila.cells[1]?.textContent.trim() || "";
+        const total = parseFloat(fila.cells[5]?.dataset.value || fila.cells[5]?.textContent || "0") || 0;
 
         datos.push({
             fecha: fecha,
@@ -276,6 +291,27 @@ function leerDatosGlobalesFacturas() {
     });
 
     return datos;
+}
+
+function obtenerVentasMensuales(facturas, meses = 12) {
+    const ventasPorMes = {};
+
+    const fechaActual = new Date();
+    for (let i = meses - 1; i >= 0; i--) {
+        const fechaMes = new Date(fechaActual.getFullYear(), fechaActual.getMonth() - i, 1);
+        const anio = fechaMes.getFullYear();
+        const mes = String(fechaMes.getMonth() + 1).padStart(2, "0");
+        ventasPorMes[`${anio}-${mes}`] = 0;
+    }
+
+    facturas.forEach(({ fecha, total }) => {
+        const mes = fecha.slice(0, 7);
+        if (ventasPorMes[mes] !== undefined) {
+            ventasPorMes[mes] += total;
+        }
+    });
+
+    return Object.entries(ventasPorMes);
 }
 
 
@@ -362,4 +398,23 @@ function actualizarGraficaTopClientes(top10Clientes) {
     chartClientes.data.labels = labels;
     chartClientes.data.datasets[0].data = data;
     chartClientes.update();
+}
+
+function actualizarGraficaVentasMensuales(ventasMensuales) {
+
+    if (!chartMeses) {
+        console.error("La gráfica chartMeses no está inicializada");
+        return;
+    }
+
+    const labels = ventasMensuales.map(([mes]) => {
+        const [anio, numeroMes] = mes.split('-');
+        const fecha = new Date(anio, numeroMes - 1, 1);
+        return fecha.toLocaleDateString('es-MX', { month: 'short', year: 'numeric' });
+    });
+    const data = ventasMensuales.map(([, total]) => total);
+
+    chartMeses.data.labels = labels;
+    chartMeses.data.datasets[0].data = data;
+    chartMeses.update();
 }

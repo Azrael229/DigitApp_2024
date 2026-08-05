@@ -30,18 +30,13 @@
                 
             </div>
         </div>
-        <div class="col text-center mt-3 mb-5">
-            <div class="dashboard-hero" style="position: relative; height: 300px;">
+    </div>
+    <div class="row">
+        <div class="col-12 text-center mt-3 mb-5">
+            <div class="dashboard-hero dashboard-monthly-chart">
 
                 <canvas id="chartMeses"></canvas>
 
-            </div>
-        </div>
-        <div class="col text-center mt-3 mb-5">
-            <div class="dashboard-hero">
-                <span class="dashboard-kicker">DigitApp</span>
-                <h1>Panel de Administrador</h1>
-                <p class="dashboard-subtitle mb-0">Tabla de facturación CFDI</p>
             </div>
         </div>
     </div>
@@ -75,7 +70,7 @@
             </div>
             <!-- row de Seccion Icono y botones de carga xml y PDF -->
 
-            <div class="col p-4 factura-table-wrap">
+            <div class="col p-4">
                 <?php if (empty($facturas)): ?>
                     <div class="alert alert-warning mb-0" role="alert">
                         No se encontraron archivos XML.
@@ -103,6 +98,7 @@
                     </div>
                     <!-- row de CARDS Registros Sutotales Total -->
 
+                    <div class="factura-table-wrap">
                     <!-- row de TABLA -->
                     <table id="example" class="table table-secondary table-striped align-middle mb-0">
                         <thead>
@@ -145,6 +141,7 @@
                         </tfoot>
                     </table>
                     <!-- row de TABLA -->
+                    </div>
 
                 <?php endif; ?>
             </div>

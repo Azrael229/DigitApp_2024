@@ -91,6 +91,9 @@
 .factura-table-wrap {
     overflow-x: visible;
     background: rgba(4, 22, 52, 0.52);
+    box-sizing: border-box;
+    padding-block: 18px;
+    padding-inline: 18px;
 }
 
 .factura-table-wrap table {
@@ -106,4 +109,36 @@
 .factura-table-wrap .factura-wrap {
     white-space: normal !important;
     word-break: break-word;
+}
+
+@media (max-width: 991px) {
+    .factura-table-wrap {
+        padding-inline: 8px;
+    }
+
+    .factura-table-wrap .dataTables_scroll {
+        width: 100%;
+    }
+
+    .factura-table-wrap .dataTables_scrollBody {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .factura-table-wrap .dataTables_scrollHead table,
+    .factura-table-wrap .dataTables_scrollBody table,
+    .factura-table-wrap .dataTables_scrollFoot table {
+        min-width: 980px;
+        width: 980px !important;
+    }
+
+    .factura-table-wrap th,
+    .factura-table-wrap td {
+        white-space: nowrap;
+    }
+
+    .factura-table-wrap .factura-wrap {
+        min-width: 300px;
+        white-space: normal !important;
+    }
 }

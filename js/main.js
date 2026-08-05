@@ -3,8 +3,9 @@
      pageLength: 20,
      responsive: false,
      autoWidth: false,
+     scrollX: true,
      searching: true,
-     dom: '<"dt-top"f>rt<"dt-bottom"lip>',
+     dom: '<"dt-top"flp>rt<"dt-bottom"lip>',
      columnDefs: [
         { width: "110px", targets: 0, className: "no-wrap" },
         { width: "240px", targets: 1 },
