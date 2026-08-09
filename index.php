@@ -70,7 +70,7 @@
             </div>
             <!-- row de Seccion Icono y botones de carga xml y PDF -->
 
-            <div class="col p-4">
+            <div class="col px-0 px-md-4 py-4">
                 <?php if (empty($facturas)): ?>
                     <div class="alert alert-warning mb-0" role="alert">
                         No se encontraron archivos XML.
@@ -98,7 +98,7 @@
                     </div>
                     <!-- row de CARDS Registros Sutotales Total -->
 
-                    <div class="factura-table-wrap">
+                    <div class="factura-table-wrap table-responsive data-table-shell">
                     <!-- row de TABLA -->
                     <table id="example" class="table table-secondary table-striped align-middle mb-0">
                         <thead>
@@ -171,6 +171,7 @@
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
 <script src="js/datatable-filters.js"></script>
+<script src="js/datatable-config.js"></script>
 <script src="js/main.js"></script>
 <script src="js/tablaFacturacion.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

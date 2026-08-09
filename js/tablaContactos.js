@@ -1,9 +1,6 @@
 
 
-let table = new DataTable('#example', {
-    // options
-    responsive: true,
-});
+let table = new DataTable('#example', getDataTableOptions());
 
 applyColumnFilters(table);
 

@@ -1,36 +1,14 @@
-﻿const table = new DataTable('#example', {
-     order: [[0, 'desc']],
-     pageLength: 20,
-     responsive: false,
-     autoWidth: false,
-     scrollX: true,
-     searching: true,
-     dom: '<"dt-top"flp>rt<"dt-bottom"lip>',
-     columnDefs: [
+const table = new DataTable('#example', getDataTableOptions({
+    order: [[0, 'desc']],
+    columnDefs: [
         { width: "110px", targets: 0, className: "no-wrap" },
         { width: "240px", targets: 1 },
         { width: "300px", targets: 2, className: "factura-wrap" },
         { width: "120px", targets: 3, className: "no-wrap text-end" },
         { width: "120px", targets: 4, className: "no-wrap text-end" },
         { width: "120px", targets: 5, className: "no-wrap text-end" }
-     ],
-     language: {
-        search: 'Buscar:',
-        searchPlaceholder: 'Cliente, descripción o fecha',
-        zeroRecords: 'No se encontraron facturas con ese criterio.',
-        emptyTable: 'No hay datos disponibles en la tabla.',
-        info: 'Mostrando _START_ a _END_ de _TOTAL_ facturas',
-        infoEmpty: 'Mostrando 0 a 0 de 0 facturas',
-        infoFiltered: '(filtradas de _MAX_ facturas)',
-        lengthMenu: 'Mostrar _MENU_ registros',
-        paginate: {
-            first: 'Primera',
-            last: 'Última',
-            next: 'Siguiente',
-            previous: 'Anterior'
-        }
-     }
-});
+    ]
+}));
 
 applyColumnFilters(table);
 

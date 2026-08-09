@@ -27,7 +27,7 @@
         <!-- titulo de tabla  -->
         <!-- tabla  -->
         <div class="row">
-            <div class="col table-responsive" >
+            <div class="col table-responsive data-table-shell" >
                 <table id="example" class="table table-secondary table-striped" >
                     <thead>
                         <tr>
@@ -88,7 +88,7 @@
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
-<script src="<?= $prefijoRuta ?>js/main.js"></script>
+<script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
 <script src="<?= $prefijoRuta ?>js/tablaCotizacion.js"></script>
 
 

@@ -5,6 +5,29 @@
     box-shadow: var(--shadow-md);
 }
 
+.data-table-shell {
+    padding: 3rem;
+    border-top: 1px solid rgba(110, 181, 255, 0.18);
+    white-space: nowrap;
+}
+
+.data-table-shell .dt-top,
+.data-table-shell .dt-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.data-table-shell .dt-top {
+    margin-bottom: 18px;
+}
+
+.data-table-shell .dt-bottom {
+    margin-top: 18px;
+}
+
 .table {
     --bs-table-bg: transparent;
     --bs-table-striped-bg: rgba(255, 255, 255, 0.04);

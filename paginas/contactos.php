@@ -112,7 +112,7 @@
           <div class="row mb-5">
                <div class="col">
                     <!-- col Tabla -->
-                    <div class="col  p-5 table-responsive border-top" style="white-space: nowrap; ">
+                    <div class="col table-responsive data-table-shell">
                          <!-- tabla -->
                          <table id="example" class="table table-secondary table-striped mb-5">
                               <thead>
@@ -166,6 +166,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
-<script src="<?= $prefijoRuta ?>js/contactos.js"></script>
+<script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
+<script src="<?= $prefijoRuta ?>js/tablaContactos.js"></script>
 
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>

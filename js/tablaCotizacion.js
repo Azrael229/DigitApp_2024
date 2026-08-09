@@ -1,3 +1,9 @@
+const cotizacionesTable = new DataTable('#example', getDataTableOptions({
+    order: [[0, 'desc']],
+}));
+
+applyColumnFilters(cotizacionesTable);
+
 function eliminar(id) {
     if (!id) {
         return;

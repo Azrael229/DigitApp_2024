@@ -124,7 +124,7 @@
           <div class="row">
                <div class="col">
                     <!-- col Tabla -->
-                    <div class="col p-5 table-responsive border-top" style="white-space: nowrap; " >
+                    <div class="col table-responsive data-table-shell" >
                          <!-- tabla -->
                          <table id="example" class="table table-secondary table-striped">
                               <thead>
@@ -175,6 +175,7 @@
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
-<script src="<?= $prefijoRuta ?>js/empresas.js"></script>
+<script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
+<script src="<?= $prefijoRuta ?>js/tablaEmpresas.js"></script>
 
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>
