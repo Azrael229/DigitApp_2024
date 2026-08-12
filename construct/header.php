@@ -73,6 +73,10 @@
                 <li><a class="dropdown-item" href="#">Something else here</a></li>
               </ul>
             </li>
+
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="<?= $prefijoRuta ?>paginas/Render_zonas_servicio.php">Catálogo</a>
+            </li>
             <!-- <li class="nav-item">
               <a class="nav-link disabled" aria-disabled="true">Disabled</a>
             </li> -->
