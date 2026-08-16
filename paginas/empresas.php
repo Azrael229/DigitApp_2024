@@ -6,9 +6,14 @@
 <!-- container -->
 <div class="container mt-5 mb-5 contain shadow-lg ">
           <!-- titulo container -->
-          <div class="row text-center">
-                    <div class="col p-2 ">
+          <div class="row align-items-center">
+                    <div class="col p-2 text-center">
                               <h3>Directorio</h3>
+                    </div>
+                    <div class="col-12 col-md-auto text-center text-md-end pb-2 pb-md-0">
+                              <a href="form_empresa.php" class="btn btn-secondary">
+                                        <i class="bi bi-plus-lg"></i> Añadir empresa
+                              </a>
                     </div>
           </div>
 

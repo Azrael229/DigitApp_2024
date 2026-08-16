@@ -1,1 +1,12 @@
 /* Estilos especificos de la pagina de empresas. */
+
+.empresa-form-card {
+    background: rgba(10, 35, 76, 0.72);
+    border: 1px solid rgba(110, 181, 255, 0.2) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.empresa-form-card .empresa-card-body {
+    color: #ffffff;
+}

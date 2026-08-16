@@ -389,3 +389,6 @@
 
 </div>
 <!-- container -->
+
+
+<?php  require ("construct/footer.html")   ?>
