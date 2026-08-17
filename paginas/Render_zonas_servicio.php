@@ -391,4 +391,4 @@
 <!-- container -->
 
 
-<?php  require ("construct/footer.html")   ?>
+<?php require (__DIR__ . "/../construct/footer.html"); ?>

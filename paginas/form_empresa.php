@@ -1,6 +1,7 @@
 <?php
 
 $prefijoRuta = '../';
+$empresaId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 require(__DIR__ . "/../construct/header.php");
 ?>
@@ -11,18 +12,18 @@ require(__DIR__ . "/../construct/header.php");
     <!-- row de titulo -->
     <div class="row">
         <div class="col text-center mt-3 mb-5">
-            <h1><span>Nueva Empresa</span></h1>
+            <h1 id="titulo_form_empresa"><span>Nueva Empresa</span></h1>
         </div>
     </div>
 
     <?php if (isset($_GET['guardado'])): ?>
         <div class="alert alert-success" role="alert">
-            Empresa y dirección fiscal guardadas correctamente.
+            Empresa guardada correctamente.
         </div>
     <?php endif; ?>
     <?php if (isset($_GET['actualizado'])): ?>
         <div class="alert alert-success" role="alert">
-            Empresa y dirección fiscal actualizadas correctamente.
+            Datos generales actualizados correctamente.
         </div>
     <?php endif; ?>
     <?php if (!empty($_GET['error'])): ?>
@@ -33,6 +34,7 @@ require(__DIR__ . "/../construct/header.php");
     <!-- row de titulo -->
 
     <form id="formEmpresa" action="<?= $prefijoRuta ?>backend/empresas/guardar_empresa_completa.php" method="POST">
+    <input type="hidden" name="empresa_id" id="empresa_id" value="<?= htmlspecialchars((string) ($empresaId ?: '')) ?>">
     <!-- row de botones de formulario empresas  -->
     <div class="row border-top justify-content-center">
         <!-- bloque de botones -->
@@ -40,10 +42,10 @@ require(__DIR__ . "/../construct/header.php");
             <div class="col mt-4 mb-4">
                 <!-- crear aqui los botones-->
                 <div class="d-flex flex-column flex-md-row justify-content-md-end gap-2">
-                    <button type="submit" class="btn btn-outline-success btn-empresa-guardar px-4">
+                    <button id="btn_guardar_empresa" type="submit" class="btn btn-outline-success btn-empresa-guardar px-4">
                         Guardar
                     </button>
-                    <a href="empresas.php" class="btn btn-danger px-4">
+                    <a id="btn_cancelar_empresa" href="empresas.php" class="btn btn-danger px-4">
                         Cancelar
                     </a>
                 </div>
@@ -331,6 +333,7 @@ require(__DIR__ . "/../construct/header.php");
 
 <script src="../js/datatable-filters.js"></script>
 <script src="../js/main.js"></script>
+<script src="<?= $prefijoRuta ?>js/form_empresa.js"></script>
 
 
 <?php require(__DIR__ . "/../construct/footer.html") ?>

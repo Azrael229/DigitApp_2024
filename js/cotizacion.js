@@ -38,15 +38,85 @@ generarNumeroUnico()
 var inputNombreEmpresa = document.getElementById('nombre_empresa');
 var inputDirEmpresa = document.getElementById('dir_empresa');
 var selectNombContacto = document.getElementById('select_contacto');
+var selectDireccion = document.getElementById('select_direccion');
 var inputNombreContacto = document.getElementById('nombre_contacto');
 var inputCorreoContacto = document.getElementById('correo_contacto');
 var inputCelContacto = document.getElementById('cel_contacto');
 var inputDeptoContacto = document.getElementById('depto_contacto');
+var direccionAntigua = '';
+var direccionesEmpresa = [];
 
-// pinta los inputs de empresa y contacto segun la empresa seleccionada en el selector
+// Convierte una direccion estructurada en el texto que se muestra y se envia al PDF.
+function formatearDireccion(direccion) {
+     var primeraLinea = [
+          direccion.calle,
+          direccion.numero_exterior ? 'No. ' + direccion.numero_exterior : '',
+          direccion.numero_interior ? 'Int. ' + direccion.numero_interior : ''
+     ].filter(Boolean).join(' ');
+     var ubicacion = [
+          direccion.colonia ? 'Col. ' + direccion.colonia : '',
+          direccion.localidad,
+          direccion.municipio && direccion.municipio !== direccion.ciudad ? direccion.municipio : '',
+          direccion.ciudad,
+          direccion.estado,
+          direccion.codigo_postal ? 'C.P. ' + direccion.codigo_postal : '',
+          direccion.pais
+     ].filter(Boolean).join(', ');
+     var partes = [primeraLinea, ubicacion, direccion.entre_calles, direccion.referencia].filter(Boolean);
+
+     return partes.length ? partes.join(', ') : (direccion.direccion_original || '');
+}
+
+// Carga las alternativas disponibles para la empresa seleccionada.
+function cargarSelectorDirecciones() {
+     selectDireccion.innerHTML = '';
+
+     if (direccionAntigua) {
+          selectDireccion.add(new Option('Dirección antigua', 'antigua'));
+     }
+
+     direccionesEmpresa.forEach(function (direccion) {
+          var etiqueta = direccion.tipo_direccion === 'fiscal' ? 'Dirección fiscal' : 'Dirección de entrega';
+          if (direccion.alias) {
+               etiqueta += ' - ' + direccion.alias;
+          }
+          selectDireccion.add(new Option(etiqueta, 'nueva:' + direccion.id));
+     });
+
+     if (!selectDireccion.options.length) {
+          selectDireccion.add(new Option('Sin direcciones registradas', ''));
+          inputDirEmpresa.value = '';
+          return;
+     }
+
+     actualizarDireccionSeleccionada();
+}
+
+// Muestra en el formulario la direccion elegida para que el PDF reciba el mismo texto.
+function actualizarDireccionSeleccionada() {
+     if (selectDireccion.value === 'antigua') {
+          inputDirEmpresa.value = direccionAntigua;
+          return;
+     }
+
+     var direccionId = selectDireccion.value.replace('nueva:', '');
+     var direccion = direccionesEmpresa.find(function (item) {
+          return String(item.id) === direccionId;
+     });
+
+     inputDirEmpresa.value = direccion ? formatearDireccion(direccion) : '';
+}
+
+// Carga los datos del contacto y las direcciones disponibles de su empresa.
 function selectContacto(){
-     // console.log(selectNombContacto.value);
     let id = selectNombContacto.value;
+
+     if (!id) {
+          direccionAntigua = '';
+          direccionesEmpresa = [];
+          cargarSelectorDirecciones();
+          return;
+     }
 
      fetch('../backend/contactos/query_id_contacto.php',{
 
@@ -56,17 +126,27 @@ function selectContacto(){
       })
       .then(response => response.json())
       .then(data => { 
-                                  
-          // console.log(data['id']);
+          if (data.error) {
+               throw new Error(data.error);
+          }
 
-          inputNombreEmpresa.innerHTML = data['empresa'];
-          inputDirEmpresa.innerHTML = data['dir_entrega'];
-          inputNombreContacto.innerHTML = data['nombre'];
-          inputCorreoContacto.innerHTML = data['correo'];
-          inputCelContacto.innerHTML = data['celular'];
-          inputDeptoContacto.innerHTML = data['depto'];
+          inputNombreEmpresa.value = data['empresa'] || '';
+          inputNombreContacto.value = data['nombre'] || '';
+          inputCorreoContacto.value = data['correo'] || '';
+          inputCelContacto.value = data['celular'] || '';
+          inputDeptoContacto.value = data['depto'] || '';
+          direccionAntigua = data['dir_entrega'] || '';
+          direccionesEmpresa = data['direcciones'] || [];
+          cargarSelectorDirecciones();
      })
+     .catch(function () {
+          direccionAntigua = '';
+          direccionesEmpresa = [];
+          cargarSelectorDirecciones();
+     });
 }
+
+selectDireccion.addEventListener('change', actualizarDireccionSeleccionada);
 
 
 var inputCantidadF1 = document.getElementById('f1_cant');

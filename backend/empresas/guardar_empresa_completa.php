@@ -15,11 +15,19 @@ function redirigirFormulario(string $parametro): void
     exit;
 }
 
+function redirigirVistaEmpresa(int $empresaId, string $parametro): void
+{
+    header('Location: ../../paginas/ver_empresa.php?id=' . $empresaId . '&' . $parametro);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirigirFormulario('error=Solicitud%20no%20valida');
 }
 
 $empresa = valorPost('empresa');
+$empresaId = filter_var($_POST['empresa_id'] ?? null, FILTER_VALIDATE_INT);
+$esEdicion = $empresaId !== false && $empresaId !== null;
 $rol = valorPost('rol');
 $estatus = valorPost('estatus');
 
@@ -67,59 +75,79 @@ $camposDireccion = [
 mysqli_begin_transaction($conexion);
 
 try {
-    $consultaEmpresa = $conexion->prepare(
-        'INSERT INTO empresas (
-            empresa, razon_social, rfc, rol, actividad_economica,
-            regimen_fiscal_codigo, regimen_fiscal_descripcion, regimen_capital,
-            tipo_persona, giro_mercantil, mercado, telefono_principal,
-            email_principal, pagina_web, estatus, origen_registro, observaciones
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-    );
-    $consultaEmpresa->bind_param(
-        'sssssssssssssssss',
-        ...$camposEmpresa
-    );
-    $consultaEmpresa->execute();
-    $empresaId = $conexion->insert_id;
-    $consultaEmpresa->close();
+    if ($esEdicion) {
+        $consultaEmpresa = $conexion->prepare(
+            'UPDATE empresas SET
+                empresa = ?, razon_social = ?, rfc = ?, rol = ?, actividad_economica = ?,
+                regimen_fiscal_codigo = ?, regimen_fiscal_descripcion = ?, regimen_capital = ?,
+                tipo_persona = ?, giro_mercantil = ?, mercado = ?, telefono_principal = ?,
+                email_principal = ?, pagina_web = ?, estatus = ?, origen_registro = ?, observaciones = ?
+            WHERE id_e = ?'
+        );
+        $tiposActualizacion = str_repeat('s', 17) . 'i';
+        $camposActualizacion = $camposEmpresa;
+        $camposActualizacion[] = $empresaId;
+        $consultaEmpresa->bind_param($tiposActualizacion, ...$camposActualizacion);
+        $consultaEmpresa->execute();
+        $consultaEmpresa->close();
+    } else {
+        $consultaEmpresa = $conexion->prepare(
+            'INSERT INTO empresas (
+                empresa, razon_social, rfc, rol, actividad_economica,
+                regimen_fiscal_codigo, regimen_fiscal_descripcion, regimen_capital,
+                tipo_persona, giro_mercantil, mercado, telefono_principal,
+                email_principal, pagina_web, estatus, origen_registro, observaciones
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+        $consultaEmpresa->bind_param('sssssssssssssssss', ...$camposEmpresa);
+        $consultaEmpresa->execute();
+        $empresaId = $conexion->insert_id;
+        $consultaEmpresa->close();
 
-    $consultaDireccion = $conexion->prepare(
-        'INSERT INTO empresa_direcciones (
-            empresa_id, tipo_direccion, alias, es_principal, calle,
-            numero_exterior, numero_interior, colonia, localidad, municipio,
-            ciudad, estado, codigo_postal, pais, entre_calles, referencia, enlace_maps
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-    );
-    $tipoDireccion = 'fiscal';
-    $esPrincipal = 1;
-    $consultaDireccion->bind_param(
-        'ississsssssssssss',
-        $empresaId,
-        $tipoDireccion,
-        $camposDireccion[0],
-        $esPrincipal,
-        $camposDireccion[1],
-        $camposDireccion[2],
-        $camposDireccion[3],
-        $camposDireccion[4],
-        $camposDireccion[5],
-        $camposDireccion[6],
-        $camposDireccion[7],
-        $camposDireccion[8],
-        $camposDireccion[9],
-        $camposDireccion[10],
-        $camposDireccion[11],
-        $camposDireccion[12],
-        $camposDireccion[13]
-    );
-    $consultaDireccion->execute();
-    $consultaDireccion->close();
+        $consultaDireccion = $conexion->prepare(
+            'INSERT INTO empresa_direcciones (
+                empresa_id, tipo_direccion, alias, es_principal, calle,
+                numero_exterior, numero_interior, colonia, localidad, municipio,
+                ciudad, estado, codigo_postal, pais, entre_calles, referencia, enlace_maps
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+        $tipoDireccion = 'fiscal';
+        $esPrincipal = 1;
+        $consultaDireccion->bind_param(
+            'ississsssssssssss',
+            $empresaId,
+            $tipoDireccion,
+            $camposDireccion[0],
+            $esPrincipal,
+            $camposDireccion[1],
+            $camposDireccion[2],
+            $camposDireccion[3],
+            $camposDireccion[4],
+            $camposDireccion[5],
+            $camposDireccion[6],
+            $camposDireccion[7],
+            $camposDireccion[8],
+            $camposDireccion[9],
+            $camposDireccion[10],
+            $camposDireccion[11],
+            $camposDireccion[12],
+            $camposDireccion[13]
+        );
+        $consultaDireccion->execute();
+        $consultaDireccion->close();
+    }
 
     mysqli_commit($conexion);
     mysqli_close($conexion);
+    if ($esEdicion) {
+        redirigirVistaEmpresa($empresaId, 'empresa_actualizada=1');
+    }
     redirigirFormulario('guardado=1');
 } catch (Throwable $error) {
     mysqli_rollback($conexion);
     mysqli_close($conexion);
+    if ($esEdicion) {
+        redirigirFormulario('id=' . $empresaId . '&error=No%20fue%20posible%20actualizar%20la%20empresa');
+    }
     redirigirFormulario('error=No%20fue%20posible%20guardar%20la%20empresa');
 }

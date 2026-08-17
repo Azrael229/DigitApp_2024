@@ -17,114 +17,6 @@
                     </div>
           </div>
 
-          <!-- fila de datos de  empresa -->
-          <div class="row">
-                    
-                    <!--col datos Empresa -->
-                         <div class="col-12 border-top p-3" >
-
-                                   <!-- titulo -->
-                                   <div class="row text-center p-3 mb-3">
-                                             <h5><i class="bi bi-buildings" id="ico_buildings"></i></h5>
-                                             <h5> Empresas</h5>
-                                   </div>
-                                   <!-- formulario Empresa -->
-                                   <form action="<?= $prefijoRuta ?>backend/empresas/add_empresa.php" method="POST">
-
-                                        <!-- input oculto empresa id -->
-                                        <input type="hidden" id="empresa_id" name="empresa_id">
-                                        
-                                        <div class="row">
-                                                  <div class="col-3 ">
-                                                            <label>Nombre</label>
-                                                  </div>
-                                                  <div class="col">
-                                                            <textarea name="emp_nombre" id="empresa_nombre" cols="40" rows="1" style="resize: none;" maxlength="50" required></textarea>
-                                                  </div>
-                                        </div>
-
-                                        <div class="row">
-                                                  <div class="col-3 ">
-                                                            <label>Dirección Entrega</label>
-                                                  </div>
-                                                  <div class="col">
-                                                            <textarea name="emp_dir_entrega" id="emp_dir_entrega" cols="40" rows="3" style="resize: none;" maxlength="500" required></textarea>
-                                                  </div>
-                                        </div>
-
-                                        <div class="row">
-                                                  <div class="col-3 ">
-                                                            <label>Razón Social</label>
-                                                  </div>
-                                                  <div class="col">
-                                                            <textarea name="emp_razon_soc" id="emp_razon_soc" cols="40" rows="1" style="resize: none;" maxlength="50"></textarea>
-                                                  </div>
-                                        </div>
-
-                                        <div class="row">
-                                                  <div class="col-3 ">
-                                                            <label>RFC</label>
-                                                  </div>
-                                                  <div class="col">
-                                                            <textarea name="emp_rfc" id="emp_rfc" cols="40" rows="1" style="resize: none;" maxlength="20"></textarea>
-                                                  </div>
-                                        </div>
-
-                                        <div class="row">
-                                                  <div class="col-3 ">
-                                                            <label>Dirección Fiscal</label>
-                                                  </div>
-                                                  <div class="col">
-                                                            <textarea name="emp_dir_fiscal" id="emp_dir_fiscal" cols="40" rows="3" style="resize: none;" maxlength="500"></textarea>
-                                                  </div>
-                                        </div>
-
-                                        <!-- rol de empresa Proveedor / Cliente -->
-                                        <div class="row">
-                                                  <div class="col mt-3">
-                                                       <div class="form-switch">
-                                                            <input class="form-check-input" type="radio" value="Proveedor" id="emp_proveedor" name="emp_rol" role="switch" />
-                                                            <label class="form-check-label" for=""> Proveedor </label>
-                                                       </div>
-                                                       <div class="form-switch mt-2">
-                                                            <input
-                                                                 class="form-check-input"
-                                                                 type="radio"
-                                                                 value="Cliente"
-                                                                 id="emp_cliente"
-                                                                 name="emp_rol"
-                                                                 role="switch"
-                                                                 checked
-                                                            />
-                                                            <label class="form-check-label" for=""> Cliente </label>
-                                                       </div>
-                                                       
-                                                  </div>
-                                        </div>                                       
-
-                                        <!-- boton submit -->
-                                        <div class="row">
-                                                  <div class="col-6 mx-auto d-grid mt-5 mb-3">
-                                                            <button
-                                                                      type="submit"
-                                                                      class="btn btn-secondary"
-                                                                      id="btn_submit_emp"
-                                                                      
-                                                            >
-                                                                      Guardar
-                                                            </button>
-                                                            
-                                                  </div>
-                                        </div>
-
-                                   </form>
-                                   <!-- formulario Empresa -->                        
-                         </div>
-                    <!--col datos Empresa -->
-          </div>
-          <!-- fila de datos de empresa -->
-
-          
           <!--Fila Tabla Empresas Data Table -->
           <div class="row">
                <div class="col">
@@ -135,9 +27,11 @@
                               <thead>
                                    <tr>
                                         <th>Nombre</th>
-                                        <th>Dirección de Entrega</th>
+                                        <th class="empresa-col-ciudad">Ciudad</th>
+                                        <th>Estado</th>
                                         <th>Rfc</th>
                                         <th>Rol</th>                                  
+                                        <th>Fecha de creación</th>
                                         <th></th>
                                         
                                    </tr>
@@ -146,11 +40,13 @@
 
                                    <?php  foreach ($result_empresas as $row): ?>
                                         <tr>
-                                             <td><?php echo $row['empresa'] ?></td>
-                                             <td><?php echo $row['dir_entrega'] ?></td>
+                                             <td><a href="ver_empresa.php?id=<?php echo $row['id_e'] ?>"><?php echo htmlspecialchars($row['empresa']) ?></a></td>
+                                             <td class="empresa-col-ciudad"><?php echo htmlspecialchars($row['ciudad_principal'] ?? '') ?></td>
+                                             <td><?php echo htmlspecialchars($row['estado_principal'] ?? '') ?></td>
                                              <td><?php echo $row['rfc'] ?></td>
                                              <td><?php echo $row['rol'] ?></td>
-                                             <td onclick="editar(<?php echo $row['id_e'] ?>)" style="cursor: pointer;">Editar</td>
+                                             <td><?php echo !empty($row['created_at']) ? date('d/m/Y H:i', strtotime($row['created_at'])) : '' ?></td>
+                                             <td><a href="form_empresa.php?id=<?php echo $row['id_e'] ?>">Editar</a></td>
                                              
                                         </tr>
                                    <?php  endforeach;    ?>

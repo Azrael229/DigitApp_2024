@@ -132,6 +132,16 @@
                                     <textarea name="nombre_empresa" id="nombre_empresa" cols="40" rows="1" style="resize: none;" ></textarea>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-3 ">
+                                    <label>Dirección a utilizar</label>
+                                </div>
+                                <div class="col">
+                                    <select class="form-control" name="tipo_direccion_empresa" id="select_direccion">
+                                        <option value="">Selecciona un contacto primero</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="row mb-4">
                                 <div class="col-3 ">
                                     <label>Dirección</label>

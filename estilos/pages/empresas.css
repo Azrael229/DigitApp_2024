@@ -10,3 +10,10 @@
 .empresa-form-card .empresa-card-body {
     color: #ffffff;
 }
+
+.empresa-col-ciudad {
+    width: 10rem;
+    max-width: 10rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
