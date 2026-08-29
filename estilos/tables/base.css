@@ -37,9 +37,9 @@
 }
 
 .table thead th {
-    background: linear-gradient(135deg, rgba(14, 103, 190, 0.96), rgba(228, 0, 124, 0.9));
+    background: #031a33;
     color: #ffffff;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    border-bottom: 1px solid rgba(135, 190, 230, 0.34);
     font-size: 0.84rem;
     font-weight: 600;
     letter-spacing: 0.05em;

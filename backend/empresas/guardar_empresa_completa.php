@@ -1,6 +1,7 @@
 <?php
 
 require(__DIR__ . "/../../config/conexion.php");
+require_once(__DIR__ . "/../helpers/normalizador_datos.php");
 
 function valorPost(string $campo): ?string
 {
@@ -30,46 +31,52 @@ $empresaId = filter_var($_POST['empresa_id'] ?? null, FILTER_VALIDATE_INT);
 $esEdicion = $empresaId !== false && $empresaId !== null;
 $rol = valorPost('rol');
 $estatus = valorPost('estatus');
+$telefonoEntrada = valorPost('telefono_principal');
+$telefono = $telefonoEntrada === null ? null : normalizarTelefonoMX($telefonoEntrada);
 
 if ($empresa === null || $rol === null || $estatus === null) {
     redirigirFormulario('error=Empresa%2C%20rol%20y%20estatus%20son%20obligatorios');
 }
 
+if ($telefonoEntrada !== null && $telefono === null) {
+    redirigirFormulario('error=' . rawurlencode('El teléfono debe contener exactamente 10 dígitos nacionales'));
+}
+
 $camposEmpresa = [
-    $empresa,
-    valorPost('razon_social'),
-    valorPost('rfc'),
+    normalizarRazonSocial($empresa),
+    normalizarRazonSocial(valorPost('razon_social')),
+    normalizarRFC(valorPost('rfc')),
     $rol,
-    valorPost('actividad_economica'),
-    valorPost('regimen_fiscal_codigo'),
-    valorPost('regimen_fiscal_descripcion'),
-    valorPost('regimen_capital'),
-    valorPost('tipo_persona'),
-    valorPost('giro_mercantil'),
-    valorPost('mercado'),
-    valorPost('telefono_principal'),
-    valorPost('email_principal'),
-    valorPost('pagina_web'),
+    normalizarTextoGeneral(valorPost('actividad_economica')),
+    normalizarTextoGeneral(valorPost('regimen_fiscal_codigo')),
+    normalizarTextoGeneral(valorPost('regimen_fiscal_descripcion')),
+    normalizarTextoGeneral(valorPost('regimen_capital')),
+    normalizarTextoGeneral(valorPost('tipo_persona')),
+    normalizarTextoGeneral(valorPost('giro_mercantil')),
+    normalizarTextoGeneral(valorPost('mercado')),
+    $telefono,
+    normalizarCorreo(valorPost('email_principal')),
+    normalizarTextoGeneral(valorPost('pagina_web')),
     $estatus,
-    valorPost('origen_registro') ?? 'manual',
-    valorPost('observaciones'),
+    normalizarTextoGeneral(valorPost('origen_registro')) ?? 'manual',
+    normalizarTextoGeneral(valorPost('observaciones')),
 ];
 
 $camposDireccion = [
-    valorPost('alias') ?? 'Fiscal',
-    valorPost('calle'),
-    valorPost('numero_exterior'),
-    valorPost('numero_interior'),
-    valorPost('colonia'),
-    valorPost('localidad'),
-    valorPost('municipio'),
-    valorPost('ciudad'),
-    valorPost('estado'),
-    valorPost('codigo_postal'),
-    valorPost('pais') ?? 'Mexico',
-    valorPost('entre_calles'),
-    valorPost('referencia'),
-    valorPost('enlace_maps'),
+    normalizarDireccionTexto(valorPost('alias')) ?? 'Fiscal',
+    normalizarDireccionTexto(valorPost('calle')),
+    normalizarTextoGeneral(valorPost('numero_exterior')),
+    normalizarTextoGeneral(valorPost('numero_interior')),
+    normalizarDireccionTexto(valorPost('colonia')),
+    normalizarDireccionTexto(valorPost('localidad')),
+    normalizarDireccionTexto(valorPost('municipio')),
+    normalizarDireccionTexto(valorPost('ciudad')),
+    normalizarDireccionTexto(valorPost('estado')),
+    normalizarTextoGeneral(valorPost('codigo_postal')),
+    normalizarDireccionTexto(valorPost('pais')) ?? 'Mexico',
+    normalizarDireccionTexto(valorPost('entre_calles')),
+    normalizarDireccionTexto(valorPost('referencia')),
+    normalizarTextoGeneral(valorPost('enlace_maps')),
 ];
 
 mysqli_begin_transaction($conexion);

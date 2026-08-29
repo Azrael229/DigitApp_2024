@@ -32,7 +32,6 @@
                                         <th>Rfc</th>
                                         <th>Rol</th>                                  
                                         <th>Fecha de creación</th>
-                                        <th></th>
                                         
                                    </tr>
                               </thead>
@@ -46,7 +45,6 @@
                                              <td><?php echo $row['rfc'] ?></td>
                                              <td><?php echo $row['rol'] ?></td>
                                              <td><?php echo !empty($row['created_at']) ? date('d/m/Y H:i', strtotime($row['created_at'])) : '' ?></td>
-                                             <td><a href="form_empresa.php?id=<?php echo $row['id_e'] ?>">Editar</a></td>
                                              
                                         </tr>
                                    <?php  endforeach;    ?>

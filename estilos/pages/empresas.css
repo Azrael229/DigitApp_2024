@@ -1,5 +1,27 @@
 /* Estilos especificos de la pagina de empresas. */
 
+.empresa-detalle-header {
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.empresa-header-kicker,
+.empresa-section-kicker {
+    color: var(--accent-mint);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.empresa-header-subtitle {
+    color: var(--text-soft);
+    font-size: 0.96rem;
+}
+
+.empresa-header-actions .btn {
+    min-height: 44px;
+}
+
 .empresa-form-card {
     background: rgba(10, 35, 76, 0.72);
     border: 1px solid rgba(110, 181, 255, 0.2) !important;
@@ -11,9 +33,128 @@
     color: #ffffff;
 }
 
+.empresa-detail-section .card-body {
+    padding: 1.5rem;
+}
+
+.empresa-section-heading {
+    min-height: 2.75rem;
+}
+
+.empresa-data-field {
+    min-width: 0;
+}
+
+.empresa-data-label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--text-soft);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.empresa-data-value {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    margin: 0;
+    padding: 0.65rem 0.85rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(89, 182, 255, 0.24);
+    border-radius: 12px;
+    color: var(--text-main);
+    font-size: 0.98rem;
+    overflow-wrap: anywhere;
+}
+
+.empresa-table-wrap {
+    border-radius: 12px;
+}
+
+.empresa-detail-table {
+    min-width: 760px;
+}
+
+.empresa-detail-table th,
+.empresa-detail-table td {
+    vertical-align: middle;
+}
+
+.empresa-detail-table .empresa-address-cell {
+    min-width: 360px;
+    white-space: normal;
+}
+
+.empresa-address-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem 1rem;
+    min-width: 320px;
+}
+
+.empresa-address-field {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    min-width: 0;
+}
+
+.empresa-address-label {
+    flex: 0 0 auto;
+    color: var(--text-soft);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.empresa-address-value {
+    min-width: 0;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+.empresa-address-empty {
+    color: var(--text-soft);
+    font-style: italic;
+}
+
+.empresa-detail-table form {
+    margin: 0;
+}
+
+.empresa-detail-table .btn {
+    white-space: nowrap;
+}
+
 .empresa-col-ciudad {
     width: 10rem;
     max-width: 10rem;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+@media (max-width: 575px) {
+    .empresa-detail-section .card-body {
+        padding: 1.15rem;
+    }
+
+    .empresa-header-actions,
+    .empresa-header-actions .btn,
+    .empresa-section-heading > .btn {
+        width: 100%;
+    }
+
+    .empresa-header-actions .btn,
+    .empresa-section-heading > .btn {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 767px) {
+    .empresa-address-list {
+        grid-template-columns: 1fr;
+        min-width: 0;
+    }
 }
