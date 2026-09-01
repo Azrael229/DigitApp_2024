@@ -5,11 +5,14 @@ var datosGenerales = document.getElementById('datos_generales');
 var tablaDirecciones = document.getElementById('tabla_direcciones');
 var tablaContactos = document.getElementById('tabla_contactos');
 var botonAgregarDireccion = document.getElementById('btn_agregar_direccion');
+var botonAgregarContacto = document.getElementById('btn_agregar_contacto');
 var botonEditarEmpresa = document.getElementById('btn_editar_empresa');
 
 // Obtiene el identificador de empresa enviado desde el directorio.
 function obtenerEmpresaId() {
-    return new URLSearchParams(window.location.search).get('id');
+    var id = new URLSearchParams(window.location.search).get('id');
+
+    return /^[1-9]\d*$/.test(id || '') ? id : null;
 }
 
 // Agrega una celda de texto sin insertar contenido HTML del usuario.
@@ -20,46 +23,75 @@ function agregarCelda(fila, valor) {
     fila.appendChild(celda);
 }
 
-// Construye la direccion con etiquetas y omite campos vacios o repetidos.
+// Agrega el nombre del contacto como enlace a su ficha y marca la empresa principal.
+function agregarContactoEnlazado(fila, contacto) {
+    var empresaId = obtenerEmpresaId();
+    var celda = document.createElement('td');
+    var enlace = document.createElement('a');
+
+    celda.className = 'empresa-detail-cell';
+    enlace.className = 'empresa-contact-link';
+    enlace.href = 'ver_contacto.php?id=' + encodeURIComponent(contacto.id)
+        + '&from=empresa&empresa_id=' + encodeURIComponent(empresaId);
+    enlace.textContent = contacto.nombre || '-';
+    celda.appendChild(enlace);
+
+    if (Number(contacto.es_principal) === 1) {
+        var principal = document.createElement('span');
+        principal.className = 'badge empresa-contact-principal';
+        principal.textContent = 'Principal';
+        celda.appendChild(principal);
+    }
+
+    fila.appendChild(celda);
+}
+
+// Convierte el tipo almacenado en una etiqueta legible sin alterar su valor real.
+function formatearTipoDireccion(tipo) {
+    var valor = tipo === null || tipo === undefined ? '' : String(tipo).trim();
+
+    return valor ? valor.charAt(0).toUpperCase() + valor.slice(1) : '-';
+}
+
+// Une las partes disponibles de una linea de direccion sin repetir contenido.
+function unirPartesDireccion(partes) {
+    var valores = [];
+    var valoresNormalizados = new Set();
+
+    partes.forEach(function (parte) {
+        var texto = parte === null || parte === undefined ? '' : String(parte).trim();
+        var clave = texto.toLocaleLowerCase('es-MX');
+
+        if (texto && !valoresNormalizados.has(clave)) {
+            valoresNormalizados.add(clave);
+            valores.push(texto);
+        }
+    });
+
+    return valores.join(', ');
+}
+
+// Construye la direccion como un bloque vertical legible con los datos disponibles.
 function formatearDireccionEmpresa(direccion) {
-    var campos = [
-        ['Calle', direccion.calle],
-        ['Número exterior', direccion.numero_exterior],
-        ['Número interior', direccion.numero_interior],
-        ['Colonia', direccion.colonia],
-        ['Localidad', direccion.localidad],
-        ['Municipio', direccion.municipio],
-        ['Ciudad', direccion.ciudad],
-        ['Estado', direccion.estado],
-        ['Código postal', direccion.codigo_postal],
-        ['País', direccion.pais],
-        ['Entre calles', direccion.entre_calles],
-        ['Referencia', direccion.referencia]
-    ];
-    var valoresMostrados = new Set();
     var listaDireccion = document.createElement('div');
+    var numero = unirPartesDireccion([direccion.numero_exterior, direccion.numero_interior]);
+    var lineas = [
+        unirPartesDireccion([direccion.calle, numero]),
+        direccion.colonia ? 'Col. ' + String(direccion.colonia).trim() : '',
+        unirPartesDireccion([direccion.localidad, direccion.municipio, direccion.ciudad, direccion.estado]),
+        direccion.codigo_postal ? 'C.P. ' + String(direccion.codigo_postal).trim() : ''
+    ];
 
-    listaDireccion.className = 'empresa-address-list';
-    campos.forEach(function (campo) {
-        var valorTexto = campo[1] === null || campo[1] === undefined ? '' : String(campo[1]).trim();
-        var claveValor = valorTexto.toLocaleLowerCase('es-MX');
-
-        if (!valorTexto || valoresMostrados.has(claveValor)) {
+    listaDireccion.className = 'empresa-address-lines';
+    lineas.forEach(function (linea) {
+        if (!linea) {
             return;
         }
 
-        valoresMostrados.add(claveValor);
-        var campoDireccion = document.createElement('div');
-        var etiqueta = document.createElement('span');
-        var valor = document.createElement('span');
-        campoDireccion.className = 'empresa-address-field';
-        etiqueta.className = 'empresa-address-label';
-        valor.className = 'empresa-address-value';
-        etiqueta.textContent = campo[0] + ':';
-        valor.textContent = valorTexto;
-        campoDireccion.appendChild(etiqueta);
-        campoDireccion.appendChild(valor);
-        listaDireccion.appendChild(campoDireccion);
+        var lineaDireccion = document.createElement('div');
+        lineaDireccion.className = 'empresa-address-line';
+        lineaDireccion.textContent = linea;
+        listaDireccion.appendChild(lineaDireccion);
     });
 
     if (!listaDireccion.children.length) {
@@ -82,47 +114,18 @@ function formatearFechaEmpresa(fecha) {
     return Number.isNaN(fechaLocal.getTime()) ? fecha : fechaLocal.toLocaleString('es-MX');
 }
 
-// Agrega los controles para editar o eliminar una direccion de forma individual.
-function agregarAccionesDireccion(fila, direccion) {
+// Agrega el acceso de edicion sin exponer la eliminacion en esta vista.
+function agregarEdicionDireccion(fila, direccion) {
     var empresaId = obtenerEmpresaId();
     var celdaEditar = document.createElement('td');
     var enlaceEditar = document.createElement('a');
-    var celdaEliminar = document.createElement('td');
-    var formularioEliminar = document.createElement('form');
-    var campoEmpresa = document.createElement('input');
-    var campoDireccion = document.createElement('input');
-    var botonEliminar = document.createElement('button');
 
     enlaceEditar.className = 'btn btn-secondary btn-sm';
     enlaceEditar.href = 'form_direccion_empresa.php?empresa_id=' + empresaId + '&direccion_id=' + direccion.id;
     enlaceEditar.innerHTML = '<i class="bi bi-pencil" aria-hidden="true"></i> Editar';
     enlaceEditar.setAttribute('aria-label', 'Editar dirección ' + (direccion.alias || 'sin alias'));
     celdaEditar.appendChild(enlaceEditar);
-
-    formularioEliminar.method = 'POST';
-    formularioEliminar.action = '../backend/empresas/eliminar_direccion_empresa.php';
-    formularioEliminar.addEventListener('submit', function (evento) {
-        if (!window.confirm('¿Deseas eliminar esta dirección? Esta acción no se puede deshacer.')) {
-            evento.preventDefault();
-        }
-    });
-    campoEmpresa.type = 'hidden';
-    campoEmpresa.name = 'empresa_id';
-    campoEmpresa.value = empresaId;
-    campoDireccion.type = 'hidden';
-    campoDireccion.name = 'direccion_id';
-    campoDireccion.value = direccion.id;
-    botonEliminar.type = 'submit';
-    botonEliminar.className = 'btn btn-danger btn-sm';
-    botonEliminar.innerHTML = '<i class="bi bi-trash" aria-hidden="true"></i> Eliminar';
-    botonEliminar.setAttribute('aria-label', 'Eliminar dirección ' + (direccion.alias || 'sin alias'));
-    formularioEliminar.appendChild(campoEmpresa);
-    formularioEliminar.appendChild(campoDireccion);
-    formularioEliminar.appendChild(botonEliminar);
-    celdaEliminar.appendChild(formularioEliminar);
-
     fila.appendChild(celdaEditar);
-    fila.appendChild(celdaEliminar);
 }
 
 // Muestra los datos generales de la empresa en la tarjeta superior.
@@ -169,7 +172,7 @@ function mostrarDirecciones(direcciones) {
     if (!direcciones.length) {
         var filaVacia = document.createElement('tr');
         agregarCelda(filaVacia, 'Sin direcciones registradas');
-        filaVacia.cells[0].colSpan = 6;
+        filaVacia.cells[0].colSpan = 3;
         tablaDirecciones.appendChild(filaVacia);
         return;
     }
@@ -178,13 +181,11 @@ function mostrarDirecciones(direcciones) {
         var fila = document.createElement('tr');
         var celdaDireccion = document.createElement('td');
         fila.className = 'empresa-detail-row';
-        agregarCelda(fila, direccion.tipo_direccion);
-        agregarCelda(fila, direccion.alias);
+        agregarCelda(fila, formatearTipoDireccion(direccion.tipo_direccion));
         celdaDireccion.className = 'empresa-detail-cell empresa-address-cell';
         celdaDireccion.appendChild(formatearDireccionEmpresa(direccion));
         fila.appendChild(celdaDireccion);
-        agregarCelda(fila, Number(direccion.es_principal) === 1 ? 'Sí' : 'No');
-        agregarAccionesDireccion(fila, direccion);
+        agregarEdicionDireccion(fila, direccion);
         tablaDirecciones.appendChild(fila);
     });
 }
@@ -203,12 +204,12 @@ function mostrarContactos(contactos) {
     contactos.forEach(function (contacto) {
         var fila = document.createElement('tr');
         fila.className = 'empresa-detail-row';
-        agregarCelda(fila, contacto.nombre);
+        agregarContactoEnlazado(fila, contacto);
         agregarCelda(fila, contacto.celular);
         agregarCelda(fila, contacto.correo);
-        agregarCelda(fila, contacto.depto);
-        agregarCelda(fila, '-');
-        agregarCelda(fila, '-');
+        agregarCelda(fila, contacto.departamento);
+        agregarCelda(fila, contacto.puesto);
+        agregarCelda(fila, Number(contacto.activo) === 1 ? 'Activo' : 'Inactivo');
         tablaContactos.appendChild(fila);
     });
 }
@@ -237,6 +238,9 @@ function cargarDetalleEmpresa() {
             botonAgregarDireccion.href = 'form_direccion_empresa.php?empresa_id=' + datos.empresa.id_e;
             botonAgregarDireccion.classList.remove('disabled');
             botonAgregarDireccion.removeAttribute('aria-disabled');
+            botonAgregarContacto.href = 'form_contacto.php?empresa_id=' + encodeURIComponent(datos.empresa.id_e);
+            botonAgregarContacto.classList.remove('disabled');
+            botonAgregarContacto.removeAttribute('aria-disabled');
             botonEditarEmpresa.href = 'form_empresa.php?id=' + datos.empresa.id_e;
             botonEditarEmpresa.classList.remove('disabled');
             botonEditarEmpresa.removeAttribute('aria-disabled');

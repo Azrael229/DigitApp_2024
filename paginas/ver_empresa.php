@@ -41,9 +41,9 @@
                     </a>
                 </div>
                 <div class="table-responsive empresa-table-wrap">
-                    <table class="table table-secondary align-middle empresa-detail-table mb-0">
+                    <table class="table table-secondary align-middle empresa-detail-table empresa-address-table mb-0">
                         <caption class="visually-hidden">Direcciones registradas de la empresa</caption>
-                        <thead><tr><th scope="col">Tipo</th><th scope="col">Alias</th><th scope="col">Dirección</th><th scope="col">Principal</th><th scope="col">Editar</th><th scope="col">Eliminar</th></tr></thead>
+                        <thead><tr><th scope="col">Tipo</th><th scope="col">Dirección</th><th scope="col">Editar</th></tr></thead>
                         <tbody id="tabla_direcciones"></tbody>
                     </table>
                 </div>
@@ -57,14 +57,14 @@
                         <p class="empresa-section-kicker mb-1">Personas vinculadas</p>
                         <h2 class="h5 card-title mb-0">Contactos</h2>
                     </div>
-                    <button type="button" class="btn btn-secondary btn-sm" disabled title="Disponible en el siguiente paso">
+                    <a id="btn_agregar_contacto" href="#" class="btn btn-secondary btn-sm disabled" aria-disabled="true">
                         <i class="bi bi-plus-lg"></i> Añadir contacto
-                    </button>
+                    </a>
                 </div>
                 <div class="table-responsive empresa-table-wrap">
-                    <table class="table table-secondary align-middle empresa-detail-table mb-0">
+                    <table class="table table-secondary align-middle empresa-detail-table empresa-contacts-table mb-0">
                         <caption class="visually-hidden">Contactos registrados de la empresa</caption>
-                        <thead><tr><th scope="col">Nombre</th><th scope="col">Teléfono</th><th scope="col">Correo</th><th scope="col">Departamento</th><th scope="col">Editar</th><th scope="col">Eliminar</th></tr></thead>
+                        <thead><tr><th scope="col">Nombre</th><th scope="col">Teléfono</th><th scope="col">Correo</th><th scope="col">Departamento</th><th scope="col">Puesto</th><th scope="col">Estado</th></tr></thead>
                         <tbody id="tabla_contactos"></tbody>
                     </table>
                 </div>

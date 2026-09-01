@@ -1,1 +1,268 @@
-/* Estilos especificos de la pagina de contactos. */
+.contactos-header,
+.contacto-form-header {
+    border-bottom: 1px solid var(--border-soft);
+    padding-bottom: 1rem;
+}
+
+.contactos-kicker {
+    color: var(--accent-mint);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.contactos-table-wrap {
+    margin-top: 1.5rem;
+    border-radius: 12px;
+}
+
+.contactos-table {
+    width: 100%;
+}
+
+.contactos-table th,
+.contactos-table td {
+    vertical-align: middle;
+}
+
+.contactos-link {
+    color: var(--accent-mint);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.contactos-link:hover,
+.contactos-link:focus {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.contactos-email {
+    overflow-wrap: anywhere;
+}
+
+.contactos-table th:nth-child(1),
+.contactos-table td:nth-child(1) {
+    width: 16%;
+}
+
+.contactos-table th:nth-child(2),
+.contactos-table td:nth-child(2) {
+    width: 11%;
+}
+
+.contactos-table th:nth-child(3),
+.contactos-table td:nth-child(3) {
+    width: 19%;
+}
+
+.contactos-table th:nth-child(4),
+.contactos-table td:nth-child(4) {
+    width: 14%;
+}
+
+.contactos-table th:nth-child(5),
+.contactos-table td:nth-child(5) {
+    width: 30%;
+}
+
+.contactos-table th:nth-child(6),
+.contactos-table td:nth-child(6) {
+    width: 10%;
+}
+
+.contactos-empresas {
+    overflow-wrap: anywhere;
+}
+
+.contactos-status {
+    min-width: 4.8rem;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.contactos-status-active {
+    background: rgba(45, 186, 121, 0.22);
+    color: #b9f6d6;
+}
+
+.contactos-status-inactive {
+    background: rgba(255, 184, 84, 0.22);
+    color: #ffe0a6;
+}
+
+.contactos-actions .btn {
+    white-space: nowrap;
+}
+
+.contacto-form-card {
+    background: rgba(10, 35, 76, 0.72);
+    border: 1px solid rgba(110, 181, 255, 0.2) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.contacto-form-card-body {
+    color: var(--text-main);
+}
+
+.contactos-muted {
+    color: var(--text-soft);
+}
+
+.required-mark {
+    color: #63d297;
+    font-size: 1em;
+    font-weight: 700;
+    margin-left: 0.1rem;
+}
+
+.contactos-required-note {
+    color: var(--text-soft);
+    font-size: 0.82rem;
+    margin-top: 0.65rem;
+}
+
+.contacto-form-actions .btn {
+    min-width: 9rem;
+}
+
+.contacto-empresas-select .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    margin-top: 6px;
+    padding: 4px 8px;
+    background: #0d5aa7 !important;
+    border: 1px solid #4d8fce !important;
+    border-radius: 6px;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+.contacto-empresas-select .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: #ffffff !important;
+}
+
+.contacto-empresas-select .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover,
+.contacto-empresas-select .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:focus {
+    background: #082f5f !important;
+    color: #ffffff !important;
+}
+
+.contacto-detail-header {
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.contacto-detail-subtitle {
+    color: var(--text-soft);
+    font-size: 0.96rem;
+}
+
+.contacto-detail-actions .btn {
+    min-height: 44px;
+}
+
+.contacto-detail-card {
+    background: rgba(10, 35, 76, 0.72);
+    border: 1px solid rgba(110, 181, 255, 0.2) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+.contacto-detail-card .card-body {
+    color: var(--text-main);
+    padding: 1.5rem;
+}
+
+.contacto-detail-heading {
+    min-height: 2.75rem;
+}
+
+.contacto-data-field {
+    min-width: 0;
+}
+
+.contacto-data-label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--text-soft);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.contacto-data-value {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    margin: 0;
+    padding: 0.65rem 0.85rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(89, 182, 255, 0.24);
+    border-radius: 12px;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+.contacto-empresas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.contacto-empresa-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.85rem 0.95rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(89, 182, 255, 0.2);
+    border-radius: 8px;
+}
+
+.contacto-empresa-link {
+    color: var(--accent-mint);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.contacto-principal-badge {
+    background: rgba(45, 186, 121, 0.22);
+    color: #b9f6d6;
+}
+
+.contacto-empty-state {
+    color: var(--text-soft);
+    font-style: italic;
+}
+
+@media (max-width: 575px) {
+    .contactos-table {
+        min-width: 720px;
+    }
+
+    .contactos-header .btn,
+    .contacto-form-actions .btn,
+    .contacto-detail-actions,
+    .contacto-detail-actions .btn {
+        width: 100%;
+    }
+
+    .contacto-form-card .card-body {
+        padding: 1.15rem !important;
+    }
+
+    .contacto-detail-card .card-body {
+        padding: 1.15rem;
+    }
+
+    .contacto-empresa-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

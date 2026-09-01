@@ -71,8 +71,8 @@ require(__DIR__ . "/../construct/header.php");
                                 </div>
                                 <div class="row g-4">
                                     <div class="col-12 col-md-6">
-                                        <label for="empresa" class="form-label fw-semibold">Empresa</label>
-                                        <input type="text" class="form-control" id="empresa" name="empresa">
+                                        <label for="empresa" class="form-label fw-semibold">Empresa <span class="required-mark" aria-hidden="true">*</span></label>
+                                        <input type="text" class="form-control" id="empresa" name="empresa" required>
                                     </div>
                                     <div class="col-12 col-md-6">
                                         <label for="razon_social" class="form-label fw-semibold">Razon social</label>
@@ -83,8 +83,8 @@ require(__DIR__ . "/../construct/header.php");
                                         <input type="text" class="form-control" id="rfc" name="rfc">
                                     </div>
                                     <div class="col-12 col-md-6">
-                                        <label for="rol" class="form-label fw-semibold">Rol</label>
-                                        <select class="form-select" id="rol" name="rol">
+                                        <label for="rol" class="form-label fw-semibold">Rol <span class="required-mark" aria-hidden="true">*</span></label>
+                                        <select class="form-select" id="rol" name="rol" required>
                                             <option value="">Selecciona una opcion</option>
                                             <option value="Cliente">Cliente</option>
                                             <option value="Proveedor">Proveedor</option>
@@ -259,10 +259,9 @@ require(__DIR__ . "/../construct/header.php");
                                 </div>
                                 <div class="row g-4">
                                     <div class="col-12 col-md-4">
-                                        <label for="estatus" class="form-label fw-semibold">Estatus</label>
-                                        <select class="form-select" id="estatus" name="estatus">
-                                            <option value="">Selecciona una opcion</option>
-                                            <option value="activo">activo</option>
+                                        <label for="estatus" class="form-label fw-semibold">Estatus <span class="required-mark" aria-hidden="true">*</span></label>
+                                        <select class="form-select" id="estatus" name="estatus" required>
+                                            <option value="activo" selected>activo</option>
                                             <option value="inactivo">inactivo</option>
                                             <option value="bloqueado">bloqueado</option>
                                         </select>

@@ -6,9 +6,9 @@
 }
 
 .data-table-shell {
-    padding: 3rem;
+    padding: 2rem;
     border-top: 1px solid rgba(110, 181, 255, 0.18);
-    white-space: nowrap;
+    white-space: normal;
 }
 
 .data-table-shell .dt-top,
@@ -48,8 +48,17 @@
 
 .table td,
 .table th {
-    padding: 14px 16px;
+    padding: 12px 14px;
     border-color: rgba(255, 255, 255, 0.08);
+    vertical-align: middle;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+.data-table-shell .dataTable {
+    width: 100% !important;
+    table-layout: fixed;
 }
 
 .table tbody tr {
@@ -58,4 +67,14 @@
 
 .table tbody tr:hover {
     transform: translateY(-1px);
+}
+
+@media (max-width: 991px) {
+    .data-table-shell {
+        padding: 1.25rem;
+    }
+
+    .data-table-shell .dataTable {
+        table-layout: auto;
+    }
 }

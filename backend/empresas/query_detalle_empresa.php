@@ -48,10 +48,15 @@ $direcciones = $consultaDirecciones->get_result()->fetch_all(MYSQLI_ASSOC);
 $consultaDirecciones->close();
 
 $consultaContactos = $conexion->prepare(
-    'SELECT id, nombre, celular, correo, depto
-     FROM contactos
-     WHERE id_empresa = ?
-     ORDER BY nombre ASC'
+    'SELECT c.id, c.nombre, c.celular, c.correo,
+            COALESCE(d.nombre, c.depto) AS departamento,
+            c.puesto, c.activo, ec.es_principal
+     FROM empresa_contactos ec
+     INNER JOIN contactos c ON c.id = ec.id_contacto
+     LEFT JOIN catalogo_departamentos d ON d.id = c.id_departamento
+     WHERE ec.id_empresa = ?
+       AND ec.activo = 1
+     ORDER BY ec.es_principal DESC, c.nombre ASC, c.id ASC'
 );
 $consultaContactos->bind_param('i', $id);
 $consultaContactos->execute();

@@ -74,7 +74,8 @@
 }
 
 .empresa-detail-table {
-    min-width: 760px;
+    width: 100%;
+    table-layout: fixed;
 }
 
 .empresa-detail-table th,
@@ -82,37 +83,42 @@
     vertical-align: middle;
 }
 
-.empresa-detail-table .empresa-address-cell {
-    min-width: 360px;
+.empresa-contact-link {
+    color: var(--accent-mint);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.empresa-contact-link:hover,
+.empresa-contact-link:focus {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.empresa-contact-principal {
+    display: inline-block;
+    margin: 0.3rem 0 0 0.45rem;
+    background: rgba(45, 186, 121, 0.22);
+    color: #b9f6d6;
+    font-size: 0.72rem;
+}
+
+.empresa-address-table .empresa-address-cell {
+    width: 68%;
+    min-width: 0;
     white-space: normal;
 }
 
-.empresa-address-list {
+.empresa-address-table th:first-child,
+.empresa-address-table td:first-child {
+    width: 14%;
+}
+
+.empresa-address-lines {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.45rem 1rem;
-    min-width: 320px;
-}
-
-.empresa-address-field {
-    display: flex;
-    align-items: baseline;
-    gap: 0.35rem;
-    min-width: 0;
-}
-
-.empresa-address-label {
-    flex: 0 0 auto;
-    color: var(--text-soft);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-}
-
-.empresa-address-value {
-    min-width: 0;
+    gap: 0.25rem;
     color: var(--text-main);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
 .empresa-address-empty {
@@ -153,8 +159,9 @@
 }
 
 @media (max-width: 767px) {
-    .empresa-address-list {
-        grid-template-columns: 1fr;
-        min-width: 0;
+    .empresa-detail-table {
+        min-width: 760px;
+        table-layout: auto;
     }
+
 }
