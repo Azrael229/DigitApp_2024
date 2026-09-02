@@ -50,6 +50,8 @@
 .contactos-table th:nth-child(2),
 .contactos-table td:nth-child(2) {
     width: 11%;
+    min-width: 8.5rem;
+    white-space: nowrap;
 }
 
 .contactos-table th:nth-child(3),
@@ -242,10 +244,6 @@
 }
 
 @media (max-width: 575px) {
-    .contactos-table {
-        min-width: 720px;
-    }
-
     .contactos-header .btn,
     .contacto-form-actions .btn,
     .contacto-detail-actions,

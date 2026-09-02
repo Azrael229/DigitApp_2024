@@ -1,3 +1,8 @@
+.table .factura-fecha {
+    min-width: 7.5rem;
+    white-space: nowrap;
+}
+
 .factura-table-wrap table tfoot th {
     background: linear-gradient(135deg, rgba(228, 0, 124, 0.9), rgba(13, 105, 194, 0.92)) !important;
     color: #ffffff !important;

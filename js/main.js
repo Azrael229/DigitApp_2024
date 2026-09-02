@@ -1,7 +1,7 @@
 const table = new DataTable('#example', getDataTableOptions({
     order: [[0, 'desc']],
     columnDefs: [
-        { width: "110px", targets: 0, className: "no-wrap" },
+        { width: "110px", targets: 0, className: "no-wrap factura-fecha" },
         { width: "240px", targets: 1 },
         { width: "300px", targets: 2, className: "factura-wrap" },
         { width: "120px", targets: 3, className: "no-wrap text-end" },

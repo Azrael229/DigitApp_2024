@@ -157,11 +157,3 @@
         justify-content: center;
     }
 }
-
-@media (max-width: 767px) {
-    .empresa-detail-table {
-        min-width: 760px;
-        table-layout: auto;
-    }
-
-}

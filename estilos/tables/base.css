@@ -3,6 +3,10 @@
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 .data-table-shell {
@@ -56,9 +60,11 @@
     word-break: normal;
 }
 
+.table-responsive > .table,
+.table-responsive > .dataTables_wrapper,
 .data-table-shell .dataTable {
     width: 100% !important;
-    table-layout: fixed;
+    table-layout: auto;
 }
 
 .table tbody tr {
@@ -74,7 +80,24 @@
         padding: 1.25rem;
     }
 
-    .data-table-shell .dataTable {
-        table-layout: auto;
+    .table-responsive {
+        overscroll-behavior-x: contain;
+    }
+}
+
+@media (max-width: 767px) {
+    .table-responsive > .table,
+    .table-responsive > .dataTables_wrapper {
+        min-width: var(--table-min-width, 760px);
+    }
+
+    .table-responsive.table-wide {
+        --table-min-width: 900px;
+    }
+
+    .table-responsive .table th,
+    .table-responsive .table td {
+        font-size: 0.875rem;
+        overflow-wrap: break-word;
     }
 }

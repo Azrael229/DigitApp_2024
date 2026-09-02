@@ -27,7 +27,7 @@
         <!-- titulo de tabla  -->
         <!-- tabla  -->
         <div class="row">
-            <div class="col table-responsive data-table-shell" >
+            <div class="col table-responsive data-table-shell table-wide" >
                 <table id="example" class="table table-secondary table-striped" >
                     <thead>
                         <tr>
