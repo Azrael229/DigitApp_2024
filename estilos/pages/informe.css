@@ -1,1 +1,280 @@
-/* Estilos especificos de la pagina de informe. */
+/* Estilos específicos del informe técnico y sus resultados metrológicos. */
+.informe-contenedor {
+    padding: 1.5rem 2rem;
+}
+
+.informe-seccion {
+    border-top: 2px solid var(--color-secondary, #ffb603);
+    margin-top: 1.5rem;
+    padding: 1.5rem 0 .5rem;
+}
+
+.informe-titulo-seccion {
+    background: linear-gradient(135deg, var(--bg-soft), var(--bg-mid));
+    border: 1px solid rgba(110, 181, 255, 0.35);
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(1, 10, 28, 0.22);
+    color: #ffffff;
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    padding: .75rem 1rem;
+    text-transform: uppercase;
+}
+
+.informe-resumen-emt {
+    color: rgba(255, 255, 255, 0.82);
+    font-weight: 600;
+}
+
+.informe-emt-referencia {
+    background: rgba(4, 22, 52, 0.52);
+    border: 1px solid var(--border-soft);
+    border-radius: .65rem;
+    padding: 1.15rem;
+}
+
+.informe-emt-referencia h3 {
+    color: #ffffff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: .35rem;
+}
+
+.informe-emt-referencia p {
+    color: rgba(255, 255, 255, 0.78);
+    margin-bottom: 1rem;
+}
+
+.tabla-emt {
+    margin-bottom: 0;
+}
+
+.tabla-emt th:last-child,
+.tabla-emt td:last-child {
+    text-align: center;
+    width: 28%;
+}
+
+.informe-unidades .form-check-input[type="radio"] {
+    appearance: none;
+    background: transparent !important;
+    border: 2px solid rgba(255, 255, 255, 0.58) !important;
+    border-radius: 50% !important;
+    height: 1.1rem;
+    margin-top: .2rem;
+    width: 1.1rem;
+}
+
+.informe-unidades .form-check-input[type="radio"]:checked {
+    background: #e4007c !important;
+    border-color: #ffffff !important;
+    box-shadow: inset 0 0 0 3px #16396f !important;
+}
+
+.informe-unidades .form-check-input[type="radio"]:focus {
+    border-color: #ffffff !important;
+    box-shadow: 0 0 0 .2rem rgba(228, 0, 124, 0.24) !important;
+}
+
+.carga-sincronizada[readonly] {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-style: dashed !important;
+    cursor: not-allowed;
+    opacity: .82;
+}
+
+.informe-tabla thead th {
+    background: linear-gradient(135deg, var(--bg-soft), var(--bg-mid));
+    border-color: rgba(110, 181, 255, 0.35);
+    color: #ffffff;
+    font-size: .9rem;
+    vertical-align: middle;
+}
+
+.informe-col-estado {
+    min-width: 165px;
+}
+
+.informe-encabezado-pruebas {
+    margin-bottom: 1.25rem;
+}
+
+.prueba-card {
+    background: var(--surface-light);
+    border: 1px solid var(--border-soft);
+    border-radius: .5rem;
+    box-shadow: var(--shadow-md);
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+}
+
+.prueba-card-header {
+    align-items: center;
+    background: linear-gradient(135deg, var(--bg-soft), var(--bg-mid));
+    border: 1px solid rgba(110, 181, 255, 0.3);
+    border-radius: 10px;
+    color: #ffffff;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding: .7rem 1rem;
+}
+
+.prueba-card-header h3 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.contenido-prueba {
+    padding-top: .25rem;
+}
+
+.contenido-prueba .table-responsive {
+    margin-bottom: 1.25rem;
+}
+
+.informe-tabla th,
+.informe-tabla td {
+    padding: .7rem .8rem;
+}
+
+.informe-tabla .form-control,
+.resultados-calculados .form-control {
+    min-height: 42px;
+    padding: .55rem .75rem;
+}
+
+.motivo-no-aplica {
+    background: rgba(4, 22, 52, 0.72);
+    border-left: 4px solid var(--accent);
+    margin-bottom: 1rem;
+    padding: 1rem;
+}
+
+.prueba-deshabilitada {
+    opacity: .5;
+    pointer-events: none;
+}
+
+.resultados-calculados {
+    background: rgba(4, 22, 52, 0.62);
+    border: 1px solid var(--border-soft);
+    border-radius: .35rem;
+    margin: 0;
+    padding: 1rem;
+}
+
+.resultados-calculados .form-label {
+    line-height: 1.25;
+    margin-bottom: .45rem;
+}
+
+.resultado-general-wrap {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    font-weight: 700;
+    gap: .75rem;
+}
+
+.resultado-badge {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    display: inline-block;
+    font-size: .78rem;
+    font-weight: 800;
+    min-width: 105px;
+    padding: .35rem .65rem;
+    text-align: center;
+}
+
+.resultado-cumple {
+    background: #d1e7dd;
+    border-color: #0f5132;
+    color: #0f5132;
+}
+
+.resultado-no-cumple {
+    background: #f8d7da;
+    border-color: #842029;
+    color: #842029;
+}
+
+.resultado-no-aplica {
+    background: #e2e3e5;
+    border-color: #41464b;
+    color: #41464b;
+}
+
+.resultado-pendiente {
+    background: #fff3cd;
+    border-color: #664d03;
+    color: #664d03;
+}
+
+.diagrama-excentricidad {
+    height: auto;
+    max-height: 150px;
+    max-width: 100%;
+}
+
+.tabla-exactitud {
+    min-width: 800px;
+}
+
+.tabla-repetibilidad,
+.tabla-excentricidad {
+    margin-bottom: 0;
+    max-width: 760px;
+}
+
+.tabla-repetibilidad th:first-child,
+.tabla-repetibilidad td:first-child,
+.tabla-excentricidad th:first-child,
+.tabla-excentricidad td:first-child {
+    width: 45%;
+}
+
+.tabla-repetibilidad th:first-child,
+.tabla-repetibilidad td:first-child {
+    text-align: center;
+    width: 28%;
+}
+
+.tabla-exactitud input,
+.tabla-excentricidad input,
+.tabla-repetibilidad input {
+    min-width: 110px;
+}
+
+.tabla-exactitud th:first-child,
+.tabla-exactitud td:first-child {
+    text-align: center;
+    width: 64px;
+}
+
+@media (max-width: 767.98px) {
+    .informe-contenedor {
+        padding: 1rem;
+    }
+
+    .prueba-card {
+        padding: 1rem .75rem;
+    }
+
+    .informe-emt-referencia {
+        padding: .85rem;
+    }
+
+    .informe-tabla th,
+    .informe-tabla td {
+        padding: .55rem;
+    }
+
+    .resultados-calculados {
+        padding: .8rem;
+    }
+}

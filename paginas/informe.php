@@ -1,599 +1,232 @@
-<?php $prefijoRuta = '../'; ?>
-<?php  require (__DIR__ . "/../construct/header.php")   ?>
-<?php  require (__DIR__ . "/../backend/empresas/query_all_empresas.php")  ?>
+<?php
+$prefijoRuta = '../';
+require_once __DIR__ . '/../backend/helpers/folio_informe.php';
 
+if (isset($_GET['consultar_folio_fecha'])) {
+    header('Content-Type: application/json; charset=utf-8');
+    try {
+        echo json_encode(['folio' => consultarSiguienteFolioInforme((string) $_GET['consultar_folio_fecha'])]);
+    } catch (RuntimeException $errorFolio) {
+        http_response_code(500);
+        echo json_encode(['error' => 'No fue posible consultar el siguiente folio.']);
+    }
+    exit;
+}
 
+require __DIR__ . '/../construct/header.php';
+require __DIR__ . '/../backend/empresas/query_all_empresas.php';
 
-<div class="container mt-5 mb-5 contain shadow-lg ">
-        <form action="<?= $prefijoRuta ?>fpdf/informePDF.php" target="_blank" method="post">
-        <!-- titulo  -->
-            <div class="row">
-                <div class="col text-center mt-3 mb-5">
-                    <h3><i class="bi bi-patch-check" id="ico_informe"></i></h3>
-                    <h1>Informe de Pruebas Metrológicas</h1>
-                </div>
-            </div>
-        <!-- titulo  -->
+try {
+    $folioSugerido = consultarSiguienteFolioInforme();
+} catch (RuntimeException $errorFolio) {
+    $folioSugerido = (string) FOLIO_INFORME_INICIAL;
+}
 
-        <!-- boton submit del formulario -->
+$reactivosInspeccion = [
+    1 => 'Identificación y placa legible.',
+    2 => 'Display / escala / unidad legibles.',
+    3 => 'Cero, tara y estabilidad funcionan correctamente.',
+    4 => 'Plataforma / plato / estructura en buen estado.',
+    5 => 'Nivelación e instalación correctas.',
+    6 => 'Limpieza y funcionamiento general.',
+];
+$bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales'];
+?>
+
+<div class="container my-5 contain shadow-lg informe-contenedor">
+    <form action="<?= $prefijoRuta ?>fpdf/informePDF.php" method="post" id="form_informe">
         <div class="row">
-            <div class="d-grid gap-2 col-4 mx-auto mb-4 ">
-                <button name="" id="" type="submit" class="btn btn-success"> GENERAR PDF</button>                
+            <div class="col text-center mt-3 mb-4">
+                <h3><i class="bi bi-patch-check" id="ico_informe"></i></h3>
+                <h1>Informe de Pruebas Metrológicas</h1>
+                <p class="text-muted mb-0">Informe técnico de servicio - V1</p>
             </div>
         </div>
-        <!-- boton submit del formulario -->
 
-        <!-- Sección Control de Informes -->
-            <div class="row">
-                <div class="col border-top ">
-                    <div class="row mt-5 mb-5">
-                        <div class="col-4">
-                            <label >Fecha</label>
-                            <input type="date" name="inf_fecha">
-                        </div>
-                        <div class="col-6 ">
-                            <label >No. de Informe</label>
-                            <input type="text" id="input_num_inf" name="input_num_inf">
-                        </div>
-                    </div>
+        <section class="informe-seccion">
+            <h2 class="informe-titulo-seccion">Datos generales</h2>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label" for="inf_fecha">Fecha</label>
+                    <input class="form-control" type="date" name="inf_fecha" id="inf_fecha" required>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label" for="input_num_inf">No. de Informe</label>
+                    <input class="form-control" type="text" id="input_num_inf" name="input_num_inf" value="<?= htmlspecialchars($folioSugerido, ENT_QUOTES, 'UTF-8') ?>" pattern="\d{5}" maxlength="5" inputmode="numeric" readonly required>
+                    <div class="form-text">Folio previsto; se reserva definitivamente al generar el PDF.</div>
                 </div>
             </div>
-        <!-- Sección Control de Informes -->
-        
+        </section>
 
-        <!-- Sección Datos del Cliente -->
-            <div class="row">
-                <div class="row text-center mb-3">
-                    <h3>Datos del Cliente</h3>
-                </div>
-
-                <!-- Select Empresas -->
-                <div class="row text-center mb-3">
-                    <div class="col-5 mb-4">
-                        <select class="select form-control" name="select_empresa" id="select_empresa" onchange="selectEmpresa()">
-
-                            <option value"">Seleccionar Cliente</option>
-                            <?php foreach($result_empresas as $fila):  ?>
-                            <option value="<?php echo $fila['id_e']; ?>"> <?php echo $fila['empresa']; ?>  </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-
-
-                <!-- Datos Empresa -->
-                <div class="col-lg-6 ">
-                    <div class="row">
-                        <div class="col-3 ">
-                            <label>Empresa</label>
-                        </div>
-                        <div class="col">
-                            <textarea name="nombre_empresa" id="nombre_empresa" cols="40" rows="1" style="resize: none;" ></textarea>
-                        </div>
-                    </div>
-                    <div class="row mb-4">
-                        <div class="col-3 ">
-                            <label>Dirección</label>
-                        </div>
-                        <div class="col">
-                            <textarea name="dir_empresa" id="dir_empresa" cols="40" rows="3" style="resize: none;" ></textarea>
-                        </div>
-                    </div>
-                </div>
-                <!-- Datos Empresa -->
-
-                <!-- Datos contacto -->
+        <section class="informe-seccion">
+            <h2 class="informe-titulo-seccion">Datos del cliente</h2>
+            <div class="row g-3 mb-3">
                 <div class="col-lg-6">
-                    <div class="row ">
-                        <div class="col-3">
-                            <label>Contacto</label>
-                        </div>
-                        <div class="col">
-                            <textarea name="nombre_contacto" id="nombre_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
-                        </div>
-                    </div>
-                    <div class="row mb-4">
-                        <div class="col-3 ">
-                            <label>Correo</label>
-                        </div>
-                        <div class="col">
-                            <textarea name="correo_contacto" id="correo_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
-                        </div>
+                    <label class="form-label" for="select_empresa">Empresa</label>
+                    <select class="select form-control" name="select_empresa" id="select_empresa" required>
+                        <option value="">Seleccionar cliente</option>
+                        <?php foreach ($result_empresas as $fila): ?>
+                            <option value="<?= (int) $fila['id_e'] ?>"><?= htmlspecialchars($fila['empresa'], ENT_QUOTES, 'UTF-8') ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-lg-6">
+                    <label class="form-label" for="select_contacto">Contacto</label>
+                    <select class="form-select" name="select_contacto" id="select_contacto" required disabled>
+                        <option value="">Seleccione primero una empresa</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <label class="form-label" for="nombre_empresa">Razón social</label>
+                    <textarea class="form-control" name="nombre_empresa" id="nombre_empresa" rows="2" required></textarea>
+                </div>
+                <div class="col-lg-6">
+                    <label class="form-label" for="dir_empresa">Dirección</label>
+                    <textarea class="form-control" name="dir_empresa" id="dir_empresa" rows="2"></textarea>
+                </div>
+                <div class="col-lg-6">
+                    <label class="form-label" for="nombre_contacto">Nombre del contacto</label>
+                    <input class="form-control" type="text" name="nombre_contacto" id="nombre_contacto" readonly>
+                </div>
+                <div class="col-lg-6">
+                    <label class="form-label" for="correo_contacto">Correo</label>
+                    <input class="form-control" type="email" name="correo_contacto" id="correo_contacto" readonly>
+                </div>
+            </div>
+        </section>
+
+        <section class="informe-seccion">
+            <h2 class="informe-titulo-seccion">Datos del instrumento</h2>
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label" for="desc_inst">Descripción</label><input class="form-control" type="text" name="desc_inst" id="desc_inst" required></div>
+                <div class="col-md-3"><label class="form-label" for="marca_inst">Marca</label><input class="form-control" type="text" name="marca_inst" id="marca_inst"></div>
+                <div class="col-md-3"><label class="form-label" for="modelo_inst">Modelo</label><input class="form-control" type="text" name="modelo_inst" id="modelo_inst"></div>
+                <div class="col-md-4"><label class="form-label" for="id_inst">ID / Identificación</label><input class="form-control" type="text" name="id_inst" id="id_inst"></div>
+                <div class="col-md-4"><label class="form-label" for="serie_inst">Número de serie</label><input class="form-control" type="text" name="serie_inst" id="serie_inst"></div>
+                <div class="col-md-4 informe-unidades">
+                    <span class="form-label d-block">Unidad</span>
+                    <div class="pt-2">
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="unidad" id="unidadeskg" value="kg" required><label class="form-check-label" for="unidadeskg">kg</label></div>
+                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="unidad" id="unidadesg" value="g" required><label class="form-check-label" for="unidadesg">g</label></div>
                     </div>
                 </div>
-                <!-- Datos contacto -->
-
+                <div class="col-md-2"><label class="form-label" for="max">Max</label><input class="form-control parametro-instrumento" type="number" id="max" name="max" step="any" min="0" required></div>
+                <div class="col-md-2"><label class="form-label" for="d">División real (d)</label><input class="form-control parametro-instrumento" type="number" name="d" id="d" step="any" min="0" required></div>
+                <div class="col-md-2"><label class="form-label" for="e">División verificación (e)</label><input class="form-control parametro-instrumento" type="number" name="e" id="e" step="any" min="0" required></div>
+                <div class="col-md-2"><label class="form-label" for="min">Min</label><input class="form-control" type="number" name="min" id="min" step="any" readonly></div>
+                <div class="col-md-4"><label class="form-label" for="clase">Clase</label><input class="form-control" type="text" name="clase" id="clase" readonly></div>
             </div>
-        <!-- Sección Datos del Cliente -->
-        
-
-        <!-- Seccion Datos de Instrumento -->
-            <div class="row text-center border-top ">
-                      
-                    <h3>Datos del Instrumento</h3>
-                
+            <div class="d-flex flex-wrap align-items-center gap-3 mt-4">
+                <button name="btn_analizar" id="btn_analizar" type="button" class="btn btn-success">CALCULAR PARÁMETROS Y CARGAS</button>
+                <div id="resumen_emt" class="informe-resumen-emt" aria-live="polite"></div>
             </div>
-
-            <div class="row">
-                <div class="col  p-3">
-                    <div class="row">
-                        <div class="col-3 ">
-                            <label>Descripción</label>
-                        </div>
-                        <div class="col">
-                            <textarea name="desc_inst" id="desc_inst" cols="40" rows="1" style="resize: none;"></textarea>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-3 ">
-                            <label>Marca</label>
-                        </div>
-                        <div class="col">
-                            <textarea name="marca_inst" id="marca_inst" cols="40" rows="1" style="resize: none;"></textarea>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-3 ">
-                            <label>Modelo</label>
-                        </div>
-                        <div class="col">
-                            <textarea name="modelo_inst" id="modelo_inst" cols="40" rows="1" style="resize: none;"></textarea>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-3">
-                            <label>ID</label>
-                        </div>
-                        <div class="col">
-                            <textarea name="id_inst" id="id_inst" cols="40" rows="1" style="resize: none;"></textarea>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-3">
-                            <label>Serie</label>
-                        </div>
-                        <div class="col">
-                            <textarea name="serie_inst" id="serie_inst" cols="40" rows="1" style="resize: none;"></textarea>
-                        </div>
-                    </div>
-                    <div class="row"> 
-                        <div class="col-3">               
-                            <label for="" class="mb-3">Unidades</label><br>
-                        </div>
-                        <div class="col">
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="unidad" id="unidadeskg" value="kg">
-                                <label class="form-check-label" for="unidadeskg">kg</label>
-                            </div>
-                            <div class="form-check form-check-inline mb-5">
-                                <input class="form-check-input" type="radio" name="unidad" id="unidadesg" value="g">
-                                <label class="form-check-label" for="unidadesg">g</label>
-                            </div>
-                        </div>
-                    </div>
-                    
+            <div class="informe-emt-referencia mt-4" aria-labelledby="titulo_tabla_emt">
+                <h3 id="titulo_tabla_emt">Tabla informativa de errores máximos tolerados (EMT)</h3>
+                <p>Referencia técnica general según la clase y la división de verificación calculadas.</p>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle informe-tabla tabla-emt">
+                        <thead><tr><th>Intervalo de pesaje</th><th>EMT</th></tr></thead>
+                        <tbody id="tabla_emt_cuerpo"><tr><td colspan="2" class="text-center">Calcule los parámetros del instrumento para consultar los intervalos.</td></tr></tbody>
+                    </table>
                 </div>
-                <div class="col p-3 ">
-                    <div class="row mb-2">
-                        <div class="col-3">
-                            <label>Capacidad</label>
-                        </div>
-                        <div class="col">
-                            <input type="number" id="max" name="max" step="0.01">
-                        </div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-3">
-                            <label>Resolución (d)</label>
-                        </div>
-                        <div class="col">
-                            <input type="number" name="d" id="d" step="0.000001">
-                        </div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-3">
-                            <label>División (e)</label>
-                        </div>
-                        <div class="col">
-                            <input type="number" name="e" id="e" step="0.000001">
-                        </div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-3">
-                            <label>Min</label>
-                        </div>
-                        <div class="col">
-                            <input type="number" name="min" id="min" step="0.001">
-                        </div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-3">
-                            <label>Clase</label>
-                        </div>
-                        <div class="col">
-                            <input type="text" name="clase" id="clase">
-                        </div>
-                    </div>
-                </div>
-            </div> 
-        <!-- Seccion Datos de Instrumento -->
-        </form>
-
-        <!-- boton analizar  -->
-        <div class="row">
-            <div class="d-grid gap-2 col-4 mx-auto mb-4 ">
-                <button name="btn_analizar" id="btn_analizar" type="button" class="btn btn-success"> ANALIZAR</button>                
             </div>
-        </div>                       
-        <!-- boton analizar  -->
-        
-        <!-- Seccion EMT y Crgas     -->
-            <div class="row">    
+        </section>
 
-                    <!-- Seccion EMT -->
-                        <div class="col-12 col-md-6 border-top">
-
-                            <div class="row mt-3 text-center">
-                                <h3>Error Máximo Tolerado</h3>
-                            </div>
-
-                            <div class="row">
-                                <div class="col p-5 ">
-                                    <!-- ENCABEZADOS TABLA EMT -->
-                                    <div class="row text-center border">
-                                        <div class="col-8 border">
-                                            <h4>Intervalos (<span class="unidades"></span>)</h4>
-                                        </div>
-                                        <div class="col">
-                                            <h4>EMT ± (<span class="unidades"></span>)</h4>
-                                        </div>
-                                    </div>
-                                    <!-- PRIMER INTERVAOL -->
-                                    <div class="row text-center border">
-                                        <div class="col-8 border">
-                                            <p>
-                                                0 a 
-                                                <span id="sp_interv1_col2"></span>
-                                            </p>
-                                        </div>
-                                        <div class="col">
-                                            <p><span id="emt_1"></span></p>
-                                        </div>
-                                    </div>
-                                    <!-- SEGUNDO INTERVALO -->
-                                    <div class="row text-center border">
-                                        <div class="col-8 border">
-                                            <p>
-                                                <span id="sp_interv2_col1"></span>
-                                                 a 
-                                                <span id="sp_interv2_col2"></span>
-                                            </p>
-                                        </div>
-                                        <div class="col">
-                                            <p><span id="emt_2"></span></p>
-                                        </div>
-                                    </div>
-                                    <!-- TERCER INTERVALO -->
-                                    <div class="row text-center border">
-                                        <div class="col-8 border">
-                                            <p>
-                                                <span id="sp_interv3_col1"></span>
-                                                a 
-                                                <span id="sp_interv3_col2"></span>
-                                            </p>
-                                        </div>
-                                        <div class="col">
-                                            <p><span id="emt_3"></span></p>
-                                        </div>
-                                    </div>
-                                    <!-- FIN DE LA TABLA EMT -->
-                                </div>
-                            </div>
-
-                        </div>
-                    <!-- Seccion EMT -->
-
-
-                    <!-- Seccion Pesas Patrón y Cargas -->
-                        <div class="col-12 col-md-6 border-top">
-
-                            <div class="row mb-3 mt-3 text-center">
-                                <h3>Patrones y Cargas</h3>
-                            </div>
-
-                            <div class="row">
-                                <div class="col p-5">
-                                    <div class="row">
-                                        <div class="col-4 ">
-                                            <label>Cantidad Pesas</label>
-                                        </div>
-                                        <div class="col">
-                                            <textarea name="" id="" cols="20" rows="1" style="resize: none;"></textarea>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-4 ">
-                                            <label>Valor Nominal</label>
-                                        </div>
-                                        <div class="col">
-                                            <textarea name="" id="" cols="20" rows="1" style="resize: none;"></textarea>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-4 ">
-                                            <label>Valor de Carga</label>
-                                        </div>
-                                        <div class="col">
-                                            <textarea name="" id="" cols="20" rows="1" style="resize: none;"></textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    <!-- Seccion Pesas Patrón y Cargas -->
+        <section class="informe-seccion">
+            <h2 class="informe-titulo-seccion">Inspección visual y funcional</h2>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle informe-tabla">
+                    <thead><tr><th scope="col">Reactivo</th><th scope="col" class="informe-col-estado">Estado</th><th scope="col">Observación breve</th></tr></thead>
+                    <tbody>
+                        <?php foreach ($reactivosInspeccion as $numero => $reactivo): ?>
+                            <tr>
+                                <td><?= $numero ?>. <?= htmlspecialchars($reactivo, ENT_QUOTES, 'UTF-8') ?></td>
+                                <td>
+                                    <select class="form-select inspeccion-estado" name="inspeccion_<?= $numero ?>_estado" data-observacion="inspeccion_<?= $numero ?>_observacion" required>
+                                        <option value="">Seleccionar</option><option value="CUMPLE">Cumple</option><option value="NO CUMPLE">No cumple</option><option value="NO APLICA">No aplica</option>
+                                    </select>
+                                </td>
+                                <td><input class="form-control inspeccion-observacion" type="text" name="inspeccion_<?= $numero ?>_observacion" id="inspeccion_<?= $numero ?>_observacion"></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
-        <!-- Seccion EMT y Crgas  -->
+            <div class="resultado-general-wrap"><span>Resultado general:</span><output id="inspeccion_resultado_texto" class="resultado-badge resultado-pendiente">PENDIENTE</output><input type="hidden" name="inspeccion_resultado" id="inspeccion_resultado"></div>
+        </section>
 
+        <?php foreach ($bloquesPruebas as $prefijo => $tituloBloque): ?>
+            <section class="informe-seccion bloque-pruebas" id="pruebas_<?= $prefijo ?>">
+                <div class="informe-encabezado-pruebas"><h2 class="informe-titulo-seccion mb-1"><?= $tituloBloque ?></h2><p class="text-muted mb-0"><?= $prefijo === 'inicial' ? 'Condición antes de la intervención técnica.' : 'Condición después de la intervención técnica.' ?></p></div>
 
-        <!-- Seccion repetibilidad y Excentricidad-->
-            <div class="row">
-
-                <!-- Repetibilidad -->
-                    <div class="col-12 col-md-6 border-top">
-
-                        <div class="row mb-2 mt-3 text-center">
-                            <!-- titulo -->
-                            <h3>Repetibilidad</h3>
-
-                            <!-- Cargas -->
-                            <h5>50% de MAX = <span id="sp_repe"></span> ( <span class="unidades"></span> )</h5>
-
-                            
+                <article class="prueba-card" data-prueba="<?= $prefijo ?>_repetibilidad">
+                    <div class="prueba-card-header"><h3>Repetibilidad</h3><div class="form-check form-switch"><input class="form-check-input prueba-no-aplica" type="checkbox" role="switch" name="<?= $prefijo ?>_repetibilidad_no_aplica" id="<?= $prefijo ?>_repetibilidad_no_aplica" value="1"><label class="form-check-label" for="<?= $prefijo ?>_repetibilidad_no_aplica">No aplica</label></div></div>
+                    <div class="motivo-no-aplica d-none"><label class="form-label" for="<?= $prefijo ?>_repetibilidad_motivo">Motivo por el cual no aplica</label><textarea class="form-control motivo-no-aplica-input" name="<?= $prefijo ?>_repetibilidad_motivo" id="<?= $prefijo ?>_repetibilidad_motivo" rows="2"></textarea></div>
+                    <div class="contenido-prueba">
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-8 col-lg-4"><label class="form-label" for="<?= $prefijo ?>_repetibilidad_carga">Carga aplicada</label><input class="form-control <?= $prefijo === 'inicial' ? 'carga-sugerida' : 'carga-sincronizada' ?> prueba-entrada" type="number" step="any" name="<?= $prefijo ?>_repetibilidad_carga" id="<?= $prefijo ?>_repetibilidad_carga" data-tipo="repetibilidad"<?= $prefijo === 'final' ? ' readonly aria-readonly="true"' : '' ?>></div>
                         </div>
-
-                        <!-- puntos -->
-                        <div class="row">
-                            <div class="col p-5">
-                                <div class="row">
-                                    <div class="col-3 text-center">
-                                        <h4>1</h4>
-                                    </div>
-                                    <div class="col">
-                                        <input type="number">
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-3 text-center">
-                                        <h4>2</h4>
-                                    </div>
-                                    <div class="col">
-                                        <input type="number">
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-3 text-center">
-                                        <h4>3</h4>
-                                    </div>
-                                    <div class="col">
-                                        <input type="number">
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-3 text-center">
-                                        <h4>4</h4>
-                                    </div>
-                                    <div class="col">
-                                        <input type="number">
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-3 text-center">
-                                        <h4>5</h4>
-                                    </div>
-                                    <div class="col">
-                                        <input type="number">
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="table-responsive"><table class="table table-bordered align-middle informe-tabla tabla-repetibilidad"><thead><tr><th>Prueba</th><th>Indicación</th></tr></thead><tbody>
+                            <?php for ($i = 1; $i <= 5; $i++): ?><tr><td><?= $i ?></td><td><input class="form-control prueba-entrada campo-indicacion" type="number" step="any" name="<?= $prefijo ?>_repetibilidad_lectura_<?= $i ?>" id="<?= $prefijo ?>_repetibilidad_lectura_<?= $i ?>"></td></tr><?php endfor; ?>
+                        </tbody></table></div>
+                        <input type="hidden" name="<?= $prefijo ?>_repetibilidad_maxima" id="<?= $prefijo ?>_repetibilidad_maxima">
+                        <input type="hidden" name="<?= $prefijo ?>_repetibilidad_minima" id="<?= $prefijo ?>_repetibilidad_minima">
+                        <input type="hidden" name="<?= $prefijo ?>_repetibilidad_intervalo" id="<?= $prefijo ?>_repetibilidad_intervalo">
+                        <div class="row g-3 resultados-calculados">
+                            <div class="col-md-4"><label class="form-label" for="<?= $prefijo ?>_repetibilidad_diferencia">Diferencia máxima encontrada</label><input class="form-control" type="text" name="<?= $prefijo ?>_repetibilidad_diferencia" id="<?= $prefijo ?>_repetibilidad_diferencia" readonly></div>
+                            <div class="col-md-4"><label class="form-label" for="<?= $prefijo ?>_repetibilidad_emt">EMT aplicable</label><input class="form-control" type="text" name="<?= $prefijo ?>_repetibilidad_emt" id="<?= $prefijo ?>_repetibilidad_emt" readonly></div>
+                            <div class="col-md-4"><label class="form-label">Resultado</label><output class="resultado-badge resultado-pendiente prueba-resultado-texto">PENDIENTE</output><input type="hidden" name="<?= $prefijo ?>_repetibilidad_resultado" class="prueba-resultado" id="<?= $prefijo ?>_repetibilidad_resultado"></div>
                         </div>
-                        <!-- puntos -->
-
-                        <div class="row text-center">
-                            <div class="col mb-5">
-                                <button class="btn btn-primary col-5">Evaluar</button>
-                            </div>
-                        </div>
-            
                     </div>
-                <!-- Repetibilidad -->
+                </article>
 
-
-                <!-- Excentricidad -->
-                    <div class="col-12 col-md-6 border-top">
-                        <div class="row mb-5 mt-3 text-center">
-                            <h3>Excentricidad</h3>
-                            <h5>1/3 de MAX = <span id="sp_exce"></span> ( <span class="unidades"></span> )</h5>
-
-                            <div class="row">
-                                <div class="col">
-                                    <label for="">Valor de Carga:
-                                    <input type="text" class="col-5">
-                                    </label>
-                                </div>                               
-                            </div>
+                <article class="prueba-card" data-prueba="<?= $prefijo ?>_excentricidad">
+                    <div class="prueba-card-header"><h3>Excentricidad</h3><div class="form-check form-switch"><input class="form-check-input prueba-no-aplica" type="checkbox" role="switch" name="<?= $prefijo ?>_excentricidad_no_aplica" id="<?= $prefijo ?>_excentricidad_no_aplica" value="1"><label class="form-check-label" for="<?= $prefijo ?>_excentricidad_no_aplica">No aplica</label></div></div>
+                    <div class="motivo-no-aplica d-none"><label class="form-label" for="<?= $prefijo ?>_excentricidad_motivo">Motivo por el cual no aplica</label><textarea class="form-control motivo-no-aplica-input" name="<?= $prefijo ?>_excentricidad_motivo" id="<?= $prefijo ?>_excentricidad_motivo" rows="2"></textarea></div>
+                    <div class="contenido-prueba">
+                        <div class="row g-3 align-items-end mb-3"><div class="col-md-4"><label class="form-label" for="<?= $prefijo ?>_excentricidad_carga">Carga aplicada</label><input class="form-control <?= $prefijo === 'inicial' ? 'carga-sugerida' : 'carga-sincronizada' ?> prueba-entrada" type="number" step="any" name="<?= $prefijo ?>_excentricidad_carga" id="<?= $prefijo ?>_excentricidad_carga" data-tipo="excentricidad"<?= $prefijo === 'final' ? ' readonly aria-readonly="true"' : '' ?>></div><div class="col-md-8 text-md-end"><img class="diagrama-excentricidad" src="<?= $prefijoRuta ?>imgs/El texto del párrafo.png" alt="Diagrama de posiciones para excentricidad"></div></div>
+                        <div class="table-responsive"><table class="table table-bordered align-middle informe-tabla tabla-excentricidad"><thead><tr><th>Posición</th><th>Indicación</th></tr></thead><tbody>
+                            <?php for ($i = 1; $i <= 5; $i++): ?><tr><td><?= $i === 1 ? '1 - Centro / referencia' : (string) $i ?></td><td><input class="form-control prueba-entrada campo-indicacion" type="number" step="any" name="<?= $prefijo ?>_excentricidad_lectura_<?= $i ?>" id="<?= $prefijo ?>_excentricidad_lectura_<?= $i ?>"></td></tr><?php endfor; ?>
+                        </tbody></table></div>
+                        <?php for ($i = 1; $i <= 5; $i++): ?><input type="hidden" name="<?= $prefijo ?>_excentricidad_diferencia_<?= $i ?>" id="<?= $prefijo ?>_excentricidad_diferencia_<?= $i ?>" value="<?= $i === 1 ? 'REFERENCIA' : '' ?>"><?php endfor; ?>
+                        <input type="hidden" name="<?= $prefijo ?>_excentricidad_intervalo" id="<?= $prefijo ?>_excentricidad_intervalo">
+                        <div class="row g-3 resultados-calculados">
+                            <div class="col-md-4"><label class="form-label" for="<?= $prefijo ?>_excentricidad_diferencia_maxima">Diferencia máxima encontrada</label><input class="form-control" type="text" name="<?= $prefijo ?>_excentricidad_diferencia_maxima" id="<?= $prefijo ?>_excentricidad_diferencia_maxima" readonly></div>
+                            <div class="col-md-4"><label class="form-label" for="<?= $prefijo ?>_excentricidad_emt">EMT aplicable</label><input class="form-control" type="text" name="<?= $prefijo ?>_excentricidad_emt" id="<?= $prefijo ?>_excentricidad_emt" readonly></div>
+                            <div class="col-md-4"><label class="form-label">Resultado</label><output class="resultado-badge resultado-pendiente prueba-resultado-texto">PENDIENTE</output><input type="hidden" name="<?= $prefijo ?>_excentricidad_resultado" class="prueba-resultado" id="<?= $prefijo ?>_excentricidad_resultado"></div>
                         </div>
-
-                        <!-- puntos -->
-                        <div class="row ">
-                            <div class="col-12 col-xl-6 p-4">
-                                <div class="row">
-                                    <div class="col-2 text-center ">
-                                        <h4>1</h4>
-                                    </div>
-                                    <div class="col text-start">
-                                        <input type="number">
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-2 text-center">
-                                        <h4>2</h4>
-                                    </div>
-                                    <div class="col text-start">
-                                        <input type="number">
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-2 text-center">
-                                        <h4>3</h4>
-                                    </div>
-                                    <div class="col text-start">
-                                        <input type="number">
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-2 text-center">
-                                        <h4>4</h4>
-                                    </div>
-                                    <div class="col text-start">
-                                        <input type="number">
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-2 text-center">
-                                        <h4>5</h4>
-                                    </div>
-                                    <div class="col text-start">
-                                        <input type="number">
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <div class="col-12 col-xl-6 p-3 text-center">
-                                <img src="<?= $prefijoRuta ?>imgs/El texto del párrafo.png" alt="" style="height: 200px;">
-                            </div>
-                        </div>
-                        <!-- puntos -->
-
                     </div>
-                <!-- excentricidad -->
+                </article>
+
+                <article class="prueba-card" data-prueba="<?= $prefijo ?>_exactitud">
+                    <div class="prueba-card-header"><h3>Exactitud</h3><div class="form-check form-switch"><input class="form-check-input prueba-no-aplica" type="checkbox" role="switch" name="<?= $prefijo ?>_exactitud_no_aplica" id="<?= $prefijo ?>_exactitud_no_aplica" value="1"><label class="form-check-label" for="<?= $prefijo ?>_exactitud_no_aplica">No aplica</label></div></div>
+                    <div class="motivo-no-aplica d-none"><label class="form-label" for="<?= $prefijo ?>_exactitud_motivo">Motivo por el cual no aplica</label><textarea class="form-control motivo-no-aplica-input" name="<?= $prefijo ?>_exactitud_motivo" id="<?= $prefijo ?>_exactitud_motivo" rows="2"></textarea></div>
+                    <div class="contenido-prueba table-responsive"><table class="table table-bordered align-middle informe-tabla tabla-exactitud"><thead><tr><th>Punto</th><th>Carga</th><th>Indicación</th><th>Error</th><th>EMT</th><th>Resultado</th></tr></thead><tbody>
+                        <?php for ($i = 0; $i <= 5; $i++): ?>
+                            <?php $cargaBloqueada = $i === 0 || $prefijo === 'final'; ?>
+                            <tr><td><?= $i ?></td><td><input class="form-control carga-exactitud <?= $cargaBloqueada ? 'carga-sincronizada' : '' ?> prueba-entrada" type="number" step="any" name="<?= $prefijo ?>_exactitud_carga_<?= $i ?>" id="<?= $prefijo ?>_exactitud_carga_<?= $i ?>" data-punto="<?= $i ?>"<?= $i === 0 ? ' value="0"' : '' ?><?= $cargaBloqueada ? ' readonly aria-readonly="true"' : '' ?>></td><td><input class="form-control prueba-entrada campo-indicacion" type="number" step="any" name="<?= $prefijo ?>_exactitud_indicacion_<?= $i ?>" id="<?= $prefijo ?>_exactitud_indicacion_<?= $i ?>"></td><td><input class="form-control" type="text" name="<?= $prefijo ?>_exactitud_error_<?= $i ?>" id="<?= $prefijo ?>_exactitud_error_<?= $i ?>" readonly></td><td><input class="form-control" type="text" name="<?= $prefijo ?>_exactitud_emt_<?= $i ?>" id="<?= $prefijo ?>_exactitud_emt_<?= $i ?>" readonly></td><td><output class="resultado-badge resultado-pendiente resultado-punto-texto">PENDIENTE</output><input type="hidden" name="<?= $prefijo ?>_exactitud_resultado_<?= $i ?>" class="resultado-punto" id="<?= $prefijo ?>_exactitud_resultado_<?= $i ?>"><input type="hidden" name="<?= $prefijo ?>_exactitud_intervalo_<?= $i ?>" id="<?= $prefijo ?>_exactitud_intervalo_<?= $i ?>"></td></tr>
+                        <?php endfor; ?>
+                    </tbody></table><div class="resultado-general-wrap mt-3"><span>Resultado general:</span><output class="resultado-badge resultado-pendiente prueba-resultado-texto">PENDIENTE</output><input type="hidden" name="<?= $prefijo ?>_exactitud_resultado" class="prueba-resultado" id="<?= $prefijo ?>_exactitud_resultado"></div></div>
+                </article>
+            </section>
+        <?php endforeach; ?>
+
+        <section class="informe-seccion">
+            <h2 class="informe-titulo-seccion">Cierre del servicio</h2>
+            <div class="row g-3">
+                <?php foreach (['observaciones' => 'Observaciones', 'trabajo_realizado' => 'Trabajo realizado', 'recomendaciones' => 'Recomendaciones', 'atencion_urgente' => 'Atención / servicios urgentes'] as $campo => $etiqueta): ?><div class="col-12"><label class="form-label" for="<?= $campo ?>"><?= $etiqueta ?></label><textarea class="form-control" name="<?= $campo ?>" id="<?= $campo ?>" rows="3"></textarea></div><?php endforeach; ?>
             </div>
-        <!-- Seccion repetibilidad y Excentricidad--> 
-        
-        <!-- Seccion Exactitud  -->
-            <div class="row ">
-                <div class="col border-top">
-                    <div class="row mt-4 mb-3 text-center">
-                        <h3>Exactitud</h3>
-                    </div>
+        </section>
 
-                    <!-- puntos -->
-                    <div class="row justify-content-center">
-
-                            <div class="col- p-3">
-                                <div class="row row-cols-auto">
-                                    <div class="col-1 text-end">
-                                        <h4>1</h4>
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number" id="exact1">
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number">
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number" disabled>
-                                    </div>
-                                </div>
-
-                                <div class="row row-cols-auto">
-                                    <div class="col-1 text-end">
-                                        <h4>2</h4>
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number" id="exact2">
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number">
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number" disabled>
-                                    </div>
-                                </div>
-
-                                <div class="row row-cols-auto">
-                                    <div class="col-1 text-end">
-                                        <h4>3</h4>
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number" id="exact3">
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number">
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number" disabled>
-                                    </div>
-                                </div>
-
-                                <div class="row row-cols-auto">
-                                    <div class="col-1 text-end">
-                                        <h4>4</h4>
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number" id="exact4">
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number">
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number" disabled>
-                                    </div>
-                                </div>
-
-                                <div class="row row-cols-auto">
-                                    <div class="col-1 text-end">
-                                        <h4>5</h4>
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number" id="exact5">
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number">
-                                    </div>
-                                    <div class="col-3 col-md-2">
-                                        <input class="col-12 col-md-6" type="number" disabled>
-                                    </div>
-                                </div>
-                            </div>
-                    </div>
-                    <!-- puntos -->
-                </div>
-                
-            </div>
-        <!-- Seccion Exactitud  -->
-
+        <div id="errores_informe" class="alert alert-danger d-none" role="alert" tabindex="-1"></div>
+        <div class="d-grid gap-2 col-lg-5 mx-auto py-4"><button type="submit" class="btn btn-success btn-lg">GENERAR Y DESCARGAR PDF</button></div>
+    </form>
 </div>
-<!-- container -->
 
-
-<!-- JQuery 3.7.1-->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-
-<!-- SELECT2 combobox -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="<?= $prefijoRuta ?>js/informe.js?v=20260929-3"></script>
 
-<script src="<?= $prefijoRuta ?>js/informe.js"></script>
-
-<?php  require (__DIR__ . "/../construct/footer.html")   ?>
+<?php require __DIR__ . '/../construct/footer.html'; ?>

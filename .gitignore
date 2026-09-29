@@ -1,1 +1,15 @@
-config/conexion.php
+/config/conexion.php
+/conexion.php
+
+# Datos locales, documentos generados y archivos protegidos.
+/database/
+/filesPDF/
+/files PDF/
+/global_xml/
+/global XML/
+/output/
+/tmp/
+
+# Estado de ejecución del consecutivo de informes.
+/backend/helpers/folio_informe_counter.txt
+/backend/helpers/folio_informe_counter.txt.*
