@@ -27,10 +27,24 @@ $consultaContactos->execute();
 $contactos = $consultaContactos->get_result()->fetch_all(MYSQLI_ASSOC);
 $consultaContactos->close();
 
+$consultaDirecciones = $conexion->prepare(
+    'SELECT id, tipo_direccion, alias, es_principal, calle, numero_exterior,
+            numero_interior, colonia, localidad, municipio, ciudad, estado,
+            codigo_postal, pais, entre_calles, referencia, direccion_original
+     FROM empresa_direcciones
+     WHERE empresa_id = ?
+     ORDER BY es_principal DESC, tipo_direccion ASC, id ASC'
+);
+$consultaDirecciones->bind_param('i', $idEmpresa);
+$consultaDirecciones->execute();
+$direcciones = $consultaDirecciones->get_result()->fetch_all(MYSQLI_ASSOC);
+$consultaDirecciones->close();
+
 // Informe actual consume nombre/correo en el objeto raiz. Se conserva el primer
 // contacto ordenado como compatibilidad y se expone el arreglo completo para el nuevo flujo.
 $respuesta = $contactos[0] ?? [];
 $respuesta['contactos'] = $contactos;
+$respuesta['direcciones'] = $direcciones;
 
 echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
 

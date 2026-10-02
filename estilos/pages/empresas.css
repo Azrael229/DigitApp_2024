@@ -41,6 +41,35 @@
     min-height: 2.75rem;
 }
 
+.empresa-notes-help,
+.empresa-notes-status,
+.empresa-quote-no-pdf {
+    color: var(--text-soft);
+}
+
+.empresa-notes-help {
+    font-size: 0.9rem;
+}
+
+.empresa-notes-textarea {
+    min-height: 11rem;
+    resize: vertical;
+    line-height: 1.55;
+}
+
+.empresa-notes-status {
+    min-height: 1.5rem;
+    font-size: 0.86rem;
+}
+
+.empresa-notes-status-success {
+    color: #b9f6d6;
+}
+
+.empresa-notes-status-error {
+    color: #ffb7c5;
+}
+
 .empresa-data-field {
     min-width: 0;
 }
@@ -122,11 +151,56 @@
     white-space: nowrap;
 }
 
+.empresa-history-tabs {
+    gap: 0.25rem;
+    border-bottom-color: var(--border-soft);
+}
+
+.empresa-history-tabs .nav-link {
+    border-color: transparent;
+    color: var(--text-soft);
+}
+
+.empresa-history-tabs .nav-link:hover,
+.empresa-history-tabs .nav-link:focus {
+    border-color: rgba(89, 182, 255, 0.24);
+    color: #ffffff;
+}
+
+.empresa-history-tabs .nav-link.active {
+    background: rgba(89, 182, 255, 0.16);
+    border-color: rgba(89, 182, 255, 0.34) rgba(89, 182, 255, 0.34) transparent;
+    color: #ffffff;
+}
+
+.empresa-history-pane {
+    padding-top: 1.25rem;
+}
+
+.empresa-quote-detail-pending {
+    cursor: not-allowed;
+    opacity: 0.68;
+}
+
 .empresa-col-ciudad {
     width: 10rem;
     max-width: 10rem;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+#tabla_oportunidades_empresa th,
+#tabla_oportunidades_empresa td,
+#tabla_cotizaciones_empresa th,
+#tabla_cotizaciones_empresa td {
+    white-space: nowrap;
+}
+
+#tabla_oportunidades_empresa td:nth-child(3),
+#tabla_oportunidades_empresa td:nth-child(5),
+#tabla_cotizaciones_empresa td:nth-child(3),
+#tabla_cotizaciones_empresa td:nth-child(5) {
+    white-space: normal;
 }
 
 @media (max-width: 575px) {

@@ -2,7 +2,7 @@ const formularioInforme = document.getElementById('form_informe');
 const selectEmpresa = document.getElementById('select_empresa');
 const selectContacto = document.getElementById('select_contacto');
 const inputEmpresa = document.getElementById('nombre_empresa');
-const inputDireccion = document.getElementById('dir_empresa');
+const selectDireccion = document.getElementById('dir_empresa');
 const inputContacto = document.getElementById('nombre_contacto');
 const inputCorreo = document.getElementById('correo_contacto');
 const inputFecha = document.getElementById('inf_fecha');
@@ -142,6 +142,58 @@ function limpiarContactos(mensaje = 'Seleccione primero una empresa') {
     inputCorreo.value = '';
 }
 
+// Limpia y deshabilita las direcciones mientras no exista una empresa cargada.
+function limpiarDirecciones(mensaje = 'Seleccione primero una empresa') {
+    selectDireccion.innerHTML = `<option value="">${mensaje}</option>`;
+    selectDireccion.disabled = true;
+}
+
+// Convierte una dirección estructurada en el texto completo enviado al informe.
+function formatearDireccionInforme(direccion) {
+    const primeraLinea = [
+        direccion.calle,
+        direccion.numero_exterior ? `No. ${direccion.numero_exterior}` : '',
+        direccion.numero_interior ? `Int. ${direccion.numero_interior}` : '',
+    ].filter(Boolean).join(' ');
+    const ubicacion = [
+        direccion.colonia ? `Col. ${direccion.colonia}` : '',
+        direccion.localidad,
+        direccion.municipio && direccion.municipio !== direccion.ciudad ? direccion.municipio : '',
+        direccion.ciudad,
+        direccion.estado,
+        direccion.codigo_postal ? `C.P. ${direccion.codigo_postal}` : '',
+        direccion.pais,
+    ].filter(Boolean).join(', ');
+    const partes = [primeraLinea, ubicacion, direccion.entre_calles, direccion.referencia].filter(Boolean);
+    return partes.length ? partes.join(', ') : (direccion.direccion_original || '');
+}
+
+// Carga las direcciones de la empresa y selecciona primero la marcada como principal.
+function cargarDirecciones(direcciones, direccionHistorica = '') {
+    selectDireccion.innerHTML = '<option value="">Seleccionar dirección</option>';
+    const opciones = Array.isArray(direcciones) ? direcciones : [];
+    opciones.forEach((direccion) => {
+        const texto = formatearDireccionInforme(direccion);
+        if (!texto) return;
+        const opcion = document.createElement('option');
+        const tipo = direccion.tipo_direccion === 'fiscal' ? 'Fiscal' : 'Entrega';
+        const alias = direccion.alias ? ` · ${direccion.alias}` : '';
+        const principal = Number(direccion.es_principal) === 1 ? ' · Principal' : '';
+        opcion.value = texto;
+        opcion.textContent = `${tipo}${alias}${principal} — ${texto}`;
+        selectDireccion.appendChild(opcion);
+    });
+    if (selectDireccion.options.length === 1 && direccionHistorica) {
+        selectDireccion.add(new Option(`Dirección registrada — ${direccionHistorica}`, direccionHistorica));
+    }
+    if (selectDireccion.options.length === 1) {
+        selectDireccion.innerHTML = '<option value="">Sin direcciones registradas</option>';
+    } else {
+        selectDireccion.selectedIndex = 1;
+    }
+    selectDireccion.disabled = false;
+}
+
 // Carga las opciones de contacto y selecciona el contacto principal devuelto por el backend.
 function cargarContactos(contactos) {
     selectContacto.innerHTML = '<option value="">Seleccionar contacto</option>';
@@ -171,14 +223,14 @@ function actualizarContactoSeleccionado() {
     inputCorreo.value = opcion?.dataset.correo || '';
 }
 
-// Consulta empresa y contactos con los endpoints existentes y llena el formulario.
+// Consulta empresa, contactos y direcciones con los endpoints existentes y llena el formulario.
 async function seleccionarEmpresa() {
     const id = selectEmpresa.value;
     if (id && empresaEnCarga === id) return;
     empresaEnCarga = id;
     inputEmpresa.value = '';
-    inputDireccion.value = '';
     limpiarContactos();
+    limpiarDirecciones();
     if (!id) {
         empresaEnCarga = '';
         return;
@@ -192,10 +244,11 @@ async function seleccionarEmpresa() {
         const empresa = await respuestaEmpresa.json();
         const contactos = await respuestaContactos.json();
         inputEmpresa.value = empresa.razon_social || empresa.empresa || '';
-        inputDireccion.value = empresa.dir_entrega || '';
         cargarContactos(contactos.contactos || []);
+        cargarDirecciones(contactos.direcciones || [], empresa.dir_entrega || '');
     } catch (error) {
         limpiarContactos('No fue posible cargar contactos');
+        limpiarDirecciones('No fue posible cargar direcciones');
         mostrarErrores([error.message]);
     } finally {
         empresaEnCarga = '';

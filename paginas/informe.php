@@ -84,7 +84,9 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
                 </div>
                 <div class="col-lg-6">
                     <label class="form-label" for="dir_empresa">Dirección</label>
-                    <textarea class="form-control" name="dir_empresa" id="dir_empresa" rows="2"></textarea>
+                    <select class="form-select" name="dir_empresa" id="dir_empresa" disabled>
+                        <option value="">Seleccione primero una empresa</option>
+                    </select>
                 </div>
                 <div class="col-lg-6">
                     <label class="form-label" for="nombre_contacto">Nombre del contacto</label>
@@ -227,6 +229,6 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="<?= $prefijoRuta ?>js/informe.js?v=20260929-3"></script>
+<script src="<?= $prefijoRuta ?>js/informe.js?v=20261002-1"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

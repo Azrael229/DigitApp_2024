@@ -63,10 +63,48 @@ $consultaContactos->execute();
 $contactos = $consultaContactos->get_result()->fetch_all(MYSQLI_ASSOC);
 $consultaContactos->close();
 
+$consultaOportunidades = $conexion->prepare(
+    'SELECT o.id, o.fecha, o.contacto_id, c.nombre AS contacto,
+            o.descripcion_corta, o.importe, o.estatus, o.created_at
+     FROM oportunidades_comerciales o
+     LEFT JOIN contactos c ON c.id = o.contacto_id
+     WHERE o.empresa_id = ?
+     ORDER BY o.created_at DESC, o.id DESC'
+);
+$consultaOportunidades->bind_param('i', $id);
+$consultaOportunidades->execute();
+$oportunidades = $consultaOportunidades->get_result()->fetch_all(MYSQLI_ASSOC);
+$consultaOportunidades->close();
+
+$consultaCotizaciones = $conexion->prepare(
+    'SELECT id_coti, cot_fecha, cot_contacto, cot_total, cot_archivo,
+            cot_numero, cot_status
+     FROM cotizaciones
+     WHERE empresa_id = ?
+     ORDER BY id_coti DESC'
+);
+$consultaCotizaciones->bind_param('i', $id);
+$consultaCotizaciones->execute();
+$cotizaciones = $consultaCotizaciones->get_result()->fetch_all(MYSQLI_ASSOC);
+$consultaCotizaciones->close();
+
+foreach ($cotizaciones as &$cotizacion) {
+    $archivo = trim((string) ($cotizacion['cot_archivo'] ?? ''));
+    $cotizacion['cot_status'] = trim(strip_tags((string) ($cotizacion['cot_status'] ?? '')));
+    $cotizacion['pdf_disponible'] = $archivo !== ''
+        && strpos($archivo, '/') === false
+        && strpos($archivo, '\\') === false
+        && preg_match('/\.pdf$/i', $archivo) === 1
+        && is_file(__DIR__ . '/../../filesPDF/' . $archivo);
+}
+unset($cotizacion);
+
 echo json_encode([
     'empresa' => $empresa,
     'direcciones' => $direcciones,
     'contactos' => $contactos,
+    'oportunidades' => $oportunidades,
+    'cotizaciones' => $cotizaciones,
 ], JSON_UNESCAPED_UNICODE);
 
 mysqli_close($conexion);

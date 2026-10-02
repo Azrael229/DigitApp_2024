@@ -7,6 +7,145 @@ var tablaContactos = document.getElementById('tabla_contactos');
 var botonAgregarDireccion = document.getElementById('btn_agregar_direccion');
 var botonAgregarContacto = document.getElementById('btn_agregar_contacto');
 var botonEditarEmpresa = document.getElementById('btn_editar_empresa');
+var contenedorEmpresa = document.querySelector('.empresa-detalle');
+var notasEmpresa = document.getElementById('empresa_notas');
+var botonGuardarNotas = document.getElementById('btn_guardar_notas');
+var estadoNotasEmpresa = document.getElementById('estado_notas_empresa');
+var tokenNotasEmpresa = contenedorEmpresa.dataset.notasCsrf;
+var notasGuardadas = '';
+var notasConCambios = false;
+var etiquetasEstatusOportunidad = {
+    preparacion: 'En preparación',
+    cotizada: 'Cotizada',
+    negociacion: 'En negociación',
+    ganada: 'Ganada',
+    perdida: 'Perdida',
+    cancelada: 'Cancelada'
+};
+
+// Escapa texto antes de insertarlo en el HTML generado por las tablas.
+function escaparHtmlEmpresa(valor) {
+    var elemento = document.createElement('span');
+    elemento.textContent = valor === null || valor === undefined ? '' : String(valor);
+    return elemento.innerHTML;
+}
+
+// Convierte importes almacenados en una cantidad ordenable y visible en moneda nacional.
+function formatearImporteEmpresa(valor, tipo) {
+    var numero = Number(String(valor || '0').replace(/,/g, ''));
+    if (tipo !== 'display') {
+        return Number.isFinite(numero) ? numero : 0;
+    }
+    return Number.isFinite(numero)
+        ? numero.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })
+        : '-';
+}
+
+var oportunidadesEmpresa = new DataTable('#tabla_oportunidades_empresa', getDataTableOptions({
+    data: [],
+    order: [[6, 'desc']],
+    columns: [
+        { data: 'fecha', defaultContent: '', render: DataTable.render.text() },
+        {
+            data: 'contacto',
+            defaultContent: '',
+            render: function (valor, tipo, fila) {
+                if (tipo !== 'display') {
+                    return valor || '';
+                }
+                var contactoId = Number(fila.contacto_id);
+                if (!contactoId) {
+                    return valor ? escaparHtmlEmpresa(valor) : '—';
+                }
+                return '<a class="entity-link" href="ver_contacto.php?id=' + contactoId + '">'
+                    + escaparHtmlEmpresa(valor || 'Ver contacto') + '</a>';
+            }
+        },
+        { data: 'descripcion_corta', defaultContent: '', render: DataTable.render.text() },
+        { data: 'importe', defaultContent: '', render: formatearImporteEmpresa },
+        {
+            data: 'estatus',
+            defaultContent: '',
+            render: function (valor, tipo) {
+                var clave = String(valor || '').toLocaleLowerCase('es-MX');
+                var etiqueta = etiquetasEstatusOportunidad[clave] || valor || 'Sin estatus';
+                if (tipo !== 'display') {
+                    return etiqueta;
+                }
+                var clase = Object.prototype.hasOwnProperty.call(etiquetasEstatusOportunidad, clave)
+                    ? ' op-status-' + clave
+                    : '';
+                return '<span class="badge op-status' + clase + '">' + escaparHtmlEmpresa(etiqueta) + '</span>';
+            }
+        },
+        {
+            data: 'id',
+            orderable: false,
+            searchable: false,
+            render: function (valor, tipo) {
+                if (tipo !== 'display') {
+                    return valor;
+                }
+                return '<a class="btn btn-outline-secondary btn-sm" href="ver_oportunidad.php?id='
+                    + Number(valor) + '">Ver oportunidad</a>';
+            }
+        },
+        {
+            data: 'created_at',
+            visible: false,
+            searchable: false,
+            render: function (valor, tipo, fila) {
+                return String(valor || '') + String(fila.id).padStart(10, '0');
+            }
+        }
+    ]
+}));
+
+var cotizacionesEmpresa = new DataTable('#tabla_cotizaciones_empresa', getDataTableOptions({
+    data: [],
+    order: [[7, 'desc']],
+    columns: [
+        { data: 'cot_fecha', defaultContent: '', render: DataTable.render.text() },
+        { data: 'cot_numero', defaultContent: '', render: DataTable.render.text() },
+        { data: 'cot_contacto', defaultContent: '', render: DataTable.render.text() },
+        {
+            data: 'cot_total',
+            defaultContent: '',
+            render: formatearImporteEmpresa
+        },
+        { data: 'cot_status', defaultContent: '', render: DataTable.render.text() },
+        {
+            data: null,
+            orderable: false,
+            searchable: false,
+            render: function (valor, tipo, fila) {
+                if (tipo !== 'display' || !fila.pdf_disponible) {
+                    return tipo === 'display' ? '<span class="empresa-quote-no-pdf">Sin PDF</span>' : '';
+                }
+                var archivo = encodeURIComponent(String(fila.cot_archivo || ''));
+                return '<a class="btn btn-outline-secondary btn-sm" href="../filesPDF/' + archivo
+                    + '" target="_blank" rel="noopener">Ver PDF</a>';
+            }
+        },
+        {
+            data: 'id_coti',
+            orderable: false,
+            searchable: false,
+            render: function (valor, tipo) {
+                if (tipo !== 'display') {
+                    return valor;
+                }
+                return '<span class="btn btn-outline-secondary btn-sm disabled empresa-quote-detail-pending"'
+                    + ' aria-disabled="true" title="Disponible cuando exista la ficha individual de cotización"'
+                    + ' data-cotizacion-id="' + Number(valor) + '">Detalle pendiente</span>';
+            }
+        },
+        { data: 'id_coti', visible: false, searchable: false }
+    ]
+}));
+
+applyColumnFilters(oportunidadesEmpresa);
+applyColumnFilters(cotizacionesEmpresa);
 
 // Obtiene el identificador de empresa enviado desde el directorio.
 function obtenerEmpresaId() {
@@ -112,6 +251,79 @@ function formatearFechaEmpresa(fecha) {
 
     var fechaLocal = new Date(fecha.replace(' ', 'T'));
     return Number.isNaN(fechaLocal.getTime()) ? fecha : fechaLocal.toLocaleString('es-MX');
+}
+
+// Presenta las notas almacenadas y habilita su edición directa.
+function mostrarNotasEmpresa(empresa) {
+    notasGuardadas = String(empresa.observaciones || '');
+    notasEmpresa.value = notasGuardadas;
+    notasEmpresa.disabled = false;
+    notasConCambios = false;
+    botonGuardarNotas.disabled = true;
+    estadoNotasEmpresa.textContent = empresa.updated_at
+        ? 'Última actualización: ' + formatearFechaEmpresa(empresa.updated_at)
+        : 'Sin modificaciones registradas.';
+    estadoNotasEmpresa.className = 'empresa-notes-status mt-2';
+}
+
+// Carga en la tabla las oportunidades vinculadas por identificador de empresa.
+function mostrarOportunidadesEmpresa(oportunidades) {
+    oportunidadesEmpresa.clear();
+    if (oportunidades.length) {
+        oportunidadesEmpresa.rows.add(oportunidades);
+    }
+    oportunidadesEmpresa.draw();
+}
+
+// Carga en la tabla las cotizaciones vinculadas por identificador de empresa.
+function mostrarCotizacionesEmpresa(cotizaciones) {
+    cotizacionesEmpresa.clear();
+    if (cotizaciones.length) {
+        cotizacionesEmpresa.rows.add(cotizaciones);
+    }
+    cotizacionesEmpresa.draw();
+}
+
+// Guarda las notas y actualiza su estado sin recargar la ficha de empresa.
+async function guardarNotasEmpresa() {
+    var empresaId = obtenerEmpresaId();
+    if (!empresaId || !notasConCambios) {
+        return;
+    }
+
+    botonGuardarNotas.disabled = true;
+    estadoNotasEmpresa.textContent = 'Guardando notas...';
+    estadoNotasEmpresa.className = 'empresa-notes-status mt-2';
+
+    try {
+        var respuesta = await fetch('../backend/empresas/guardar_notas_empresa.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+            body: new URLSearchParams({
+                empresa_id: empresaId,
+                notas: notasEmpresa.value,
+                csrf: tokenNotasEmpresa
+            })
+        });
+        var datos = await respuesta.json();
+        if (!respuesta.ok || datos.error) {
+            throw new Error(datos.error || 'No fue posible guardar las notas.');
+        }
+
+        notasGuardadas = String(datos.notas || '');
+        notasEmpresa.value = notasGuardadas;
+        notasConCambios = false;
+        estadoNotasEmpresa.textContent = 'Notas guardadas. Última actualización: ' + formatearFechaEmpresa(datos.updated_at);
+        estadoNotasEmpresa.className = 'empresa-notes-status empresa-notes-status-success mt-2';
+        var fechaActualizacion = document.getElementById('empresa-dato-8');
+        if (fechaActualizacion) {
+            fechaActualizacion.textContent = formatearFechaEmpresa(datos.updated_at);
+        }
+    } catch (error) {
+        botonGuardarNotas.disabled = false;
+        estadoNotasEmpresa.textContent = error.message;
+        estadoNotasEmpresa.className = 'empresa-notes-status empresa-notes-status-error mt-2';
+    }
 }
 
 // Agrega el acceso de edicion sin exponer la eliminacion en esta vista.
@@ -233,8 +445,11 @@ function cargarDetalleEmpresa() {
                 throw new Error(datos.error);
             }
             mostrarDatosGenerales(datos.empresa);
+            mostrarNotasEmpresa(datos.empresa);
             mostrarDirecciones(datos.direcciones || []);
             mostrarContactos(datos.contactos || []);
+            mostrarOportunidadesEmpresa(datos.oportunidades || []);
+            mostrarCotizacionesEmpresa(datos.cotizaciones || []);
             botonAgregarDireccion.href = 'form_direccion_empresa.php?empresa_id=' + datos.empresa.id_e;
             botonAgregarDireccion.classList.remove('disabled');
             botonAgregarDireccion.removeAttribute('aria-disabled');
@@ -246,11 +461,41 @@ function cargarDetalleEmpresa() {
             botonEditarEmpresa.removeAttribute('aria-disabled');
             mensajeEmpresa.classList.add('d-none');
             contenidoEmpresa.classList.remove('d-none');
+            oportunidadesEmpresa.columns.adjust();
         })
         .catch(function () {
             mensajeEmpresa.textContent = 'No fue posible cargar la información de la empresa.';
             mensajeEmpresa.className = 'alert alert-danger';
         });
 }
+
+// Marca cambios pendientes y evita guardar cuando el contenido no cambió.
+notasEmpresa.addEventListener('input', function () {
+    notasConCambios = notasEmpresa.value !== notasGuardadas;
+    botonGuardarNotas.disabled = !notasConCambios;
+    estadoNotasEmpresa.textContent = notasConCambios ? 'Cambios sin guardar.' : 'Sin cambios pendientes.';
+    estadoNotasEmpresa.className = 'empresa-notes-status mt-2';
+});
+
+botonGuardarNotas.addEventListener('click', guardarNotasEmpresa);
+
+// Recalcula la tabla visible después de cambiar de pestaña.
+document.querySelectorAll('#empresa-historial-tabs [data-bs-toggle="tab"]').forEach(function (boton) {
+    boton.addEventListener('click', function () {
+        window.setTimeout(function () {
+            var tabla = boton.id === 'empresa-cotizaciones-tab' ? cotizacionesEmpresa : oportunidadesEmpresa;
+            tabla.columns.adjust();
+        }, 0);
+    });
+});
+
+// Advierte antes de abandonar la ficha cuando existen notas sin guardar.
+window.addEventListener('beforeunload', function (evento) {
+    if (!notasConCambios) {
+        return;
+    }
+    evento.preventDefault();
+    evento.returnValue = '';
+});
 
 cargarDetalleEmpresa();

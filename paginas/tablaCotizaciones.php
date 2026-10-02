@@ -19,9 +19,14 @@
     <!-- row de Tabla cotizaciones -->
     <div class="row border-top justify-content-center ">
         <!-- titulo de tabla  -->
-        <div class="row">
-            <div class="col text-center mt-3 mb-5">
-                <h1>Cotizaciones</h1>
+        <div class="row align-items-center g-3 mt-3 mb-5">
+            <div class="col">
+                <h1 class="mb-0">Cotizaciones</h1>
+            </div>
+            <div class="col-12 col-sm-auto">
+                <a href="<?= $prefijoRuta ?>paginas/nuevaCotizacion.php" class="btn btn-success">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva cotización
+                </a>
             </div>
         </div>
         <!-- titulo de tabla  -->
