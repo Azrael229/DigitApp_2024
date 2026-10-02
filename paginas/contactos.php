@@ -1,6 +1,7 @@
 <?php
 $prefijoRuta = '../';
 require __DIR__ . '/../backend/contactos/query_all_contactos.php';
+require_once __DIR__ . '/../backend/helpers/entity_links.php';
 require __DIR__ . '/../construct/header.php';
 
 function escaparContacto($valor): string
@@ -51,14 +52,14 @@ function escaparContacto($valor): string
                             ?>
                             <tr>
                                 <td>
-                                    <a class="contactos-link" href="ver_contacto.php?id=<?= $id ?>">
-                                        <?= escaparContacto($contacto['nombre']) ?>
-                                    </a>
+                                    <?= renderizarEnlaceEntidad('contacto', $id, (string) $contacto['nombre']) ?>
                                 </td>
                                 <td><?= escaparContacto($contacto['celular'] ?: '—') ?></td>
                                 <td class="contactos-email"><?= escaparContacto($contacto['correo'] ?: '—') ?></td>
                                 <td><?= escaparContacto($contacto['departamento'] ?: '—') ?></td>
-                                <td class="contactos-empresas"><?= escaparContacto($empresaTexto) ?></td>
+                                <td class="contactos-empresas">
+                                    <?= renderizarEnlaceEntidad('empresa', $contacto['empresa_id'] ?? null, $empresaTexto) ?>
+                                </td>
                                 <td>
                                     <span class="badge contactos-status <?= $activo ? 'contactos-status-active' : 'contactos-status-inactive' ?>">
                                         <?= $activo ? 'Activo' : 'Inactivo' ?>
@@ -78,6 +79,6 @@ function escaparContacto($valor): string
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
-<script src="<?= $prefijoRuta ?>js/tablaContactos.js"></script>
+<script src="<?= $prefijoRuta ?>js/tablaContactos.js?v=20261001-1"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

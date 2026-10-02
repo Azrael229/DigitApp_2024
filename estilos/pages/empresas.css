@@ -83,18 +83,6 @@
     vertical-align: middle;
 }
 
-.empresa-contact-link {
-    color: var(--accent-mint);
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.empresa-contact-link:hover,
-.empresa-contact-link:focus {
-    color: #ffffff;
-    text-decoration: underline;
-}
-
 .empresa-contact-principal {
     display: inline-block;
     margin: 0.3rem 0 0 0.45rem;

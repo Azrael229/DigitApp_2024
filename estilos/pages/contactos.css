@@ -26,18 +26,6 @@
     vertical-align: middle;
 }
 
-.contactos-link {
-    color: var(--accent-mint);
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.contactos-link:hover,
-.contactos-link:focus {
-    color: #ffffff;
-    text-decoration: underline;
-}
-
 .contactos-email {
     overflow-wrap: anywhere;
 }
@@ -228,8 +216,6 @@
 }
 
 .contacto-empresa-link {
-    color: var(--accent-mint);
-    font-weight: 700;
     overflow-wrap: anywhere;
 }
 

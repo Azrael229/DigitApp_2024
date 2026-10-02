@@ -22,7 +22,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- CSS personalizado: se carga al final para sobreescribir Bootstrap/plugins -->
-    <link rel="stylesheet" href="<?= $prefijoRuta ?>estilos/style.css?v=20260803">
+    <link rel="stylesheet" href="<?= $prefijoRuta ?>estilos/style.css?v=20261001-3">
 
 
   </head>
@@ -52,6 +52,10 @@
               <a class="nav-link active" aria-current="page" href="<?= $prefijoRuta ?>paginas/informe.php">Informe</a>
             </li>
           
+            <li class="nav-item">
+              <a class="nav-link" href="<?= $prefijoRuta ?>paginas/oportunidades.php">OP C</a>
+            </li>
+
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Cotizaciones

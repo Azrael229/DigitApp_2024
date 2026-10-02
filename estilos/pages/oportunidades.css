@@ -1,0 +1,9 @@
+.op-amount { display: flex; align-items: center; gap: .4rem; min-width: 11rem; }
+.op-amount input { min-width: 8rem; text-align: right; }
+.op-multiline { white-space: pre-wrap; overflow-wrap: anywhere; }
+.op-filter-label { display: block; color: var(--text-main); font-size: .75rem; }
+.op-status { padding: .5rem .65rem; background: rgba(78, 144, 230, .25); color: #d0e5ff; }
+.op-status-ganada { background: rgba(45, 186, 121, .22); color: #b9f6d6; }
+.op-status-perdida, .op-status-cancelada { background: rgba(255, 184, 84, .22); color: #ffe0a6; }
+#tabla-oportunidades td:nth-child(4) { min-width: 12rem; overflow-wrap: anywhere; }
+#tabla-oportunidades td:nth-child(6), #tabla-oportunidades td:nth-child(7), #tabla-oportunidades td:nth-child(8) { white-space: nowrap; }

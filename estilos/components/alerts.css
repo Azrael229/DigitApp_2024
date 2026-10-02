@@ -1,5 +1,16 @@
+.alert {
+    color: var(--bs-alert-color, #1f2937) !important;
+}
+
+.alert a {
+    color: inherit !important;
+}
+
 .alert-warning {
-    background: rgba(228, 0, 124, 0.14);
-    border: 1px solid rgba(228, 0, 124, 0.28);
-    color: #ffffff;
+    --bs-alert-color: #3f1230;
+    --bs-alert-bg: #f8d7ea;
+    --bs-alert-border-color: #efacd0;
+    background: var(--bs-alert-bg);
+    border-color: var(--bs-alert-border-color);
+    color: var(--bs-alert-color) !important;
 }

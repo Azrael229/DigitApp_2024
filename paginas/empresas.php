@@ -1,4 +1,5 @@
 <?php $prefijoRuta = '../'; ?>
+<?php require_once __DIR__ . '/../backend/helpers/entity_links.php'; ?>
 <?php  require (__DIR__ . "/../construct/header.php")   ?>
 <?php  require (__DIR__ . "/../backend/empresas/query_all_empresas.php")   ?>
 
@@ -39,7 +40,7 @@
 
                                    <?php  foreach ($result_empresas as $row): ?>
                                         <tr>
-                                             <td><a href="ver_empresa.php?id=<?php echo $row['id_e'] ?>"><?php echo htmlspecialchars($row['empresa']) ?></a></td>
+                                             <td><?= renderizarEnlaceEntidad('empresa', $row['id_e'] ?? null, (string) ($row['empresa'] ?? '')) ?></td>
                                              <td class="empresa-col-ciudad"><?php echo htmlspecialchars($row['ciudad_principal'] ?? '') ?></td>
                                              <td><?php echo htmlspecialchars($row['estado_principal'] ?? '') ?></td>
                                              <td><?php echo $row['rfc'] ?></td>

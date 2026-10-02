@@ -18,7 +18,7 @@ $consultaContactos = $conexion->prepare(
          WHERE ec.activo = 1
          GROUP BY ec.id_contacto
      ) AS relaciones ON relaciones.id_contacto = c.id
-     ORDER BY c.nombre ASC, c.id ASC'
+     ORDER BY c.fecha_creacion DESC, c.id DESC'
 );
 $consultaContactos->execute();
 $result_contactos = $consultaContactos->get_result();

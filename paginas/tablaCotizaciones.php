@@ -46,8 +46,8 @@
                         <tr>
                             <td><?php echo $row_coti['id_coti'] ?></td>
                             <td><?php echo $row_coti['cot_fecha'] ?></td>
-                            <td><?php echo $row_coti['cot_empresa'] ?></td>
-                            <td><?php echo $row_coti['cot_contacto'] ?></td>
+                            <td><?= htmlspecialchars((string) ($row_coti['cot_empresa'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
+                            <td><?= htmlspecialchars((string) ($row_coti['cot_contacto'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
                             <td>$ <?php echo $row_coti['cot_total'] ?></td>
                             <td><a href="<?= $prefijoRuta ?>filesPDF/<?php echo $row_coti['cot_archivo'] ?>" download><?php echo $row_coti['cot_archivo'] ?></a></td>
                             <td onclick="editar(<?php echo $row_coti['id_coti'] ?>)" style="cursor: pointer;">Editar</td>

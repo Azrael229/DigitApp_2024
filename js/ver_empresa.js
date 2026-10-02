@@ -30,7 +30,7 @@ function agregarContactoEnlazado(fila, contacto) {
     var enlace = document.createElement('a');
 
     celda.className = 'empresa-detail-cell';
-    enlace.className = 'empresa-contact-link';
+    enlace.className = 'entity-link';
     enlace.href = 'ver_contacto.php?id=' + encodeURIComponent(contacto.id)
         + '&from=empresa&empresa_id=' + encodeURIComponent(empresaId);
     enlace.textContent = contacto.nombre || '-';

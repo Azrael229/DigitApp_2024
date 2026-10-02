@@ -18,12 +18,13 @@
 @import url("./components/icons.css");
 @import url("./components/cards.css");
 @import url("./components/dashboard.css");
-@import url("./components/alerts.css");
+@import url("./components/alerts.css?v=20261001-2");
 
-@import url("./main/utilities.css");
+@import url("./main/utilities.css?v=20261001-1");
 @import url("./main/responsive.css");
 
 @import url("./pages/cotizaciones.css");
 @import url("./pages/contactos.css");
+@import url("./pages/oportunidades.css");
 @import url("./pages/empresas.css");
 @import url("./pages/informe.css?v=20260929-1");

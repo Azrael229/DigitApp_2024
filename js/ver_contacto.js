@@ -92,7 +92,7 @@ function mostrarEmpresasContacto(empresas) {
         var enlace = document.createElement('a');
 
         elemento.className = 'contacto-empresa-item';
-        enlace.className = 'contacto-empresa-link';
+        enlace.className = 'entity-link contacto-empresa-link';
         enlace.href = 'ver_empresa.php?id=' + encodeURIComponent(empresa.id_empresa);
         enlace.textContent = empresa.empresa || 'Empresa';
         elemento.appendChild(enlace);
