@@ -63,6 +63,24 @@ $consultaContactos->execute();
 $contactos = $consultaContactos->get_result()->fetch_all(MYSQLI_ASSOC);
 $consultaContactos->close();
 
+$consultaEquipos = $conexion->prepare(
+    'SELECT ee.id, ee.direccion_id, COALESCE(ee.modelo, \'\') AS modelo,
+            COALESCE(ee.identificacion, \'\') AS identificacion,
+            COALESCE(ee.numero_serie, \'\') AS numero_serie,
+            ee.unidad, ee.capacidad_maxima, ee.division_real, ee.division_verificacion,
+            COALESCE(ee.clase_exactitud, \'\') AS clase_exactitud, ee.estatus,
+            COALESCE(cd.nombre, \'\') AS descripcion, COALESCE(cm.nombre, \'\') AS marca
+     FROM empresa_equipos ee
+     LEFT JOIN catalogo_descripciones_equipo cd ON cd.id = ee.descripcion_id
+     LEFT JOIN catalogo_marcas_equipo cm ON cm.id = ee.marca_id
+     WHERE ee.empresa_id = ?
+     ORDER BY ee.direccion_id ASC, cd.nombre ASC, ee.identificacion ASC, ee.id ASC'
+);
+$consultaEquipos->bind_param('i', $id);
+$consultaEquipos->execute();
+$equipos = $consultaEquipos->get_result()->fetch_all(MYSQLI_ASSOC);
+$consultaEquipos->close();
+
 $consultaOportunidades = $conexion->prepare(
     'SELECT o.id, o.fecha, o.contacto_id, c.nombre AS contacto,
             o.descripcion_corta, o.importe, o.estatus, o.created_at
@@ -103,6 +121,7 @@ echo json_encode([
     'empresa' => $empresa,
     'direcciones' => $direcciones,
     'contactos' => $contactos,
+    'equipos' => $equipos,
     'oportunidades' => $oportunidades,
     'cotizaciones' => $cotizaciones,
 ], JSON_UNESCAPED_UNICODE);

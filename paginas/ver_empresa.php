@@ -22,6 +22,14 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
         </div>
     </div>
 
+    <?php if (isset($_GET['equipo_guardado'])): ?>
+        <div class="alert alert-success" role="alert">Equipo registrado correctamente.</div>
+    <?php elseif (isset($_GET['equipo_actualizado'])): ?>
+        <div class="alert alert-success" role="alert">Equipo actualizado correctamente.</div>
+    <?php elseif (!empty($_GET['error_equipo'])): ?>
+        <div class="alert alert-danger" role="alert"><?= htmlspecialchars((string) $_GET['error_equipo'], ENT_QUOTES, 'UTF-8') ?></div>
+    <?php endif; ?>
+
     <div id="mensaje_empresa" class="alert alert-info" role="status" aria-live="polite">Cargando información de la empresa...</div>
 
     <div id="contenido_empresa" class="d-none">
@@ -59,7 +67,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
             <div class="card-body empresa-card-body">
                 <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-3 empresa-section-heading">
                     <div>
-                        <p class="empresa-section-kicker mb-1">Ubicaciones registradas</p>
+                        <p class="empresa-section-kicker mb-1">Domicilios registrados</p>
                         <h2 class="h5 card-title mb-0">Direcciones</h2>
                     </div>
                     <a id="btn_agregar_direccion" href="#" class="btn btn-secondary btn-sm disabled" aria-disabled="true">
@@ -92,6 +100,55 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                         <caption class="visually-hidden">Contactos registrados de la empresa</caption>
                         <thead><tr><th scope="col">Nombre</th><th scope="col">Teléfono</th><th scope="col">Correo</th><th scope="col">Departamento</th><th scope="col">Puesto</th><th scope="col">Estado</th></tr></thead>
                         <tbody id="tabla_contactos"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="equipos" class="card mb-4 empresa-form-card empresa-detail-section">
+            <div class="card-body empresa-card-body">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-start gap-3 mb-3 empresa-section-heading">
+                    <div>
+                        <p class="empresa-section-kicker mb-1">Inventario metrológico</p>
+                        <h2 class="h5 card-title mb-1">Equipos</h2>
+                        <p class="empresa-notes-help mb-0">Básculas registradas en las direcciones de esta empresa.</p>
+                    </div>
+                    <a id="btn_agregar_equipo" href="#" class="btn btn-secondary btn-sm disabled" aria-disabled="true">
+                        <i class="bi bi-plus-lg" aria-hidden="true"></i> Añadir equipo
+                    </a>
+                </div>
+
+                <div class="row g-3 align-items-end mb-3">
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <label class="form-label" for="filtro_direccion_equipos">Dirección</label>
+                        <select id="filtro_direccion_equipos" class="form-select" disabled>
+                            <option value="">Todas las direcciones</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-8">
+                        <p id="ayuda_equipos" class="empresa-notes-help mb-0">Cargando direcciones y equipos...</p>
+                    </div>
+                </div>
+
+                <div class="table-responsive data-table-shell empresa-table-wrap table-wide">
+                    <table id="tabla_equipos_empresa" class="table table-secondary table-striped align-middle mb-0 w-100">
+                        <caption class="visually-hidden">Equipos registrados en la empresa</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Descripción de equipo</th>
+                                <th scope="col">Marca</th>
+                                <th scope="col">Modelo</th>
+                                <th scope="col">Identificación</th>
+                                <th scope="col">Serie</th>
+                                <th scope="col">Capacidad</th>
+                                <th scope="col">División real</th>
+                                <th scope="col">División de verificación</th>
+                                <th scope="col">Clase de exactitud</th>
+                                <th scope="col">Editar</th>
+                                <th scope="col">Estatus</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>
@@ -165,6 +222,6 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
-<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261002-2"></script>
+<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261002-5"></script>
 
 <?php require (__DIR__ . "/../construct/footer.html"); ?>

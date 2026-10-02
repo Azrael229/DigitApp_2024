@@ -22,7 +22,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- CSS personalizado: se carga al final para sobreescribir Bootstrap/plugins -->
-    <link rel="stylesheet" href="<?= $prefijoRuta ?>estilos/style.css?v=20261002-3">
+    <link rel="stylesheet" href="<?= $prefijoRuta ?>estilos/style.css?v=20261002-4">
 
 
   </head>

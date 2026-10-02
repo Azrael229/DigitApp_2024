@@ -40,11 +40,29 @@ $consultaDirecciones->execute();
 $direcciones = $consultaDirecciones->get_result()->fetch_all(MYSQLI_ASSOC);
 $consultaDirecciones->close();
 
+$consultaEquipos = $conexion->prepare(
+    'SELECT ee.id, ee.direccion_id, ee.modelo, ee.identificacion, ee.numero_serie,
+            ee.unidad, ee.capacidad_maxima, ee.division_real,
+            ee.division_verificacion, ee.clase_exactitud, ee.estatus,
+            COALESCE(cd.nombre, \'\') AS descripcion,
+            COALESCE(cm.nombre, \'\') AS marca
+     FROM empresa_equipos AS ee
+     LEFT JOIN catalogo_descripciones_equipo AS cd ON cd.id = ee.descripcion_id
+     LEFT JOIN catalogo_marcas_equipo AS cm ON cm.id = ee.marca_id
+     WHERE ee.empresa_id = ?
+     ORDER BY ee.direccion_id ASC, cd.nombre ASC, ee.identificacion ASC, ee.id ASC'
+);
+$consultaEquipos->bind_param('i', $idEmpresa);
+$consultaEquipos->execute();
+$equipos = $consultaEquipos->get_result()->fetch_all(MYSQLI_ASSOC);
+$consultaEquipos->close();
+
 // Informe actual consume nombre/correo en el objeto raiz. Se conserva el primer
 // contacto ordenado como compatibilidad y se expone el arreglo completo para el nuevo flujo.
 $respuesta = $contactos[0] ?? [];
 $respuesta['contactos'] = $contactos;
 $respuesta['direcciones'] = $direcciones;
+$respuesta['equipos'] = $equipos;
 
 echo json_encode($respuesta, JSON_UNESCAPED_UNICODE);
 

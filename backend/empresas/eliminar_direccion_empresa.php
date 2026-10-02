@@ -24,6 +24,23 @@ $consultaEliminar = $conexion->prepare('DELETE FROM empresa_direcciones WHERE id
 $consultaEliminar->bind_param('ii', $direccionId, $empresaId);
 
 try {
+    $consultaEquipos = $conexion->prepare(
+        'SELECT COUNT(*) AS total FROM empresa_equipos WHERE direccion_id = ? AND empresa_id = ?'
+    );
+    $consultaEquipos->bind_param('ii', $direccionId, $empresaId);
+    $consultaEquipos->execute();
+    $totalEquipos = (int) $consultaEquipos->get_result()->fetch_assoc()['total'];
+    $consultaEquipos->close();
+
+    if ($totalEquipos > 0) {
+        $consultaEliminar->close();
+        mysqli_close($conexion);
+        redirigirEmpresaTrasEliminar(
+            $empresaId,
+            'error=No%20se%20puede%20eliminar%20una%20dirección%20con%20equipos%20asociados'
+        );
+    }
+
     $consultaEliminar->execute();
     $eliminada = $consultaEliminar->affected_rows === 1;
     $consultaEliminar->close();

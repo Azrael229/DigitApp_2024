@@ -84,7 +84,7 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
                 </div>
                 <div class="col-lg-6">
                     <label class="form-label" for="dir_empresa">Dirección</label>
-                    <select class="form-select" name="dir_empresa" id="dir_empresa" disabled>
+                    <select class="form-select" name="dir_empresa" id="dir_empresa" required disabled>
                         <option value="">Seleccione primero una empresa</option>
                     </select>
                 </div>
@@ -102,21 +102,29 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
         <section class="informe-seccion">
             <h2 class="informe-titulo-seccion">Datos del instrumento</h2>
             <div class="row g-3">
-                <div class="col-md-6"><label class="form-label" for="desc_inst">Descripción</label><input class="form-control" type="text" name="desc_inst" id="desc_inst" required></div>
-                <div class="col-md-3"><label class="form-label" for="marca_inst">Marca</label><input class="form-control" type="text" name="marca_inst" id="marca_inst"></div>
-                <div class="col-md-3"><label class="form-label" for="modelo_inst">Modelo</label><input class="form-control" type="text" name="modelo_inst" id="modelo_inst"></div>
-                <div class="col-md-4"><label class="form-label" for="id_inst">ID / Identificación</label><input class="form-control" type="text" name="id_inst" id="id_inst"></div>
-                <div class="col-md-4"><label class="form-label" for="serie_inst">Número de serie</label><input class="form-control" type="text" name="serie_inst" id="serie_inst"></div>
+                <div class="col-12">
+                    <label class="form-label" for="select_equipo">Equipo asociado</label>
+                    <select class="form-select" name="equipo_id" id="select_equipo" required disabled>
+                        <option value="">Seleccione primero una empresa y una dirección</option>
+                    </select>
+                    <div class="form-text">Los datos se toman del registro del equipo. Para corregirlos, edite el equipo desde la empresa correspondiente.</div>
+                </div>
+                <div class="col-md-6"><label class="form-label" for="desc_inst">Descripción</label><input class="form-control" type="text" name="desc_inst" id="desc_inst" readonly aria-readonly="true" required></div>
+                <div class="col-md-3"><label class="form-label" for="marca_inst">Marca</label><input class="form-control" type="text" name="marca_inst" id="marca_inst" readonly aria-readonly="true"></div>
+                <div class="col-md-3"><label class="form-label" for="modelo_inst">Modelo</label><input class="form-control" type="text" name="modelo_inst" id="modelo_inst" readonly aria-readonly="true"></div>
+                <div class="col-md-4"><label class="form-label" for="id_inst">ID / Identificación</label><input class="form-control" type="text" name="id_inst" id="id_inst" readonly aria-readonly="true"></div>
+                <div class="col-md-4"><label class="form-label" for="serie_inst">Número de serie</label><input class="form-control" type="text" name="serie_inst" id="serie_inst" readonly aria-readonly="true"></div>
                 <div class="col-md-4 informe-unidades">
                     <span class="form-label d-block">Unidad</span>
                     <div class="pt-2">
-                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="unidad" id="unidadeskg" value="kg" required><label class="form-check-label" for="unidadeskg">kg</label></div>
-                        <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="unidad" id="unidadesg" value="g" required><label class="form-check-label" for="unidadesg">g</label></div>
+                        <div class="form-check form-check-inline"><input class="form-check-input unidad-instrumento" type="radio" id="unidadeskg" value="kg" disabled><label class="form-check-label" for="unidadeskg">kg</label></div>
+                        <div class="form-check form-check-inline"><input class="form-check-input unidad-instrumento" type="radio" id="unidadesg" value="g" disabled><label class="form-check-label" for="unidadesg">g</label></div>
+                        <input type="hidden" name="unidad" id="unidad_inst">
                     </div>
                 </div>
-                <div class="col-md-2"><label class="form-label" for="max">Max</label><input class="form-control parametro-instrumento" type="number" id="max" name="max" step="any" min="0" required></div>
-                <div class="col-md-2"><label class="form-label" for="d">División real (d)</label><input class="form-control parametro-instrumento" type="number" name="d" id="d" step="any" min="0" required></div>
-                <div class="col-md-2"><label class="form-label" for="e">División verificación (e)</label><input class="form-control parametro-instrumento" type="number" name="e" id="e" step="any" min="0" required></div>
+                <div class="col-md-2"><label class="form-label" for="max">Max</label><input class="form-control parametro-instrumento" type="number" id="max" name="max" step="any" min="0" readonly aria-readonly="true" required></div>
+                <div class="col-md-2"><label class="form-label" for="d">División real (d)</label><input class="form-control parametro-instrumento" type="number" name="d" id="d" step="any" min="0" readonly aria-readonly="true" required></div>
+                <div class="col-md-2"><label class="form-label" for="e">División verificación (e)</label><input class="form-control parametro-instrumento" type="number" name="e" id="e" step="any" min="0" readonly aria-readonly="true" required></div>
                 <div class="col-md-2"><label class="form-label" for="min">Min</label><input class="form-control" type="number" name="min" id="min" step="any" readonly></div>
                 <div class="col-md-4"><label class="form-label" for="clase">Clase</label><input class="form-control" type="text" name="clase" id="clase" readonly></div>
             </div>
@@ -229,6 +237,6 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="<?= $prefijoRuta ?>js/informe.js?v=20261002-1"></script>
+<script src="<?= $prefijoRuta ?>js/informe.js?v=20261002-2"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

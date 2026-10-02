@@ -3,10 +3,17 @@ const selectEmpresa = document.getElementById('select_empresa');
 const selectContacto = document.getElementById('select_contacto');
 const inputEmpresa = document.getElementById('nombre_empresa');
 const selectDireccion = document.getElementById('dir_empresa');
+const selectEquipo = document.getElementById('select_equipo');
 const inputContacto = document.getElementById('nombre_contacto');
 const inputCorreo = document.getElementById('correo_contacto');
 const inputFecha = document.getElementById('inf_fecha');
 const inputFolio = document.getElementById('input_num_inf');
+const inputDescripcion = document.getElementById('desc_inst');
+const inputMarca = document.getElementById('marca_inst');
+const inputModelo = document.getElementById('modelo_inst');
+const inputIdentificacion = document.getElementById('id_inst');
+const inputSerie = document.getElementById('serie_inst');
+const inputUnidad = document.getElementById('unidad_inst');
 const inputMax = document.getElementById('max');
 const inputD = document.getElementById('d');
 const inputE = document.getElementById('e');
@@ -15,6 +22,7 @@ const inputClase = document.getElementById('clase');
 const resumenEmt = document.getElementById('resumen_emt');
 const cuerpoTablaEmt = document.getElementById('tabla_emt_cuerpo');
 let empresaEnCarga = '';
+let equiposEmpresa = [];
 
 if (window.jQuery && jQuery.fn.select2) {
     jQuery('#select_empresa')
@@ -148,6 +156,80 @@ function limpiarDirecciones(mensaje = 'Seleccione primero una empresa') {
     selectDireccion.disabled = true;
 }
 
+// Borra la ficha del instrumento para impedir que queden datos de otro equipo.
+function limpiarDatosInstrumento() {
+    [inputDescripcion, inputMarca, inputModelo, inputIdentificacion, inputSerie, inputMax, inputD, inputE, inputMin, inputClase]
+        .forEach((control) => { control.value = ''; });
+    inputUnidad.value = '';
+    document.querySelectorAll('.unidad-instrumento').forEach((control) => { control.checked = false; });
+    resumenEmt.textContent = '';
+    actualizarTablaEmt('', Number.NaN, Number.NaN, Number.NaN);
+}
+
+// Restablece el selector de equipo y la ficha vinculada a este.
+function limpiarEquipos(mensaje = 'Seleccione primero una empresa y una dirección') {
+    selectEquipo.innerHTML = `<option value="">${mensaje}</option>`;
+    selectEquipo.disabled = true;
+    limpiarDatosInstrumento();
+}
+
+// Presenta los decimales almacenados sin ceros sobrantes ni separadores de miles.
+function normalizarDecimalEquipo(valor) {
+    if (valor === null || valor === undefined || String(valor).trim() === '') return '';
+    const numero = Number(valor);
+    return Number.isFinite(numero) ? String(numero) : '';
+}
+
+// Construye una etiqueta breve que permita identificar el equipo en el selector.
+function etiquetaEquipo(equipo) {
+    const identidad = [equipo.descripcion, equipo.marca, equipo.modelo].filter(Boolean).join(' · ');
+    const referencia = equipo.identificacion
+        ? `ID ${equipo.identificacion}`
+        : equipo.numero_serie ? `Serie ${equipo.numero_serie}` : `Equipo #${equipo.id}`;
+    const estado = equipo.estatus && equipo.estatus !== 'activo'
+        ? ` · ${equipo.estatus === 'fuera_servicio' ? 'Fuera de servicio' : 'Inactivo'}`
+        : '';
+    return `${identidad || 'Equipo sin descripción'} · ${referencia}${estado}`;
+}
+
+// Filtra los equipos de la empresa por la dirección elegida en el informe.
+function cargarEquiposDireccion() {
+    limpiarEquipos('Seleccione un equipo');
+    const direccionId = selectDireccion.options[selectDireccion.selectedIndex]?.dataset.id || '';
+    if (!direccionId) {
+        limpiarEquipos('Seleccione una dirección registrada');
+        return;
+    }
+    const equiposDireccion = equiposEmpresa.filter((equipo) => String(equipo.direccion_id || '') === direccionId);
+    if (!equiposDireccion.length) {
+        limpiarEquipos('Sin equipos asociados a esta dirección');
+        return;
+    }
+    equiposDireccion.forEach((equipo) => selectEquipo.add(new Option(etiquetaEquipo(equipo), String(equipo.id))));
+    selectEquipo.disabled = false;
+}
+
+// Copia al informe la ficha registrada del equipo, sin ejecutar cálculos automáticos.
+function cargarEquipoSeleccionado() {
+    limpiarDatosInstrumento();
+    const equipo = equiposEmpresa.find((registro) => String(registro.id) === selectEquipo.value);
+    if (!equipo) return;
+    inputDescripcion.value = equipo.descripcion || '';
+    inputMarca.value = equipo.marca || '';
+    inputModelo.value = equipo.modelo || '';
+    inputIdentificacion.value = equipo.identificacion || '';
+    inputSerie.value = equipo.numero_serie || '';
+    inputUnidad.value = equipo.unidad || '';
+    document.querySelectorAll('.unidad-instrumento').forEach((control) => {
+        control.checked = control.value === inputUnidad.value;
+    });
+    inputMax.value = normalizarDecimalEquipo(equipo.capacidad_maxima);
+    inputD.value = normalizarDecimalEquipo(equipo.division_real);
+    inputE.value = normalizarDecimalEquipo(equipo.division_verificacion);
+    inputClase.value = equipo.clase_exactitud || '';
+    actualizarPasoIndicaciones();
+}
+
 // Convierte una dirección estructurada en el texto completo enviado al informe.
 function formatearDireccionInforme(direccion) {
     const primeraLinea = [
@@ -180,6 +262,7 @@ function cargarDirecciones(direcciones, direccionHistorica = '') {
         const alias = direccion.alias ? ` · ${direccion.alias}` : '';
         const principal = Number(direccion.es_principal) === 1 ? ' · Principal' : '';
         opcion.value = texto;
+        opcion.dataset.id = String(direccion.id || '');
         opcion.textContent = `${tipo}${alias}${principal} — ${texto}`;
         selectDireccion.appendChild(opcion);
     });
@@ -223,14 +306,16 @@ function actualizarContactoSeleccionado() {
     inputCorreo.value = opcion?.dataset.correo || '';
 }
 
-// Consulta empresa, contactos y direcciones con los endpoints existentes y llena el formulario.
+// Consulta empresa, contactos, direcciones y equipos con los endpoints existentes.
 async function seleccionarEmpresa() {
     const id = selectEmpresa.value;
     if (id && empresaEnCarga === id) return;
     empresaEnCarga = id;
     inputEmpresa.value = '';
+    equiposEmpresa = [];
     limpiarContactos();
     limpiarDirecciones();
+    limpiarEquipos();
     if (!id) {
         empresaEnCarga = '';
         return;
@@ -244,11 +329,15 @@ async function seleccionarEmpresa() {
         const empresa = await respuestaEmpresa.json();
         const contactos = await respuestaContactos.json();
         inputEmpresa.value = empresa.razon_social || empresa.empresa || '';
+        equiposEmpresa = Array.isArray(contactos.equipos) ? contactos.equipos : [];
         cargarContactos(contactos.contactos || []);
         cargarDirecciones(contactos.direcciones || [], empresa.dir_entrega || '');
+        cargarEquiposDireccion();
     } catch (error) {
+        equiposEmpresa = [];
         limpiarContactos('No fue posible cargar contactos');
         limpiarDirecciones('No fue posible cargar direcciones');
+        limpiarEquipos('No fue posible cargar equipos');
         mostrarErrores([error.message]);
     } finally {
         empresaEnCarga = '';
@@ -267,7 +356,7 @@ function configuracionClase(clase) {
 
 // Devuelve la unidad seleccionada para presentar intervalos y resultados con contexto.
 function obtenerUnidadSeleccionada() {
-    return document.querySelector('input[name="unidad"]:checked')?.value || '';
+    return inputUnidad.value;
 }
 
 // Actualiza la tabla EMT general usando límites inclusivos separados por una división real.
@@ -596,7 +685,7 @@ function mostrarErrores(errores) {
 // Ejecuta la validación integral y permite el POST solo cuando el informe está completo.
 function validarEnvio(evento) {
     const errores = [];
-    if (!actualizarParametros(false)) errores.push('Max, d y e deben ser números mayores que cero.');
+    if (!actualizarParametros(false)) errores.push('El equipo seleccionado debe tener capacidad máxima, división real y división de verificación mayores que cero. Corrija los datos desde el formulario del equipo.');
     evaluarInspeccion(true, errores);
     errores.push(...evaluarTodasLasPruebas(true));
     if (!formularioInforme.checkValidity()) {
@@ -613,11 +702,14 @@ function validarEnvio(evento) {
 establecerFechaActual();
 actualizarFolioPrevisto();
 limpiarContactos();
+limpiarEquipos();
 inputFecha.addEventListener('change', actualizarFolioPrevisto);
 selectEmpresa.addEventListener('change', seleccionarEmpresa);
 selectContacto.addEventListener('change', actualizarContactoSeleccionado);
+selectDireccion.addEventListener('change', cargarEquiposDireccion);
+selectEquipo.addEventListener('change', cargarEquipoSeleccionado);
 document.getElementById('btn_analizar').addEventListener('click', () => {
-    if (!actualizarParametros(true)) mostrarErrores(['Capture Max, d y e con valores mayores que cero.']);
+    if (!actualizarParametros(true)) mostrarErrores(['El equipo seleccionado debe tener capacidad máxima, división real y división de verificación mayores que cero. Corrija los datos desde el formulario del equipo.']);
     else {
         mostrarErrores([]);
         evaluarTodasLasPruebas(false);
@@ -627,7 +719,6 @@ document.querySelectorAll('#pruebas_inicial .carga-sugerida, #pruebas_inicial .c
     control.dataset.automatica = 'false';
     sincronizarCargaFinal(control);
 }));
-document.querySelectorAll('input[name="unidad"]').forEach((control) => control.addEventListener('change', () => actualizarParametros(false)));
 inputD.addEventListener('input', () => {
     actualizarPasoIndicaciones();
     evaluarTodasLasPruebas(false);
