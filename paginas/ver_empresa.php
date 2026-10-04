@@ -109,7 +109,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
             <div class="card-body empresa-card-body">
                 <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-start gap-3 mb-3 empresa-section-heading">
                     <div>
-                        <p class="empresa-section-kicker mb-1">Inventario metrológico</p>
+                        <p class="empresa-section-kicker mb-1">Inventario de equipos</p>
                         <h2 class="h5 card-title mb-1">Equipos</h2>
                         <p class="empresa-notes-help mb-0">Básculas registradas en las direcciones de esta empresa.</p>
                     </div>
@@ -136,6 +136,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                         <thead>
                             <tr>
                                 <th scope="col">Descripción de equipo</th>
+                                <th scope="col">Ubicación</th>
                                 <th scope="col">Marca</th>
                                 <th scope="col">Modelo</th>
                                 <th scope="col">Identificación</th>
@@ -179,11 +180,11 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                                 <thead>
                                     <tr>
                                         <th scope="col">Fecha</th>
+                                        <th scope="col">Número</th>
                                         <th scope="col">Contacto</th>
                                         <th scope="col">Proyecto</th>
                                         <th scope="col">Importe sin IVA</th>
                                         <th scope="col">Estatus</th>
-                                        <th scope="col">Ver</th>
                                         <th scope="col">Registro</th>
                                     </tr>
                                 </thead>
@@ -201,9 +202,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                                         <th scope="col">Número</th>
                                         <th scope="col">Contacto</th>
                                         <th scope="col">Importe</th>
-                                        <th scope="col">Estado</th>
-                                        <th scope="col">PDF</th>
-                                        <th scope="col">Ver</th>
+                                        <th scope="col">Estatus</th>
                                         <th scope="col">Registro</th>
                                     </tr>
                                 </thead>
@@ -222,6 +221,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
-<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261002-5"></script>
+<script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
+<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261003-1"></script>
 
 <?php require (__DIR__ . "/../construct/footer.html"); ?>

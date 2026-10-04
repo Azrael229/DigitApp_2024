@@ -84,8 +84,15 @@ function validarIndicacionesPost(): array
 class InformePDF extends FPDF
 {
     private string $folio = '';
-    private string $versionFormato = 'Versión 1.0';
+    private string $versionFormato = 'Revisión 02';
     private string $leyenda = 'Pruebas técnicas basadas en criterios metrológicos de la NOM-010-SCFI-1994. El alcance corresponde al procedimiento interno de servicio y no constituye por sí mismo una verificación oficial de cumplimiento de la NOM.';
+    private const AZUL = [18, 56, 94];
+    private const ROJO = [214, 45, 45];
+    private const ROJO_OSCURO = [183, 31, 36];
+    private const GRIS_CLARO = [242, 244, 246];
+    private const GRIS = [216, 222, 228];
+    private const TEXTO = [24, 50, 75];
+    private const MUTED = [102, 116, 130];
 
     public function establecerFolio(string $folio): void
     {
@@ -101,40 +108,86 @@ class InformePDF extends FPDF
 
     public function Header(): void
     {
-        $this->SetTextColor(0, 0, 0);
-        $this->SetFont('Arial', 'B', 13);
-        $this->SetXY(10, 6);
-        $this->Cell(132, 7, $this->texto('INFORME TÉCNICO DE PRUEBAS METROLÓGICAS'), 0, 1, 'C');
-        $this->SetFont('Arial', '', 7);
-        $this->SetX(10);
-        $this->Cell(132, 4, $this->texto('SERVICIOS DE PRECISIÓN A SISTEMAS DE PESAJE'), 0, 1, 'C');
-        $this->SetFont('Arial', 'B', 7);
-        $this->SetX(10);
-        $this->Cell(132, 4, $this->texto('Folio: ' . $this->folio), 0, 0, 'C');
-        $rutaLogo = __DIR__ . '/../imgs/LogoMakr_3N5U8p-262x87.png';
+        $this->SetFillColor(...self::ROJO_OSCURO);
+        $this->Rect(0, 0, 58, 3.2, 'F');
+        $this->SetFillColor(...self::ROJO);
+        $this->Rect(58, 0, 158, 3.2, 'F');
+        $rutaLogo = __DIR__ . '/../imgs/Logo_SERVICOM_texto_negro_sin_fondo.png';
         if (is_file($rutaLogo)) {
-            $this->Image($rutaLogo, 150, 6, 55);
+            $this->Image($rutaLogo, 14, 8, 64);
         }
-        $this->SetDrawColor(255, 182, 3);
-        $this->SetLineWidth(0.45);
-        $this->Line(10, 27, 206, 27);
+        $this->SetTextColor(...self::MUTED);
+        $this->SetFont('Arial', 'B', 7.2);
+        $this->SetXY(116, 10);
+        $this->Cell(86, 4, $this->texto('DOCUMENTO TÉCNICO'), 0, 0, 'R');
+        $this->SetTextColor(...self::AZUL);
+        $this->SetFont('Arial', 'B', 15.5);
+        $this->SetXY(104, 16);
+        $this->Cell(98, 7, $this->texto('Informe de servicio'), 0, 0, 'R');
+        $this->SetFont('Arial', 'B', 7.6);
+        $this->SetXY(116, 25);
+        $this->Cell(86, 4, $this->texto('Folio ' . $this->folio), 0, 0, 'R');
+        $this->SetDrawColor(...self::ROJO);
+        $this->SetLineWidth(0.55);
+        $this->Line(14, 36, 202, 36);
         $this->SetLineWidth(0.2);
-        $this->SetY(30);
+        $this->SetY(40);
     }
 
     public function Footer(): void
     {
-        $this->SetY(-22);
-        $this->SetDrawColor(255, 182, 3);
-        $this->Line(10, $this->GetY(), 206, $this->GetY());
-        $this->Ln(1.5);
-        $this->SetTextColor(85, 85, 85);
-        $this->SetFont('Arial', 'I', 5.6);
-        $this->MultiCell(196, 2.7, $this->texto($this->leyenda), 0, 'J');
-        $this->SetY(-8);
-        $this->SetFont('Arial', '', 7);
-        $this->Cell(98, 4, $this->texto($this->versionFormato), 0, 0, 'L');
-        $this->Cell(98, 4, $this->texto('Página ' . $this->PageNo() . '/{nb}'), 0, 0, 'R');
+        $this->SetFillColor(...self::ROJO);
+        $this->Rect(0, 250, 216, 1.8, 'F');
+        $this->SetFillColor(...self::AZUL);
+        $this->Rect(0, 251.8, 216, 27.6, 'F');
+        $this->SetTextColor(255, 255, 255);
+        $this->SetFont('Arial', 'B', 8.5);
+        $this->SetXY(14, 257);
+        $this->Cell(95, 4, $this->texto('SERVICOM Básculas Digitales'), 0, 0, 'L');
+        $this->SetFont('Arial', '', 6.9);
+        $this->SetXY(14, 264);
+        $this->Cell(108, 4, 'contacto@servicombasculas.com.mx  |  servicombasculas.com.mx', 0, 0, 'L');
+        $this->SetXY(116, 257);
+        $this->Cell(86, 4, $this->texto('PRECISIÓN  -  SERVICIO  -  CONFIANZA'), 0, 0, 'R');
+        $this->SetXY(116, 264);
+        $this->Cell(86, 4, $this->texto('F-INF-01  |  ' . $this->versionFormato . '  |  Página ' . $this->PageNo() . ' de {nb}'), 0, 0, 'R');
+        $this->SetTextColor(220, 229, 238);
+        $this->SetFont('Arial', 'I', 4.7);
+        $this->SetXY(14, 270);
+        $this->Cell(188, 3, $this->texto($this->leyenda), 0, 0, 'L');
+    }
+
+    // Dibuja rectángulos redondeados como los utilizados en el formato de cotización.
+    public function rectanguloRedondeado(float $x, float $y, float $w, float $h, float $r, string $estilo = ''): void
+    {
+        $k = $this->k;
+        $hp = $this->h;
+        $op = $estilo === 'F' ? 'f' : (($estilo === 'FD' || $estilo === 'DF') ? 'B' : 'S');
+        $myArc = 4 / 3 * (sqrt(2) - 1);
+        $this->_out(sprintf('%.2F %.2F m', ($x + $r) * $k, ($hp - $y) * $k));
+        $xc = $x + $w - $r;
+        $yc = $y + $r;
+        $this->_out(sprintf('%.2F %.2F l', $xc * $k, ($hp - $y) * $k));
+        $this->arco($xc + $r * $myArc, $yc - $r, $xc + $r, $yc - $r * $myArc, $xc + $r, $yc);
+        $xc = $x + $w - $r;
+        $yc = $y + $h - $r;
+        $this->_out(sprintf('%.2F %.2F l', ($x + $w) * $k, ($hp - $yc) * $k));
+        $this->arco($xc + $r, $yc + $r * $myArc, $xc + $r * $myArc, $yc + $r, $xc, $yc + $r);
+        $xc = $x + $r;
+        $yc = $y + $h - $r;
+        $this->_out(sprintf('%.2F %.2F l', $xc * $k, ($hp - ($y + $h)) * $k));
+        $this->arco($xc - $r * $myArc, $yc + $r, $xc - $r, $yc + $r * $myArc, $xc - $r, $yc);
+        $xc = $x + $r;
+        $yc = $y + $r;
+        $this->_out(sprintf('%.2F %.2F l', $x * $k, ($hp - $yc) * $k));
+        $this->arco($xc - $r, $yc - $r * $myArc, $xc - $r * $myArc, $yc - $r, $xc, $yc - $r);
+        $this->_out($op);
+    }
+
+    private function arco(float $x1, float $y1, float $x2, float $y2, float $x3, float $y3): void
+    {
+        $h = $this->h;
+        $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c', $x1 * $this->k, ($h - $y1) * $this->k, $x2 * $this->k, ($h - $y2) * $this->k, $x3 * $this->k, ($h - $y3) * $this->k));
     }
 
     // Divide un texto en un máximo de líneas y agrega puntos suspensivos si debe truncarse.
@@ -190,8 +243,10 @@ class InformePDF extends FPDF
     }
 
     // Dibuja una fila de altura fija para mantener posiciones idénticas entre informes.
-    public function filaFija(float $y, array $valores, array $anchos, float $alto = 6, array $alineaciones = [], bool $relleno = false, float $xInicial = 10): void
+    public function filaFija(float $y, array $valores, array $anchos, float $alto = 6, array $alineaciones = [], bool $relleno = false, float $xInicial = 14): void
     {
+        $this->SetDrawColor(...self::GRIS);
+        $this->SetTextColor(...self::TEXTO);
         $x = $xInicial;
         foreach ($valores as $indice => $valor) {
             $ancho = (float) $anchos[$indice];
@@ -204,22 +259,25 @@ class InformePDF extends FPDF
     // Dibuja un título de sección en una coordenada fija.
     public function tituloFijo(float $y, string $titulo, float $alto = 6): void
     {
-        $this->SetFillColor(205, 205, 205);
-        $this->SetTextColor(0, 0, 0);
-        $this->SetFont('Arial', 'B', 8.5);
-        $this->Rect(10, $y, 196, $alto, 'F');
-        $this->SetXY(11, $y + 0.7);
-        $this->Cell(194, $alto - 1.2, $this->texto($titulo), 0, 0, 'L');
+        $this->SetFillColor(...self::AZUL);
+        $this->SetTextColor(255, 255, 255);
+        $this->SetFont('Arial', 'B', 8.3);
+        $this->rectanguloRedondeado(14, $y, 188, $alto, 2.4, 'F');
+        $this->SetXY(21, $y + 0.7);
+        $this->Cell(174, $alto - 1.2, $this->texto($titulo), 0, 0, 'L');
     }
 
     // Dibuja un subtítulo compacto dentro de una página de pruebas.
     public function subtituloFijo(float $y, string $titulo): void
     {
-        $this->SetDrawColor(255, 182, 3);
-        $this->SetTextColor(0, 0, 0);
-        $this->SetFont('Arial', 'B', 8);
-        $this->SetXY(10, $y);
-        $this->Cell(196, 5, $this->texto($titulo), 'B', 0, 'L');
+        $this->SetFillColor(...self::AZUL);
+        $this->SetTextColor(255, 255, 255);
+        $this->SetFont('Arial', 'B', 8.2);
+        $this->rectanguloRedondeado(14, $y, 188, 6, 2.2, 'F');
+        $this->SetFillColor(...self::ROJO);
+        $this->rectanguloRedondeado(18, $y + 1.8, 2.3, 2.3, 1.15, 'F');
+        $this->SetXY(23, $y + 0.7);
+        $this->Cell(173, 4.6, $this->texto($titulo), 0, 0, 'L');
     }
 
     // Dibuja un campo narrativo con tamaño fijo y contenido truncado de forma controlada.
@@ -229,6 +287,46 @@ class InformePDF extends FPDF
         $this->SetFont('Arial', '', 6.7);
         $this->Rect(10, $y + 5.5, 196, $altoCaja);
         $this->textoCelda(10, $y + 5.5, 196, $altoCaja, $contenido !== '' ? $contenido : 'Sin información registrada.');
+    }
+
+    // Reúne el cierre del servicio en una sola tarjeta, sin dispersar la información.
+    public function bloqueCierreServicio(float $y, float $alto): void
+    {
+        $this->SetFillColor(...self::GRIS_CLARO);
+        $this->SetDrawColor(...self::GRIS);
+        $this->rectanguloRedondeado(14, $y, 188, $alto, 3.5, 'FD');
+        $this->SetTextColor(...self::AZUL);
+        $this->SetFont('Arial', 'B', 9.2);
+        $this->SetXY(22, $y + 5);
+        $this->Cell(172, 5, $this->texto('CIERRE DEL SERVICIO'), 0, 0, 'L');
+
+        $bloques = [
+            ['OBSERVACIONES', datoPost('observaciones')],
+            ['TRABAJO REALIZADO', datoPost('trabajo_realizado')],
+            ['RECOMENDACIONES', datoPost('recomendaciones')],
+            ['ATENCIÓN / SERVICIOS URGENTES', datoPost('atencion_urgente')],
+        ];
+        $ancho = 87;
+        $altoBloque = ($alto - 16) / 2;
+        foreach ($bloques as $indice => [$titulo, $contenido]) {
+            $columna = $indice % 2;
+            $fila = intdiv($indice, 2);
+            $x = 22 + $columna * 91;
+            $yy = $y + 13 + $fila * $altoBloque;
+            $this->SetFillColor(...self::ROJO);
+            $this->rectanguloRedondeado($x, $yy + 1, 2.2, 2.2, 1.1, 'F');
+            $this->SetTextColor(...self::AZUL);
+            $this->SetFont('Arial', 'B', 6.8);
+            $this->SetXY($x + 4.5, $yy);
+            $this->Cell($ancho - 4.5, 4, $this->texto($titulo), 0, 0, 'L');
+            $this->SetTextColor(...self::TEXTO);
+            $this->SetFont('Arial', '', 5.7);
+            $this->textoCelda($x + 3.5, $yy + 4.2, $ancho - 3.5, $altoBloque - 4.8, $contenido !== '' ? $contenido : 'Sin información registrada.');
+            if ($columna === 0) {
+                $this->SetDrawColor(...self::GRIS);
+                $this->Line(108, $yy, 108, $yy + $altoBloque - 2);
+            }
+        }
     }
 
     // Dibuja una línea discontinua simple sin depender de extensiones de FPDF.
@@ -301,15 +399,16 @@ class InformePDF extends FPDF
         }
     }
 
-    // Dibuja la gráfica fija de exactitud con EMT escalonado, escala adaptativa y error real.
+    // Dibuja la gráfica de exactitud con banda de tolerancia, escala adaptativa y alertas fuera de EMT.
     public function graficaExactitud(string $fase, float $x, float $y, float $ancho, float $alto, string $titulo): void
     {
-        $this->SetDrawColor(70, 70, 70);
-        $this->Rect($x, $y, $ancho, $alto);
-        $this->SetTextColor(0, 0, 0);
-        $this->SetFont('Arial', 'B', 7.5);
-        $this->SetXY($x + 2, $y + 1);
-        $this->Cell($ancho - 4, 4, $this->texto($titulo), 0, 0, 'L');
+        $this->SetFillColor(255, 255, 255);
+        $this->SetDrawColor(...self::GRIS);
+        $this->rectanguloRedondeado($x, $y, $ancho, $alto, 2.5, 'FD');
+        $this->SetTextColor(...self::AZUL);
+        $this->SetFont('Arial', 'B', 7.6);
+        $this->SetXY($x + 4, $y + 1.3);
+        $this->Cell($ancho - 8, 4, $this->texto($titulo), 0, 0, 'L');
 
         $cargas = [];
         $errores = [];
@@ -332,10 +431,10 @@ class InformePDF extends FPDF
             return;
         }
 
-        $plotX = $x + 17;
-        $plotY = $y + 11;
-        $plotW = $ancho - 23;
-        $plotH = $alto - 23;
+        $plotX = $x + 18;
+        $plotY = $y + 13;
+        $plotW = $ancho - 24;
+        $plotH = $alto - 26;
         $minCarga = 0.0;
         $maxCarga = max(array_merge($cargas, [$maximoInstrumento]));
         $rangoCarga = max($maxCarga - $minCarga, 1.0);
@@ -368,68 +467,130 @@ class InformePDF extends FPDF
         $puntosX = array_map($convertirX, $cargas);
         $errorY = array_map($convertirY, $errores);
 
-        $this->SetDrawColor(210, 210, 210);
+        $fueraDeTolerancia = 0;
+        foreach ($errores as $indice => $error) {
+            $resultadoPunto = strtoupper(datoPost($fase . '_exactitud_resultado_' . $indice));
+            if ($resultadoPunto === 'NO CUMPLE' || abs($error) > $emts[$indice] + 1e-12) {
+                $fueraDeTolerancia++;
+            }
+        }
+
+        $this->SetFont('Arial', 'B', 5.5);
+        $this->SetTextColor(...($fueraDeTolerancia > 0 ? self::ROJO_OSCURO : self::AZUL));
+        $this->SetXY($x + $ancho - 51, $y + 1.3);
+        $estadoGrafica = $fueraDeTolerancia > 0
+            ? $fueraDeTolerancia . ' PUNTO' . ($fueraDeTolerancia === 1 ? '' : 'S') . ' FUERA DE EMT'
+            : 'TODOS LOS PUNTOS DENTRO DEL EMT';
+        $this->Cell(47, 4, $this->texto($estadoGrafica), 0, 0, 'R');
+
+        // La franja escalonada permite reconocer de inmediato la zona admisible.
+        $this->SetFillColor(231, 240, 247);
+        foreach ($tramos as [$inicio, $fin, $emt]) {
+            $xInicio = $convertirX($inicio);
+            $xFin = $convertirX($fin);
+            $ySuperior = $convertirY($emt);
+            $yInferior = $convertirY(-$emt);
+            $this->Rect($xInicio, $ySuperior, max(0.2, $xFin - $xInicio), $yInferior - $ySuperior, 'F');
+        }
+
+        $this->SetDrawColor(...self::GRIS);
         $this->Rect($plotX, $plotY, $plotW, $plotH);
-        $this->SetFont('Arial', '', 5.2);
+        $this->SetFont('Arial', '', 5.5);
 
         for ($tick = -$cantidadTicks; $tick <= $cantidadTicks; $tick++) {
             $valorTick = $tick * $pasoY;
             $tickY = $convertirY($valorTick);
-            $this->SetDrawColor($tick === 0 ? 95 : 225, $tick === 0 ? 95 : 225, $tick === 0 ? 95 : 225);
+            $this->SetDrawColor($tick === 0 ? 92 : 215, $tick === 0 ? 106 : 222, $tick === 0 ? 120 : 229);
+            $this->SetLineWidth($tick === 0 ? 0.35 : 0.12);
             $this->Line($plotX, $tickY, $plotX + $plotW, $tickY);
-            $this->SetTextColor(75, 75, 75);
-            $this->SetXY($x + 1, $tickY - 1.5);
-            $this->Cell(15, 3, $this->etiquetaGrafica($valorTick, $pasoY), 0, 0, 'R');
+            $this->SetTextColor(...self::MUTED);
+            $this->SetXY($x + 1, $tickY - 1.6);
+            $this->Cell(15.5, 3.2, $this->etiquetaGrafica($valorTick, $pasoY), 0, 0, 'R');
         }
 
-        $this->SetDrawColor(190, 50, 50);
+        // Las verticales se limitan a los puntos realmente medidos para evitar ruido visual.
+        $this->SetDrawColor(225, 230, 235);
+        $this->SetLineWidth(0.12);
+        foreach (array_values(array_unique(array_map(static fn(float $valor): string => (string) $valor, $cargas))) as $cargaUnica) {
+            $gridX = $convertirX((float) $cargaUnica);
+            $this->Line($gridX, $plotY, $gridX, $plotY + $plotH);
+        }
+
+        $this->SetDrawColor(...self::ROJO);
+        $this->SetLineWidth(0.28);
         $this->limiteEscalonado($tramos, 1, $convertirX, $convertirY);
-        $this->SetDrawColor(150, 50, 110);
         $this->limiteEscalonado($tramos, -1, $convertirX, $convertirY);
-        $this->SetDrawColor(30, 95, 170);
-        $this->SetFillColor(30, 95, 170);
-        $this->SetTextColor(0, 0, 0);
+        $this->SetDrawColor(...self::AZUL);
+        $this->SetLineWidth(0.52);
+        $this->SetTextColor(...self::TEXTO);
         $cantidadPuntos = count($cargas);
         for ($i = 0; $i < $cantidadPuntos; $i++) {
             if ($i < $cantidadPuntos - 1) {
+                $this->SetDrawColor(...self::AZUL);
+                $this->SetLineWidth(0.52);
                 $this->Line($puntosX[$i], $errorY[$i], $puntosX[$i + 1], $errorY[$i + 1]);
             }
-            $this->Rect($puntosX[$i] - 0.65, $errorY[$i] - 0.65, 1.3, 1.3, 'F');
+            $resultadoPunto = strtoupper(datoPost($fase . '_exactitud_resultado_' . $i));
+            $puntoFuera = $resultadoPunto === 'NO CUMPLE' || abs($errores[$i]) > $emts[$i] + 1e-12;
+            $this->SetFillColor(...($puntoFuera ? self::ROJO : self::AZUL));
+            $this->SetDrawColor(255, 255, 255);
+            $this->Rect($puntosX[$i] - 0.95, $errorY[$i] - 0.95, 1.9, 1.9, 'DF');
             if ($i === 0) {
-                $this->SetXY($puntosX[$i] - 7, $plotY + $plotH + 1);
+                $this->SetXY($puntosX[$i] - 6, $plotY + $plotH + 1);
                 $this->Cell(5, 3, '0', 0, 0, 'R');
+            } elseif ($i === 1 && abs($puntosX[$i] - $puntosX[0]) < 9) {
+                $this->SetXY($puntosX[$i] + 1, $plotY + $plotH + 1);
+                $this->Cell(12, 3, $this->texto((string) $cargas[$i]), 0, 0, 'L');
             } else {
                 $this->SetXY($puntosX[$i] - 10, $plotY + $plotH + 1);
                 $this->Cell(20, 3, $this->texto((string) $cargas[$i]), 0, 0, 'C');
             }
         }
+        $unidad = datoPost('unidad');
+        $sufijoUnidad = $unidad !== '' ? ' (' . $unidad . ')' : '';
+        $this->SetLineWidth(0.2);
         $this->SetFont('Arial', '', 5.5);
-        $this->SetXY($plotX, $y + $alto - 7);
-        $this->Cell($plotW, 3, $this->texto('Carga aplicada'), 0, 0, 'C');
-        $this->SetXY($x + 2, $y + 5.5);
-        $this->SetTextColor(30, 95, 170);
-        $this->Cell(32, 3, $this->texto('Error real'), 0, 0, 'L');
-        $this->SetTextColor(190, 50, 50);
-        $this->Cell(25, 3, $this->texto('+EMT'), 0, 0, 'L');
-        $this->SetTextColor(150, 50, 110);
-        $this->Cell(25, 3, $this->texto('-EMT'), 0, 0, 'L');
-        $this->SetTextColor(90, 90, 90);
-        $this->Cell(35, 3, $this->texto('Línea cero'), 0, 0, 'L');
+        $this->SetTextColor(...self::MUTED);
+        $this->SetXY($plotX, $y + $alto - 5.2);
+        $this->Cell($plotW, 3, $this->texto('Carga aplicada' . $sufijoUnidad), 0, 0, 'C');
+        $this->SetXY($x + 1.5, $plotY - 4.2);
+        $this->Cell(15.5, 3, $this->texto('Error' . $sufijoUnidad), 0, 0, 'R');
+
+        $leyendaY = $y + 6.7;
+        $this->SetFillColor(231, 240, 247);
+        $this->SetDrawColor(181, 198, 212);
+        $this->Rect($x + 4, $leyendaY, 5, 2.4, 'DF');
+        $this->SetTextColor(...self::MUTED);
+        $this->SetXY($x + 10, $leyendaY - 0.3);
+        $this->Cell(33, 3, $this->texto('Zona admisible'), 0, 0, 'L');
+        $this->SetDrawColor(...self::AZUL);
+        $this->SetLineWidth(0.52);
+        $this->Line($x + 44, $leyendaY + 1.2, $x + 50, $leyendaY + 1.2);
+        $this->SetXY($x + 51, $leyendaY - 0.3);
+        $this->Cell(25, 3, $this->texto('Error medido'), 0, 0, 'L');
+        $this->SetFillColor(...self::ROJO);
+        $this->Rect($x + 77, $leyendaY + 0.3, 1.8, 1.8, 'F');
+        $this->SetXY($x + 80, $leyendaY - 0.3);
+        $this->Cell(32, 3, $this->texto('Fuera de EMT'), 0, 0, 'L');
+        $this->SetDrawColor(...self::ROJO);
+        $this->SetLineWidth(0.28);
+        $this->lineaDiscontinua($x + 113, $leyendaY + 1.2, $x + 120, $leyendaY + 1.2, 1.1);
+        $this->SetXY($x + 121, $leyendaY - 0.3);
+        $this->Cell(28, 3, $this->texto('Límites EMT'), 0, 0, 'L');
+        $this->SetLineWidth(0.2);
     }
 }
 
 // Dibuja la página 1 con todas las secciones generales en posiciones predeterminadas.
 function dibujarPaginaGeneral(InformePDF $pdf, string $folio): void
 {
-    $pdf->SetDrawColor(90, 90, 90);
-    $pdf->SetTextColor(0, 0, 0);
-    $pdf->SetFont('Arial', '', 6.5);
-    $pdf->tituloFijo(31, 'A. IDENTIFICACIÓN DEL INFORME');
-    $pdf->filaFija(37, ['Folio', $folio, 'Fecha', datoPost('inf_fecha')], [30, 68, 30, 68], 7);
-    $pdf->tituloFijo(46, 'B. CLIENTE');
-    $pdf->filaFija(52, ['Empresa', datoPost('nombre_empresa'), 'Contacto', datoPost('nombre_contacto')], [30, 68, 30, 68], 7);
-    $pdf->filaFija(59, ['Dirección', datoPost('dir_empresa'), 'Correo', datoPost('correo_contacto')], [30, 68, 30, 68], 10);
-    $pdf->tituloFijo(71, 'C. INSTRUMENTO');
+    $pdf->SetTextColor(24, 50, 75);
+    $pdf->SetFont('Arial', '', 6.3);
+    $pdf->tituloFijo(42, 'IDENTIFICACIÓN Y DATOS DEL CLIENTE', 7);
+    $pdf->filaFija(49, ['Folio', $folio, 'Fecha', datoPost('inf_fecha')], [26, 68, 26, 68], 6);
+    $pdf->filaFija(55, ['Empresa', datoPost('nombre_empresa'), 'Contacto', datoPost('nombre_contacto')], [26, 68, 26, 68], 7);
+    $pdf->filaFija(62, ['Dirección', datoPost('dir_empresa'), 'Correo', datoPost('correo_contacto')], [26, 68, 26, 68], 12);
+    $pdf->tituloFijo(76, 'INSTRUMENTO', 7);
     $filasInstrumento = [
         ['Descripción', datoPost('desc_inst'), 'Marca', datoPost('marca_inst')],
         ['Modelo', datoPost('modelo_inst'), 'ID', datoPost('id_inst')],
@@ -439,7 +600,7 @@ function dibujarPaginaGeneral(InformePDF $pdf, string $folio): void
         ['Clase', datoPost('clase'), '', ''],
     ];
     foreach ($filasInstrumento as $indice => $fila) {
-        $pdf->filaFija(77 + $indice * 6, $fila, [30, 68, 30, 68], 6);
+        $pdf->filaFija(83 + $indice * 5.5, $fila, [26, 68, 26, 68], 5.5);
     }
     $reactivos = [
         1 => 'Identificación y placa legible.',
@@ -449,83 +610,80 @@ function dibujarPaginaGeneral(InformePDF $pdf, string $folio): void
         5 => 'Nivelación e instalación correctas.',
         6 => 'Limpieza y funcionamiento general.',
     ];
-    $pdf->tituloFijo(115, 'D. INSPECCIÓN VISUAL Y FUNCIONAL');
-    $pdf->SetFillColor(232, 232, 232);
+    $pdf->tituloFijo(120, 'INSPECCIÓN VISUAL Y FUNCIONAL', 7);
+    $pdf->SetFillColor(242, 244, 246);
     $pdf->SetFont('Arial', 'B', 6.3);
-    $pdf->filaFija(121, ['Reactivo', 'Estado', 'Observación'], [91, 30, 75], 6, ['L', 'C', 'L'], true);
+    $pdf->filaFija(127, ['Reactivo', 'Estado', 'Observación'], [88, 28, 72], 5, ['L', 'C', 'L'], true);
     $pdf->SetFont('Arial', '', 6.1);
     foreach ($reactivos as $numero => $reactivo) {
-        $pdf->filaFija(127 + ($numero - 1) * 5.5, [$numero . '. ' . $reactivo, datoPost('inspeccion_' . $numero . '_estado'), datoPost('inspeccion_' . $numero . '_observacion')], [91, 30, 75], 5.5, ['L', 'C', 'L']);
+        $pdf->filaFija(132 + ($numero - 1) * 5, [$numero . '. ' . $reactivo, datoPost('inspeccion_' . $numero . '_estado'), datoPost('inspeccion_' . $numero . '_observacion')], [88, 28, 72], 5, ['L', 'C', 'L']);
     }
     $pdf->SetFont('Arial', 'B', 6.3);
-    $pdf->filaFija(160, ['Resultado general', datoPost('inspeccion_resultado', 'PENDIENTE')], [45, 151], 6);
-    $pdf->bloqueFijo(168, 'E. OBSERVACIONES', datoPost('observaciones'), 11);
-    $pdf->bloqueFijo(186, 'F. TRABAJO REALIZADO', datoPost('trabajo_realizado'), 11);
-    $pdf->bloqueFijo(204, 'G. RECOMENDACIONES', datoPost('recomendaciones'), 11);
-    $pdf->bloqueFijo(222, 'H. ATENCIÓN / SERVICIOS URGENTES', datoPost('atencion_urgente'), 11);
+    $pdf->filaFija(162, ['Resultado general', datoPost('inspeccion_resultado', 'PENDIENTE')], [43, 145], 6);
+    $pdf->bloqueCierreServicio(172, 72);
 }
 
 // Dibuja repetibilidad en el área fija superior de una página de pruebas.
 function dibujarRepetibilidadFija(InformePDF $pdf, string $fase): void
 {
     $prefijo = $fase . '_repetibilidad';
-    $pdf->subtituloFijo(40, 'Repetibilidad');
+    $pdf->subtituloFijo(52, 'REPETIBILIDAD');
     $pdf->SetFont('Arial', '', 6.5);
-    $pdf->filaFija(46, ['Carga aplicada', datoPost($prefijo . '_carga'), 'Resultado', datoPost($prefijo . '_resultado', 'PENDIENTE')], [31, 67, 31, 67], 6);
-    $pdf->SetFillColor(232, 232, 232);
+    $pdf->filaFija(58, ['Carga aplicada', datoPost($prefijo . '_carga'), 'Resultado', datoPost($prefijo . '_resultado', 'PENDIENTE')], [29, 65, 29, 65], 6);
+    $pdf->SetFillColor(242, 244, 246);
     $pdf->SetFont('Arial', 'B', 6.3);
-    $pdf->filaFija(52, ['Prueba', 'Indicación'], [65, 131], 5, ['C', 'C'], true);
+    $pdf->filaFija(64, ['Prueba', 'Indicación'], [62, 126], 5, ['C', 'C'], true);
     $pdf->SetFont('Arial', '', 6.3);
     for ($i = 1; $i <= 5; $i++) {
-        $pdf->filaFija(57 + ($i - 1) * 4.8, [(string) $i, indicacionPost($prefijo . '_lectura_' . $i)], [65, 131], 4.8, ['C', 'C']);
+        $pdf->filaFija(69 + ($i - 1) * 4.2, [(string) $i, indicacionPost($prefijo . '_lectura_' . $i)], [62, 126], 4.2, ['C', 'C']);
     }
-    $pdf->filaFija(81, ['Diferencia máxima encontrada', datoPost($prefijo . '_diferencia'), 'EMT aplicable', datoPost($prefijo . '_emt')], [43, 55, 35, 63], 7);
+    $pdf->filaFija(90, ['Diferencia máxima encontrada', datoPost($prefijo . '_diferencia'), 'EMT aplicable', datoPost($prefijo . '_emt')], [43, 51, 33, 61], 6);
 }
 
 // Dibuja excentricidad en el área fija central de una página de pruebas.
 function dibujarExcentricidadFija(InformePDF $pdf, string $fase): void
 {
     $prefijo = $fase . '_excentricidad';
-    $pdf->subtituloFijo(91, 'Excentricidad');
+    $pdf->subtituloFijo(100, 'EXCENTRICIDAD');
     $pdf->SetFont('Arial', '', 6.5);
-    $pdf->filaFija(97, ['Carga aplicada', datoPost($prefijo . '_carga'), 'Resultado', datoPost($prefijo . '_resultado', 'PENDIENTE')], [31, 67, 31, 67], 6);
-    $pdf->SetFillColor(232, 232, 232);
+    $pdf->filaFija(106, ['Carga aplicada', datoPost($prefijo . '_carga'), 'Resultado', datoPost($prefijo . '_resultado', 'PENDIENTE')], [29, 65, 29, 65], 6);
+    $pdf->SetFillColor(242, 244, 246);
     $pdf->SetFont('Arial', 'B', 6.3);
-    $pdf->filaFija(103, ['Posición', 'Indicación'], [80, 116], 5, ['C', 'C'], true);
+    $pdf->filaFija(112, ['Posición', 'Indicación'], [76, 112], 5, ['C', 'C'], true);
     $pdf->SetFont('Arial', '', 6.3);
     for ($i = 1; $i <= 5; $i++) {
         $posicion = $i === 1 ? '1 - Centro / referencia' : (string) $i;
-        $pdf->filaFija(108 + ($i - 1) * 4.8, [$posicion, indicacionPost($prefijo . '_lectura_' . $i)], [80, 116], 4.8, ['L', 'C']);
+        $pdf->filaFija(117 + ($i - 1) * 4.2, [$posicion, indicacionPost($prefijo . '_lectura_' . $i)], [76, 112], 4.2, ['L', 'C']);
     }
-    $pdf->filaFija(132, ['Diferencia máxima encontrada', datoPost($prefijo . '_diferencia_maxima'), 'EMT aplicable', datoPost($prefijo . '_emt')], [43, 55, 35, 63], 7);
+    $pdf->filaFija(138, ['Diferencia máxima encontrada', datoPost($prefijo . '_diferencia_maxima'), 'EMT aplicable', datoPost($prefijo . '_emt')], [43, 51, 33, 61], 6);
 }
 
 // Dibuja exactitud en un área fija y conserva las seis columnas aprobadas.
 function dibujarExactitudFija(InformePDF $pdf, string $fase): void
 {
     $prefijo = $fase . '_exactitud';
-    $pdf->subtituloFijo(142, 'Exactitud');
-    $pdf->SetFillColor(232, 232, 232);
+    $pdf->subtituloFijo(148, 'EXACTITUD');
+    $pdf->SetFillColor(242, 244, 246);
     $pdf->SetFont('Arial', 'B', 6.1);
-    $anchos = [16, 36, 38, 30, 30, 46];
+    $anchos = [16, 34, 36, 29, 29, 44];
     $alineaciones = ['C', 'C', 'C', 'C', 'C', 'C'];
-    $pdf->filaFija(148, ['Punto', 'Carga', 'Indicación', 'Error', 'EMT', 'Resultado'], $anchos, 5, $alineaciones, true);
+    $pdf->filaFija(154, ['Punto', 'Carga', 'Indicación', 'Error', 'EMT', 'Resultado'], $anchos, 5, $alineaciones, true);
     $pdf->SetFont('Arial', '', 6.1);
     for ($i = 0; $i <= 5; $i++) {
-        $pdf->filaFija(153 + $i * 4.5, [(string) $i, datoPost($prefijo . '_carga_' . $i), indicacionPost($prefijo . '_indicacion_' . $i), datoPost($prefijo . '_error_' . $i), datoPost($prefijo . '_emt_' . $i), datoPost($prefijo . '_resultado_' . $i)], $anchos, 4.5, $alineaciones);
+        $pdf->filaFija(159 + $i * 4, [(string) $i, datoPost($prefijo . '_carga_' . $i), indicacionPost($prefijo . '_indicacion_' . $i), datoPost($prefijo . '_error_' . $i), datoPost($prefijo . '_emt_' . $i), datoPost($prefijo . '_resultado_' . $i)], $anchos, 4, $alineaciones);
     }
     $pdf->SetFont('Arial', 'B', 6.3);
-    $pdf->filaFija(180, ['Resultado general', datoPost($prefijo . '_resultado', 'PENDIENTE')], [45, 151], 6);
+    $pdf->filaFija(183, ['Resultado general', datoPost($prefijo . '_resultado', 'PENDIENTE')], [43, 145], 6);
 }
 
 // Construye una página fija de pruebas y coloca la gráfica en coordenadas absolutas idénticas.
 function dibujarPaginaPruebas(InformePDF $pdf, string $fase, string $tituloPagina, string $tituloGrafica): void
 {
-    $pdf->tituloFijo(31, $tituloPagina, 7);
+    $pdf->tituloFijo(42, $tituloPagina, 7);
     dibujarRepetibilidadFija($pdf, $fase);
     dibujarExcentricidadFija($pdf, $fase);
     dibujarExactitudFija($pdf, $fase);
-    $pdf->graficaExactitud($fase, 20, 189, 176, 60, $tituloGrafica);
+    $pdf->graficaExactitud($fase, 14, 191, 188, 53, $tituloGrafica);
 }
 
 $erroresDivisionReal = validarIndicacionesPost();
@@ -535,7 +693,9 @@ if ($erroresDivisionReal !== []) {
 }
 
 try {
-    $folio = reservarSiguienteFolioInforme(datoPost('inf_fecha'));
+    $folio = defined('INFORME_FOLIO_FORZADO')
+        ? trim((string) constant('INFORME_FOLIO_FORZADO'))
+        : reservarSiguienteFolioInforme(datoPost('inf_fecha'));
 } catch (RuntimeException $error) {
     http_response_code(500);
     exit('No fue posible asignar el folio consecutivo del informe.');
@@ -554,4 +714,9 @@ $pdf->AddPage();
 dibujarPaginaPruebas($pdf, 'inicial', 'PRUEBAS METROLÓGICAS INICIALES', 'Exactitud - Comportamiento inicial');
 $pdf->AddPage();
 dibujarPaginaPruebas($pdf, 'final', 'PRUEBAS METROLÓGICAS FINALES', 'Exactitud - Comportamiento final');
-$pdf->Output('D', 'Informe_SERVICOM_' . $folio . '.pdf', true);
+$nombreArchivo = 'Informe_SERVICOM_' . $folio . '.pdf';
+if (defined('INFORME_PDF_DESTINO')) {
+    $pdf->Output('F', (string) constant('INFORME_PDF_DESTINO'));
+} else {
+    $pdf->Output('D', $nombreArchivo, true);
+}

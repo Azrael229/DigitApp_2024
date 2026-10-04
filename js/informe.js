@@ -189,7 +189,8 @@ function etiquetaEquipo(equipo) {
     const estado = equipo.estatus && equipo.estatus !== 'activo'
         ? ` · ${equipo.estatus === 'fuera_servicio' ? 'Fuera de servicio' : 'Inactivo'}`
         : '';
-    return `${identidad || 'Equipo sin descripción'} · ${referencia}${estado}`;
+    const ubicacion = equipo.ubicacion ? ` · ${equipo.ubicacion}` : '';
+    return `${identidad || 'Equipo sin descripción'} · ${referencia}${ubicacion}${estado}`;
 }
 
 // Filtra los equipos de la empresa por la dirección elegida en el informe.

@@ -2,16 +2,15 @@
 // Inicializa el listado, los filtros y la edición rápida de importes.
 (async function () {
     const table = new DataTable('#tabla-oportunidades', getDataTableOptions({
-        data: [], order: [[8, 'desc']], orderCellsTop: true,
+        data: [], order: [[7, 'desc']], orderCellsTop: true,
         columns: [
             {data: 'fecha', render: (value, type) => type === 'display' ? Op.date(value) : value},
+            {data: 'numero_oportunidad', render: (value, type, row) => type === 'display' ? `<a class="entity-link fw-semibold" href="ver_oportunidad.php?id=${Number(row.id)}">${Op.escape(value || '#' + row.id)}</a>` : (value || '')},
             {data: 'empresa', render: (value, type, row) => type === 'display' ? `<a class="entity-link" href="ver_empresa.php?id=${Number(row.empresa_id)}">${Op.escape(value)}</a>` : value},
             {data: 'contacto', defaultContent: '', render: (value, type, row) => type === 'display' ? (row.contacto_id ? `<a class="entity-link" href="ver_contacto.php?id=${Number(row.contacto_id)}">${Op.escape(value)}</a>` : '—') : (value || '')},
             {data: 'descripcion_corta', render: DataTable.render.text()},
             {data: 'importe', render: (value, type, row) => type === 'display' ? `<div class="op-amount"><input type="number" class="form-control form-control-sm op-importe" aria-label="Importe sin IVA de oportunidad ${Number(row.id)}" min="0" max="9999999999.99" step="0.01" value="${Number(value).toFixed(2)}"><button type="button" class="btn btn-outline-success btn-sm op-save-amount" aria-label="Guardar importe" title="Guardar importe"><i class="bi bi-check-lg" aria-hidden="true"></i></button></div>` : value},
             {data: 'estatus', render: (value, type) => type === 'display' ? `<span class="badge op-status op-status-${Op.statuses[value] ? value : 'preparacion'}">${Op.escape(Op.statuses[value] || value)}</span>` : (Op.statuses[value] || value)},
-            {data: 'id', orderable: false, searchable: false, render: value => `<a class="btn btn-outline-secondary btn-sm" href="ver_oportunidad.php?id=${Number(value)}">Ver detalle</a>`},
-            {data: 'id', orderable: false, searchable: false, render: value => `<a class="btn btn-secondary btn-sm" href="form_oportunidad.php?id=${Number(value)}">Editar</a>`},
             {data: 'created_at', visible: false, searchable: false, render: (value, type, row) => value + String(row.id).padStart(10, '0')}
         ]
     }));

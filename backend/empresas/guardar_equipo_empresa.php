@@ -73,6 +73,7 @@ if (empty($_SESSION['empresa_equipos_csrf']) || !hash_equals($_SESSION['empresa_
 }
 
 $direccionId = idOpcionalEquipo($_POST['direccion_id'] ?? null);
+$ubicacion = textoEquipo('ubicacion');
 $descripcionId = idOpcionalEquipo($_POST['descripcion_id'] ?? null);
 $marcaId = idOpcionalEquipo($_POST['marca_id'] ?? null);
 $modelo = textoEquipo('modelo');
@@ -133,14 +134,15 @@ $clase = $divisionVerificacion === null ? null : claseExactitudEquipo($capacidad
 try {
     if ($equipoId !== false && $equipoId !== null && $equipoId > 0) {
         $guardar = $conexion->prepare(
-            'UPDATE empresa_equipos SET direccion_id = ?, descripcion_id = ?, marca_id = ?,
+            'UPDATE empresa_equipos SET direccion_id = ?, ubicacion = ?, descripcion_id = ?, marca_id = ?,
                 modelo = ?, identificacion = ?, numero_serie = ?, unidad = ?, capacidad_maxima = ?,
                 division_real = ?, division_verificacion = ?, clase_exactitud = ?, estatus = ?
              WHERE id = ? AND empresa_id = ?'
         );
         $guardar->bind_param(
-            'iiisssssssssii',
+            'isiisssssssssii',
             $direccionId,
+            $ubicacion,
             $descripcionId,
             $marcaId,
             $modelo,
@@ -165,15 +167,16 @@ try {
     } else {
         $guardar = $conexion->prepare(
             'INSERT INTO empresa_equipos
-                (empresa_id, direccion_id, descripcion_id, marca_id, modelo, identificacion,
+                (empresa_id, direccion_id, ubicacion, descripcion_id, marca_id, modelo, identificacion,
                  numero_serie, unidad, capacidad_maxima, division_real, division_verificacion,
                  clase_exactitud, estatus)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         );
         $guardar->bind_param(
-            'iiiisssssssss',
+            'iisiisssssssss',
             $empresaId,
             $direccionId,
+            $ubicacion,
             $descripcionId,
             $marcaId,
             $modelo,

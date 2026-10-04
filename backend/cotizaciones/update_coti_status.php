@@ -1,57 +1,8 @@
 <?php
+declare(strict_types=1);
 
-$id_cot = $_POST['id_cot'];
-$id_status = $_POST['id_status'];
-
-
-if($id_status == "2"){
-  
-  $cot_status = '<i class="bi bi-circle-fill" style="color: green;"> Aceptada </i>';
-
-  require (__DIR__ . "/../../config/conexion.php");
-
-  $sql = "UPDATE cotizaciones
-  SET cot_status = '$cot_status'
-  WHERE id_coti = '$id_cot'";
-
-  mysqli_query($conexion, $sql);
-  mysqli_close($conexion);
-
-  echo json_encode('2');
-  // header('Location: ' . $_SERVER['HTTP_REFERER']);
-
-}
-if($id_status == "3"){
-  
-  $cot_status = '<i class="bi bi-circle-fill" style="color: red;"> Cancelada </i>';
-
-  require (__DIR__ . "/../../config/conexion.php");
-
-  $sql = "UPDATE cotizaciones
-  SET cot_status = '$cot_status'
-  WHERE id_coti = '$id_cot'";
-
-  mysqli_query($conexion, $sql);
-  mysqli_close($conexion);
-
-  echo json_encode('3');
-
-  // header('Location: ' . $_SERVER['HTTP_REFERER']);
-}
-if($id_status == "1"){
-  
-  $cot_status = '<i class="bi bi-circle-fill" style="color: blue;"> Esperar </i>';
-
-  require (__DIR__ . "/../../config/conexion.php");
-
-  $sql = "UPDATE cotizaciones
-  SET cot_status = '$cot_status'
-  WHERE id_coti = '$id_cot'";
-
-  mysqli_query($conexion, $sql);
-  mysqli_close($conexion);
-
-  echo json_encode('1');
-
-  // header('Location: ' . $_SERVER['HTTP_REFERER']);
-}
+header('Content-Type: application/json; charset=utf-8');
+http_response_code(410);
+echo json_encode([
+    'error' => 'El estatus de la cotización solo puede actualizarse desde Editar cotización.',
+], JSON_UNESCAPED_UNICODE);

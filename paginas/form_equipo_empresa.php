@@ -14,7 +14,7 @@ if (empty($_SESSION['empresa_equipos_csrf'])) {
 <div class="container mt-5 mb-5 contain shadow-lg empresa-equipo-form">
     <div class="row align-items-center pt-3 pb-4 mb-4 empresa-detalle-header">
         <div class="col">
-            <p class="empresa-header-kicker mb-1">Inventario metrológico</p>
+            <p class="empresa-header-kicker mb-1">Inventario de equipos</p>
             <h1 id="titulo_equipo" class="h2 mb-1"><?= $equipoId ? 'Editar equipo' : 'Nuevo equipo' ?></h1>
             <p id="subtitulo_equipo" class="empresa-header-subtitle mb-0">Cargando información de la empresa...</p>
         </div>
@@ -82,17 +82,22 @@ if (empty($_SESSION['empresa_equipos_csrf'])) {
                             </div>
                             <div id="estado_marca_equipo" class="empresa-notes-status mt-1" role="status" aria-live="polite"></div>
                         </div>
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-3">
                             <label class="form-label" for="modelo">Modelo</label>
                             <input class="form-control" type="text" name="modelo" id="modelo" maxlength="100">
                         </div>
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-3">
                             <label class="form-label" for="identificacion">Identificación</label>
                             <input class="form-control" type="text" name="identificacion" id="identificacion" maxlength="100">
                         </div>
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-3">
                             <label class="form-label" for="numero_serie">Número de serie</label>
                             <input class="form-control" type="text" name="numero_serie" id="numero_serie" maxlength="100">
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label" for="ubicacion">Ubicación</label>
+                            <input class="form-control" type="text" name="ubicacion" id="ubicacion" maxlength="150" placeholder="Ej. Área de embarques">
+                            <div class="form-text">Área de operación del equipo dentro de las instalaciones del cliente.</div>
                         </div>
                     </div>
                 </div>

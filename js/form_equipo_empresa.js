@@ -122,6 +122,7 @@ function mostrarEquipoEnFormulario(equipo) {
     document.getElementById('modelo').value = equipo.modelo || '';
     document.getElementById('identificacion').value = equipo.identificacion || '';
     document.getElementById('numero_serie').value = equipo.numero_serie || '';
+    document.getElementById('ubicacion').value = equipo.ubicacion || '';
     document.getElementById('unidad').value = equipo.unidad || '';
     campoCapacidadEquipo.value = normalizarDecimalEquipo(equipo.capacidad_maxima);
     campoDivisionRealEquipo.value = normalizarDecimalEquipo(equipo.division_real);

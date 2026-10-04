@@ -47,7 +47,7 @@ $marcas = $conexion->query(
 $equipo = null;
 if ($equipoId !== false && $equipoId !== null && $equipoId > 0) {
     $consultaEquipo = $conexion->prepare(
-        'SELECT id, empresa_id, direccion_id, descripcion_id, marca_id, modelo,
+        'SELECT id, empresa_id, direccion_id, ubicacion, descripcion_id, marca_id, modelo,
                 identificacion, numero_serie, unidad, capacidad_maxima,
                 division_real, division_verificacion, clase_exactitud, estatus
          FROM empresa_equipos

@@ -13,6 +13,78 @@
     box-shadow: var(--shadow-md);
 }
 
+.cotizacion-detail-multiline,
+.cotizacion-detail-description {
+    white-space: pre-line;
+}
+
+.cotizacion-detail-description {
+    min-width: 22rem;
+    line-height: 1.5;
+}
+
+.cotizacion-company-title {
+    display: inline-block;
+    color: var(--text-main);
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.cot-status {
+    padding: 0.5rem 0.65rem;
+    color: #d0e5ff;
+    background: rgba(78, 144, 230, 0.25);
+}
+
+.cot-status-aceptada {
+    color: #b9f6d6;
+    background: rgba(45, 186, 121, 0.22);
+}
+
+.cot-status-rechazada,
+.cot-status-vencida,
+.cot-status-cancelada {
+    color: #ffe0a6;
+    background: rgba(255, 184, 84, 0.22);
+}
+
+.cot-title-status {
+    font-size: 0.42em;
+    vertical-align: middle;
+}
+
+.cotizacion-detail-totals {
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(110, 181, 255, 0.24);
+    border-radius: var(--radius-md);
+}
+
+.cotizacion-detail-totals > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0;
+}
+
+.cotizacion-detail-total {
+    margin-top: 0.35rem;
+    padding-top: 0.8rem !important;
+    border-top: 1px solid var(--border-soft);
+    color: #b9f6d6;
+    font-size: 1.08rem;
+}
+
+.cotizacion-detail-notes {
+    padding-left: 1.25rem;
+    color: var(--text-main);
+}
+
+.cotizacion-detail-notes li + li {
+    margin-top: 0.5rem;
+}
+
 .cotizacion-section-heading {
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--border-soft);
@@ -35,6 +107,28 @@
     resize: vertical !important;
 }
 
+.cotizacion-form #contenedor_pago_anticipo .input-group {
+    flex-wrap: nowrap;
+}
+
+.cotizacion-form #contenedor_pago_anticipo .input-group > .form-control {
+    width: 1%;
+    min-width: 0;
+    flex: 1 1 auto;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.cotizacion-form #contenedor_pago_anticipo .input-group-text {
+    min-width: 2.75rem;
+    justify-content: center;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(89, 182, 255, 0.24);
+    border-left: 0;
+    border-radius: 0 12px 12px 0;
+}
+
 .cotizacion-form .table {
     margin-bottom: 0;
     border-color: rgba(110, 181, 255, 0.18);
@@ -53,6 +147,18 @@
 
 .cotizacion-form .table td:nth-child(3) {
     min-width: 21rem;
+}
+
+.cotizacion-form .table td:last-child {
+    min-width: 7rem;
+}
+
+.cotizacion-form .partida-descripcion {
+    min-height: 5.5rem;
+}
+
+.cotizacion-form .btn-eliminar-partida {
+    white-space: nowrap;
 }
 
 .cotizacion-form .totales {

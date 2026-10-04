@@ -62,6 +62,7 @@ function op_get(mysqli $db, int $id, bool $lock = false): array {
         }
     }
     $rows = op_rows($db, 'SELECT o.*, e.empresa, c.nombre AS contacto,
+        c.celular AS contacto_telefono, c.correo AS contacto_correo,
         d.alias AS direccion_alias, d.tipo_direccion, d.calle, d.numero_exterior, d.numero_interior,
         d.colonia, d.localidad, d.municipio, d.ciudad, d.estado, d.codigo_postal, d.pais,
         d.entre_calles, d.referencia, d.direccion_original, d.enlace_maps

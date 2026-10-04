@@ -64,7 +64,8 @@ $contactos = $consultaContactos->get_result()->fetch_all(MYSQLI_ASSOC);
 $consultaContactos->close();
 
 $consultaEquipos = $conexion->prepare(
-    'SELECT ee.id, ee.direccion_id, COALESCE(ee.modelo, \'\') AS modelo,
+    'SELECT ee.id, ee.direccion_id, COALESCE(ee.ubicacion, \'\') AS ubicacion,
+            COALESCE(ee.modelo, \'\') AS modelo,
             COALESCE(ee.identificacion, \'\') AS identificacion,
             COALESCE(ee.numero_serie, \'\') AS numero_serie,
             ee.unidad, ee.capacidad_maxima, ee.division_real, ee.division_verificacion,
@@ -82,7 +83,7 @@ $equipos = $consultaEquipos->get_result()->fetch_all(MYSQLI_ASSOC);
 $consultaEquipos->close();
 
 $consultaOportunidades = $conexion->prepare(
-    'SELECT o.id, o.fecha, o.contacto_id, c.nombre AS contacto,
+    'SELECT o.id, o.numero_oportunidad, o.fecha, o.contacto_id, c.nombre AS contacto,
             o.descripcion_corta, o.importe, o.estatus, o.created_at
      FROM oportunidades_comerciales o
      LEFT JOIN contactos c ON c.id = o.contacto_id

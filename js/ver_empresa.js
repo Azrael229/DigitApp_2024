@@ -60,9 +60,10 @@ function formatearNumeroEquipoEmpresa(valor) {
 
 var equiposEmpresa = new DataTable('#tabla_equipos_empresa', getDataTableOptions({
     data: [],
-    order: [[0, 'asc'], [3, 'asc']],
+    order: [[0, 'asc'], [4, 'asc']],
     columns: [
         { data: 'descripcion', defaultContent: '', render: DataTable.render.text() },
+        { data: 'ubicacion', defaultContent: '', render: DataTable.render.text() },
         { data: 'marca', defaultContent: '', render: DataTable.render.text() },
         { data: 'modelo', defaultContent: '', render: DataTable.render.text() },
         { data: 'identificacion', defaultContent: '', render: DataTable.render.text() },
@@ -136,6 +137,15 @@ var oportunidadesEmpresa = new DataTable('#tabla_oportunidades_empresa', getData
     columns: [
         { data: 'fecha', defaultContent: '', render: DataTable.render.text() },
         {
+            data: 'numero_oportunidad',
+            defaultContent: '',
+            render: function (valor, tipo, fila) {
+                return tipo === 'display'
+                    ? '<a class="entity-link fw-semibold" href="ver_oportunidad.php?id=' + Number(fila.id) + '">' + escaparHtmlEmpresa(valor || '#' + fila.id) + '</a>'
+                    : (valor || '');
+            }
+        },
+        {
             data: 'contacto',
             defaultContent: '',
             render: function (valor, tipo, fila) {
@@ -168,18 +178,6 @@ var oportunidadesEmpresa = new DataTable('#tabla_oportunidades_empresa', getData
             }
         },
         {
-            data: 'id',
-            orderable: false,
-            searchable: false,
-            render: function (valor, tipo) {
-                if (tipo !== 'display') {
-                    return valor;
-                }
-                return '<a class="btn btn-outline-secondary btn-sm" href="ver_oportunidad.php?id='
-                    + Number(valor) + '">Ver oportunidad</a>';
-            }
-        },
-        {
             data: 'created_at',
             visible: false,
             searchable: false,
@@ -192,43 +190,25 @@ var oportunidadesEmpresa = new DataTable('#tabla_oportunidades_empresa', getData
 
 var cotizacionesEmpresa = new DataTable('#tabla_cotizaciones_empresa', getDataTableOptions({
     data: [],
-    order: [[7, 'desc']],
+    order: [[5, 'desc']],
     columns: [
         { data: 'cot_fecha', defaultContent: '', render: DataTable.render.text() },
-        { data: 'cot_numero', defaultContent: '', render: DataTable.render.text() },
+        {
+            data: 'cot_numero',
+            defaultContent: '',
+            render: function (valor, tipo, fila) {
+                return tipo === 'display'
+                    ? '<a class="entity-link fw-semibold" href="ver_cotizacion.php?id=' + Number(fila.id_coti) + '">' + escaparHtmlEmpresa(valor || '#' + fila.id_coti) + '</a>'
+                    : (valor || '');
+            }
+        },
         { data: 'cot_contacto', defaultContent: '', render: DataTable.render.text() },
         {
             data: 'cot_total',
             defaultContent: '',
             render: formatearImporteEmpresa
         },
-        { data: 'cot_status', defaultContent: '', render: DataTable.render.text() },
-        {
-            data: null,
-            orderable: false,
-            searchable: false,
-            render: function (valor, tipo, fila) {
-                if (tipo !== 'display' || !fila.pdf_disponible) {
-                    return tipo === 'display' ? '<span class="empresa-quote-no-pdf">Sin PDF</span>' : '';
-                }
-                var archivo = encodeURIComponent(String(fila.cot_archivo || ''));
-                return '<a class="btn btn-outline-secondary btn-sm" href="../filesPDF/' + archivo
-                    + '" target="_blank" rel="noopener">Ver PDF</a>';
-            }
-        },
-        {
-            data: 'id_coti',
-            orderable: false,
-            searchable: false,
-            render: function (valor, tipo) {
-                if (tipo !== 'display') {
-                    return valor;
-                }
-                return '<span class="btn btn-outline-secondary btn-sm disabled empresa-quote-detail-pending"'
-                    + ' aria-disabled="true" title="Disponible cuando exista la ficha individual de cotización"'
-                    + ' data-cotizacion-id="' + Number(valor) + '">Detalle pendiente</span>';
-            }
-        },
+        { data: 'cot_status', defaultContent: '', render: function (valor, tipo) { return tipo === 'display' ? CotStatus.badge(valor) : CotStatus.labels[CotStatus.key(valor)]; } },
         { data: 'id_coti', visible: false, searchable: false }
     ]
 }));

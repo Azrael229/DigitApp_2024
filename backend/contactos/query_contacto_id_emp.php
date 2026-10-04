@@ -41,7 +41,7 @@ $direcciones = $consultaDirecciones->get_result()->fetch_all(MYSQLI_ASSOC);
 $consultaDirecciones->close();
 
 $consultaEquipos = $conexion->prepare(
-    'SELECT ee.id, ee.direccion_id, ee.modelo, ee.identificacion, ee.numero_serie,
+    'SELECT ee.id, ee.direccion_id, ee.ubicacion, ee.modelo, ee.identificacion, ee.numero_serie,
             ee.unidad, ee.capacidad_maxima, ee.division_real,
             ee.division_verificacion, ee.clase_exactitud, ee.estatus,
             COALESCE(cd.nombre, \'\') AS descripcion,

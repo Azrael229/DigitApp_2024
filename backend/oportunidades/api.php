@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require __DIR__ . '/common.php';
+require_once __DIR__ . '/../helpers/folio_comercial.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -86,7 +87,7 @@ try {
                 throw new InvalidArgumentException('Escribe una descripción corta de hasta 150 caracteres y un detalle de hasta 60,000 bytes.');
             }
             $amount = op_amount($input['importe'] ?? '');
-            $status = (string) ($input['estatus'] ?? 'preparacion');
+            $status = $id ? (string) ($input['estatus'] ?? '') : 'preparacion';
             if (!isset(OP_ESTATUS[$status])) {
                 throw new InvalidArgumentException('El estatus no es válido.');
             }
@@ -100,10 +101,11 @@ try {
                     updated_by = ?, updated_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ?',
                     'siiissssii', [$date, $company, $contact, $address, $short, $long, $amount, $status, $actor, $id])->close();
             } else {
+                $numeroOportunidad = reservarFolioComercial($conexion, 'OPC', $date);
                 op_query($conexion, 'INSERT INTO oportunidades_comerciales
-                    (fecha, empresa_id, contacto_id, direccion_id, descripcion_corta, descripcion_larga, importe, estatus, created_by, updated_by)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 'siiissssii',
-                    [$date, $company, $contact, $address, $short, $long, $amount, $status, $actor, $actor])->close();
+                    (numero_oportunidad, fecha, empresa_id, contacto_id, direccion_id, descripcion_corta, descripcion_larga, importe, estatus, created_by, updated_by)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 'ssiiissssii',
+                    [$numeroOportunidad, $date, $company, $contact, $address, $short, $long, $amount, $status, $actor, $actor])->close();
                 $id = (int) $conexion->insert_id;
             }
         } elseif ($action === 'amount') {

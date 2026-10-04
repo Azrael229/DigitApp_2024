@@ -1,4 +1,15 @@
-<?php $prefijoRuta = '../'; ?>
+<?php
+$prefijoRuta = '../';
+$oportunidadId = filter_input(INPUT_GET, 'oportunidad_id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+$cotizacionId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+$editandoCotizacion = $cotizacionId !== false && $cotizacionId !== null;
+$paginaRegreso = $editandoCotizacion
+    ? 'ver_cotizacion.php?id=' . (int) $cotizacionId
+    : (($oportunidadId !== false && $oportunidadId !== null)
+        ? 'ver_oportunidad.php?id=' . (int) $oportunidadId
+        : 'tablaCotizaciones.php');
+require_once __DIR__ . '/../backend/cotizaciones/common.php';
+?>
 <?php  require (__DIR__ . "/../construct/header.php")   ?>
 <?php  require (__DIR__ . "/../backend/contactos/query_all_contactos.php")  ?>
 
@@ -8,19 +19,24 @@
      <div class="row align-items-center contacto-form-header g-3 pt-3 mb-4">
         <div class="col">
             <p class="contactos-kicker mb-1">Gestión comercial</p>
-            <h1 class="h2 mb-0"><i class="bi bi-cash-coin" id="ico_coti" aria-hidden="true"></i> Nueva cotización</h1>
+            <h1 class="h2 mb-0"><i class="bi bi-cash-coin" id="ico_coti" aria-hidden="true"></i> <?= $editandoCotizacion ? 'Editar cotización' : 'Nueva cotización' ?></h1>
         </div>  
     </div>
     <!-- titulo  -->
 
-    <form action="<?= $prefijoRuta ?>fpdf/cotizacionPDF.php" method="POST" target="_blank" id="form_cotizacion" class="cotizacion-form">
+    <form action="<?= $prefijoRuta ?>fpdf/cotizacionPDF.php" method="POST" target="cotizacion_pdf" id="form_cotizacion" class="cotizacion-form" data-oportunidad-id="<?= $oportunidadId ? (int) $oportunidadId : '' ?>" data-cotizacion-id="<?= $editandoCotizacion ? (int) $cotizacionId : '' ?>" data-return-url="<?= htmlspecialchars($paginaRegreso, ENT_QUOTES, 'UTF-8') ?>">
+    <input type="hidden" name="oportunidad_id" id="oportunidad_id" value="<?= $oportunidadId ? (int) $oportunidadId : '' ?>">
+    <input type="hidden" name="empresa_id" id="cot_empresa_id">
+    <input type="hidden" name="contacto_id" id="cot_contacto_id">
+    <input type="hidden" name="direccion_id" id="cot_direccion_id">
+    <input type="hidden" name="cotizacion_id" id="cotizacion_id" value="<?= $editandoCotizacion ? (int) $cotizacionId : '' ?>">
     
     
     <!-- boton submit del formulario -->
     <div class="row">
         <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mb-4">
-            <a href="tablaCotizaciones.php" class="btn btn-secondary">Cancelar</a>
-            <button id="btn_guardar" type="submit" class="btn btn-success"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> Guardar y ver PDF</button>
+            <a href="<?= htmlspecialchars($paginaRegreso, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-secondary">Cancelar</a>
+            <button id="btn_guardar" type="submit" class="btn btn-success"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> <?= $editandoCotizacion ? 'Guardar cambios y ver PDF' : 'Guardar y ver PDF' ?></button>
         </div>
     </div>
     <!-- boton submit del formulario -->
@@ -39,7 +55,7 @@
                         <label >No. Cotización</label>
                     </div>
                     <div class="col ">
-                        <input type="text" id="numero_coti" name="numero_coti">
+                        <input type="text" id="numero_coti" name="numero_coti" placeholder="Se asignará al guardar" readonly aria-readonly="true">
                     </div>
                 </div>
             <!-- fila de fecha de cotizacion -->
@@ -48,7 +64,7 @@
                         <label >Fecha</label>
                     </div>
                     <div class="col  ">
-                        <input type="date" name="coti_fecha">
+                        <input type="date" id="coti_fecha" name="coti_fecha" required>
                     </div>
                 </div>
             <!-- fila de vigencia de cotizacion -->
@@ -57,10 +73,22 @@
                         <label >Fecha Vigencia</label>
                     </div>
                     <div class="col ">
-                        <input type="date" name="coti_vigencia">
+                        <input type="date" id="coti_vigencia" name="coti_vigencia" required>
                     </div>
                 </div>
             <!-- fin de las filas -->
+            <?php if ($editandoCotizacion): ?>
+                <div class="row mb-5">
+                    <div class="col col-lg-2"><label for="cot_status">Estatus</label></div>
+                    <div class="col">
+                        <select class="form-select" name="cot_status" id="cot_status" required>
+                            <?php foreach (COTIZACION_ESTATUS as $clave => $etiqueta): ?>
+                                <option value="<?= htmlspecialchars($clave, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($etiqueta, ENT_QUOTES, 'UTF-8') ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
     <!-- Sección Control de Cotizacion -->
@@ -163,165 +191,137 @@
 
         </div>
     <!-- Seccion datos del cliente -->
-                        
+
+    <!-- Sección Condiciones comerciales -->
+    <div class="row cotizacion-form-section">
+        <div class="col">
+            <div class="cotizacion-section-heading mb-4">
+                <h2 class="h4 mb-1">Condiciones comerciales</h2>
+                <p class="contactos-muted mb-0">Define la entrega, el pago, la garantía y los costos de envío aplicables.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-12 col-lg-6">
+                    <label class="form-label" for="tiempo_entrega_tipo">Tiempo de entrega</label>
+                    <select class="form-select" name="tiempo_entrega_tipo" id="tiempo_entrega_tipo" required>
+                        <option value="">Selecciona una opción</option>
+                        <option value="inmediato">Inmediato</option>
+                        <option value="dias_habiles">Días hábiles</option>
+                        <option value="semanas">Semanas</option>
+                    </select>
+                    <div class="row g-3 align-items-end mt-1">
+                        <div class="col-8 d-none" id="contenedor_tiempo_entrega_cantidad">
+                            <label class="form-label" for="tiempo_entrega_cantidad">Cantidad</label>
+                            <input class="form-control" type="number" min="1" max="65535" name="tiempo_entrega_cantidad" id="tiempo_entrega_cantidad">
+                        </div>
+                        <div class="col-4 d-none pb-2" id="etiqueta_tiempo_entrega"></div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-6">
+                    <label class="form-label" for="condicion_entrega">Condición de entrega</label>
+                    <select class="form-select" name="condicion_entrega" id="condicion_entrega" required>
+                        <option value="">Selecciona una opción</option>
+                        <option value="instalaciones_cliente">Instalaciones del cliente</option>
+                        <option value="paqueteria">Paquetería</option>
+                        <option value="instalaciones_servicom">Instalaciones de SERVICOM Básculas Digitales</option>
+                    </select>
+                </div>
+                <div class="col-12 col-lg-6">
+                    <label class="form-label" for="condicion_pago_tipo">Condición de pago</label>
+                    <select class="form-select" name="condicion_pago_tipo" id="condicion_pago_tipo" required>
+                        <option value="">Selecciona una opción</option>
+                        <option value="anticipado">Pago anticipado</option>
+                        <option value="anticipado_total">Pago 100% anticipado</option>
+                        <option value="anticipo_saldo">Pago con anticipo y saldo</option>
+                        <option value="credito">Días de crédito</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3 d-none" id="contenedor_pago_anticipo">
+                    <label class="form-label" for="pago_anticipo_porcentaje">Anticipo</label>
+                    <div class="input-group">
+                        <input class="form-control" type="number" min="1" max="99" step="1" name="pago_anticipo_porcentaje" id="pago_anticipo_porcentaje" value="60">
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <div id="resumen_pago_saldo" class="form-text contactos-muted">40% al finalizar.</div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3 d-none" id="contenedor_pago_saldo_momento">
+                    <label class="form-label" for="pago_saldo_momento">Pago del saldo</label>
+                    <select class="form-select" name="pago_saldo_momento" id="pago_saldo_momento">
+                        <option value="al_finalizar">Al finalizar</option>
+                        <option value="contra_aviso_entrega">Contra aviso de entrega</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3 d-none" id="contenedor_pago_credito">
+                    <label class="form-label" for="pago_credito_dias">Días de crédito</label>
+                    <input class="form-control" type="number" min="1" max="365" step="1" name="pago_credito_dias" id="pago_credito_dias" value="30">
+                </div>
+                <div class="col-12 col-lg-4">
+                    <label class="form-label" for="garantia_tipo">Garantía</label>
+                    <select class="form-select" name="garantia_tipo" id="garantia_tipo" required>
+                        <option value="">Selecciona una opción</option>
+                        <option value="sin_garantia">Sin garantía especificada</option>
+                        <option value="producto">Producto por defectos de fabricación</option>
+                        <option value="mano_obra">Mano de obra</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 d-none" id="contenedor_garantia_vigencia">
+                    <label class="form-label" for="garantia_vigencia">Vigencia de la garantía</label>
+                    <input class="form-control" type="number" min="1" max="65535" step="1" name="garantia_vigencia" id="garantia_vigencia">
+                </div>
+                <div class="col-12 col-md-6 col-lg-4 d-none" id="contenedor_garantia_unidad">
+                    <label class="form-label" for="garantia_unidad">Unidad de vigencia</label>
+                    <select class="form-select" name="garantia_unidad" id="garantia_unidad">
+                        <option value="dias">Días</option>
+                        <option value="meses">Meses</option>
+                    </select>
+                </div>
+                <div class="col-12 col-lg-6">
+                    <label class="form-label" for="costos_envio">Costos de envío</label>
+                    <select class="form-select" name="costos_envio" id="costos_envio" required>
+                        <option value="">Selecciona una opción</option>
+                        <option value="incluye">Incluye costos de envío</option>
+                        <option value="no_incluye">No incluye costos de envío</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="notas7">Nota adicional (máximo 255 caracteres)</label>
+                    <textarea class="form-control" name="notas7" id="notas7" rows="3" maxlength="255" placeholder="Escribe únicamente una condición adicional que deba aparecer en la cotización."></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Sección Condiciones comerciales -->
 
 
     <!-- Seccion Cotizacion -->
     <div class="row cotizacion-form-section">
-        <!-- titulo -->
-        <div class="cotizacion-section-heading mb-4">
-            <h2 class="h4 mb-1">Conceptos de la cotización</h2>
-            <p class="contactos-muted mb-0">Captura hasta cuatro conceptos con su cantidad y valor unitario.</p>
-        </div>  
-        <!-- titulo -->
-        
-        <!-- Tabla articulos -->
+        <div class="cotizacion-section-heading d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h2 class="h4 mb-1">Conceptos de la cotización</h2>
+                <p class="contactos-muted mb-0">Agrega las partidas que necesites; el PDF ajustará automáticamente sus páginas.</p>
+            </div>
+            <button type="button" id="btn_agregar_partida" class="btn btn-success flex-shrink-0">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i> Agregar partida
+            </button>
+        </div>
+
         <div class="table-responsive mb-4">
-            <table class="table table-secondary">
-                <!-- encabezados -->
+            <table class="table table-secondary align-middle" id="tabla_partidas_cotizacion">
                 <thead class="text-center">
                     <tr>
                         <th scope="col">Cantidad</th>
                         <th scope="col">Unidad</th>
                         <th scope="col">Descripción</th>
                         <th scope="col">Valor unitario</th>
+                        <th scope="col">Acción</th>
                     </tr>
                 </thead>
-                <!-- encabezados -->
-
-                <tbody>
-                    <!-- fila 1 -->
-                    <tr>
-                        <!-- ingresar Cantidad -->
-                        <td scope="row"><input name="f1_cant" id="f1_cant" type="number" Class="col-9" oninput="operacionTotalF1()"></td>
-
-                        <!-- ingresar Unidad -->
-                        <td>
-                            <select class="form-select form-select-sm" name="f1_unidad"id="">
-                                <option value="">selecciona</option>
-                                <option value="Servicio">Servicio</option>
-                                <option value="Pieza">Pieza</option>
-                            </select>
-                        </td>
-
-                        <!-- ingresar Descripcion -->
-                        <td><textarea  name="f1_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260" placeholder="Máximo 250 caracteres"></textarea></td>
-
-                        <!-- ingresar Valor Unitario -->
-                        <td>
-                            <label class="visually-hidden" for="f1_valUnit">Valor unitario del concepto 1</label>
-                            <input type="number" step="0.01" min="0" name="f1_valUnit" id="f1_valUnit" oninput="operacionTotalF1()">
-                            <input type="hidden" name="f1_total" id="f1_total" value="0.00">
-                        </td>
+                <tbody id="partidas_cotizacion">
+                    <tr id="partidas_vacias">
+                        <td colspan="5" class="text-center contactos-muted py-4">Aún no hay partidas. Utiliza “Agregar partida” para comenzar.</td>
                     </tr>
-                    <!-- fila 1 -->
-
-                    <!-- fila 2 -->
-                    <tr>
-                        <!-- ingresar Cantidad -->
-                        <td scope="row">
-                            <input name="f2_cant" id="f2_cant"  type="number" Class="col-9" oninput="operacionTotalF2()">
-                        </td>
-
-                        <!-- ingresar Unidad -->
-                        <td>
-                            <select class="form-select form-select-sm" name="f2_unidad"id="">       
-                                <option value="">selecciona</option>
-                                <option value="Servicio">Servicio</option>
-                                <option value="Pieza">Pieza</option>
-                            </select>
-                        </td>
-
-                        <!-- ingresar Descripcion -->
-                        <td>
-                            <textarea name="f2_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260" placeholder="Máximo 250 caracteres"></textarea>
-                        </td>
-
-                        <!-- ingresar Valor Unitario -->
-                        <td>
-                            <label class="visually-hidden" for="f2_valUnit">Valor unitario del concepto 2</label>
-                            <input type="number" step="0.01" min="0" name="f2_valUnit" id="f2_valUnit" oninput="operacionTotalF2()">
-                            <input type="hidden" name="f2_total" id="f2_total" value="0.00">
-                        </td>
-                    </tr>
-                    <!-- fila 2 -->
-
-                    <!-- fila 3 -->
-                    <tr>
-                        <!-- ingresar Cantidad -->
-                        <td scope="row">
-                            <input name="f3_cant" id="f3_cant" type="number" Class="col-9" oninput="operacionTotalF3()">
-                        </td>
-
-                        <!-- ingresar Unidad -->
-                        <td>
-                            <select class="form-select form-select-sm" name="f3_unidad"id="">
-                                <option value="">selecciona</option>
-                                <option value="Servicio">Servicio</option>
-                                <option value="Pieza">Pieza</option>
-                            </select>
-                        </td>
-
-                        <!-- ingresar Descripcion -->
-                        <td>
-                            <textarea name="f3_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260" placeholder="Máximo 250 caracteres"></textarea>
-                        </td>
-
-                        <!-- ingresar Valor Unitario -->
-                        <td>
-                            <label class="visually-hidden" for="f3_valUnit">Valor unitario del concepto 3</label>
-                            <input type="number" step="0.01" min="0" name="f3_valUnit" id="f3_valUnit" oninput="operacionTotalF3()">
-                            <input type="hidden" name="f3_total" id="f3_total" value="0.00">
-                        </td>
-                    </tr>
-                    <!-- fila 3 -->
-
-                    <!-- fila 4 -->
-                    <tr>
-                        <!-- ingresar Cantidad -->
-                        <td scope="row">
-                            <input name="f4_cant" id="f4_cant" type="number" Class="col-9" oninput="operacionTotalF4()">
-                        </td>
-
-                        <!-- ingresar Unidad -->
-                        <td>
-                            <select class="form-select form-select-sm" name="f4_unidad"id=""> 
-                                <option value="">selecciona</option>
-                                <option value="Servicio">Servicio</option>
-                                <option value="Pieza">Pieza</option>
-                            </select>
-                        </td>
-                        <!-- ingresar Descripcion -->
-                        <td>
-                            <textarea name="f4_descrip" id="" cols="60" rows="4" style="resize: none;" maxlength="260" placeholder="Máximo 250 caracteres"></textarea>
-                        </td>
-
-                        <!-- ingresar Valor Unitario -->
-                        <td>
-                            <label class="visually-hidden" for="f4_valUnit">Valor unitario del concepto 4</label>
-                            <input type="number" step="0.01" min="0" name="f4_valUnit" id="f4_valUnit" oninput="operacionTotalF4()">
-                            <input type="hidden" name="f4_total" id="f4_total" value="0.00">
-                        </td>
-                    </tr>
-                    <!-- fila 4 -->
-                                                                                 
                 </tbody>
             </table>
         </div>
-        <!-- Tabla articulos -->
-
-
-        <!--seccion tiempo de entrga -->
-        <div class="row">
-            <div class="col col-lg-3">
-                <div class="row mb-5 p-2">
-                    <label for="tiempo_entrega">Tiempo de entrega (días habiles):</label>
-                    <input type="number" name="tiempo_entrega" id="tiempo_entrega"class="col-8 col-lg-10">
-                </div>
-            </div>
-        </div>
-        <!--seccion tiempo de entrga -->
-
 
         <!-- Totales -->
         <div class="row justify-content-end mt-4">
@@ -337,15 +337,15 @@
                         <tbody>
                             <tr class="">
                                 <td scope="row">SUBTOTAL</td>
-                                <td><input type="number" step="0.01" name="subtotal" id="subtotal"></td>
+                                <td><input type="number" step="0.01" name="subtotal" id="subtotal" readonly></td>
                             </tr>
                             <tr class="">
                                 <td scope="row">IVA</td>
-                                <td><input type="number" step="0.01" name="iva" id="iva"></td>
+                                <td><input type="number" step="0.01" name="iva" id="iva" readonly></td>
                             </tr>
                             <tr class="">
                                 <td scope="row">TOTAL</td>
-                                <td><input type="number" step="0.01" name="total" id="total"></td>
+                                <td><input type="number" step="0.01" name="total" id="total" readonly></td>
                             </tr>
                         </tbody>
                     </table>
@@ -360,53 +360,7 @@
     </div>
     <!-- Seccion Cotizacion -->
 
-    <!-- Seccion Notas  -->
-    <div class="row cotizacion-form-section">
-      <div class="col">
-            <div class="cotizacion-section-heading mb-2">
-                <h2 class="h4 mb-1">Notas y condiciones</h2>
-                <p class="contactos-muted mb-0">Selecciona hasta tres condiciones o escribe una indicación personalizada.</p>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-lg-10 ">
-                    <!-- nota 1 -->
-                    <div class="form-check form-switch mb-4">
-                        <input class="form-check-input" type="checkbox" value="Pago anticipado mediante transferencia bancaria." id="nota1" name="notas1"/>
-                        <label class="form-check-label" for="nota1">Pago anticipado mediante transferencia bancaria</label>
-                    </div>
-                    <!-- nota 6 -->
-                    <div class="form-check form-switch mb-4">
-                        <input class="form-check-input" type="checkbox" value="Pago anticipado 60% mediante transferencia bancaria." id="nota6" name="notas6"/>
-                        <label class="form-check-label" for="nota6">Pago anticipado 60% mediante transferencia bancaria.</label>
-                    </div>
-                    <!-- nota 2 -->
-                    <div class="form-check form-switch mb-4">
-                        <input class="form-check-input" type="checkbox" value="Garantía de 6 meses por defectos de fabricación." id="nota2" name="notas2" />
-                        <label class="form-check-label" for="nota2">Garantía de 6 meses por defectos de fabricación</label>
-                    </div>
-                    <!-- nota 3 -->
-                    <div class="form-check form-switch mb-4">
-                        <input class="form-check-input" type="checkbox" value="Garantía de 5 días en mano de obra." id="nota3" name="notas3"/>
-                        <label class="form-check-label" for="nota3">Garantía de 5 días en mano de obra.</label>
-                    </div>
-                    <!-- nota 4 -->
-                    <div class="form-check form-switch mb-4">
-                        <input class="form-check-input" type="checkbox" value="No incluye costos de envío." id="nota4" name="notas4" />
-                        <label class="form-check-label" for="nota4">No incluye costos de envío.</label>
-                    </div>
-                    
-                    <!-- nota 7 text area-->
-                    <div class="mb-2">
-                        <label class="form-label" for="notas7">Ingresar texto (máximo 85 caracteres)</label>
-                        <textarea class="form-control" name="notas7" id="notas7" rows="3" maxlength="85"></textarea>
-                    </div>
-                    
-                </div>
-            </div>
-      </div>                  
-    </div> 
     </form>                   
-    <!-- Seccion Notas  -->
 
 
 
@@ -422,6 +376,7 @@
 <!-- SELECT2 combobox -->
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261002-1"></script>
+<script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
+<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261003-9"></script>
 
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>
