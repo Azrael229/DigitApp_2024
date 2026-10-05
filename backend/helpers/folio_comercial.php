@@ -12,10 +12,17 @@ function saltoDiarioFolioCotizacion(string $fecha): int
     return in_array($salto, [10, 20], true) ? $salto + 1 : $salto;
 }
 
-// Reserva dentro de la transacción activa un folio anual único para OPC o Q.
+// Elige un salto irregular y siempre positivo para ocultar el volumen de órdenes de venta.
+function saltoFolioOrdenVenta(): int
+{
+    $saltos = [2, 3, 5, 10, 11];
+    return $saltos[random_int(0, count($saltos) - 1)];
+}
+
+// Reserva dentro de la transacción activa un folio anual único para OPC, Q, OV u OS.
 function reservarFolioComercial(mysqli $conexion, string $tipo, string $fecha): string
 {
-    if (!in_array($tipo, ['OPC', 'Q'], true)) {
+    if (!in_array($tipo, ['OPC', 'Q', 'OV', 'OS'], true)) {
         throw new InvalidArgumentException('El tipo de folio comercial no es válido.');
     }
     $fechaObjeto = DateTimeImmutable::createFromFormat('!Y-m-d', $fecha);
@@ -26,7 +33,12 @@ function reservarFolioComercial(mysqli $conexion, string $tipo, string $fecha): 
     }
 
     $anio = (int) $fechaObjeto->format('Y');
-    $inicial = $tipo === 'Q' ? 14327 : 1;
+    $inicial = match ($tipo) {
+        'Q' => 14327,
+        'OV' => 1001,
+        'OS' => 12781,
+        default => 1,
+    };
     $anteriorInicial = $inicial - 1;
 
     $crear = $conexion->prepare(
@@ -57,6 +69,8 @@ function reservarFolioComercial(mysqli $conexion, string $tipo, string $fecha): 
         $siguiente = $inicial;
     } elseif ($tipo === 'Q' && !empty($estado['ultima_fecha']) && $fecha > $estado['ultima_fecha']) {
         $siguiente = $ultimo + saltoDiarioFolioCotizacion($fecha);
+    } elseif (in_array($tipo, ['OV', 'OS'], true)) {
+        $siguiente = $ultimo + saltoFolioOrdenVenta();
     } else {
         $siguiente = $ultimo + 1;
     }

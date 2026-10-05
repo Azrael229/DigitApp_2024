@@ -46,6 +46,18 @@ $consultaEmpresas->execute();
 $contacto['empresas'] = $consultaEmpresas->get_result()->fetch_all(MYSQLI_ASSOC);
 $consultaEmpresas->close();
 
+$consultaDirecciones = $conexion->prepare(
+    'SELECT edc.direccion_id, d.empresa_id, edc.es_principal
+     FROM empresa_direccion_contactos edc
+     JOIN empresa_direcciones d ON d.id = edc.direccion_id
+     WHERE edc.contacto_id = ? AND edc.activo = 1
+     ORDER BY edc.es_principal DESC, d.empresa_id, d.id'
+);
+$consultaDirecciones->bind_param('i', $id);
+$consultaDirecciones->execute();
+$contacto['direcciones'] = $consultaDirecciones->get_result()->fetch_all(MYSQLI_ASSOC);
+$consultaDirecciones->close();
+
 echo json_encode($contacto, JSON_UNESCAPED_UNICODE);
 
 mysqli_close($conexion);

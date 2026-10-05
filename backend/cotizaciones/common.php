@@ -1,6 +1,13 @@
 <?php
 declare(strict_types=1);
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+if (empty($_SESSION['cotizacion_status_csrf'])) {
+    $_SESSION['cotizacion_status_csrf'] = bin2hex(random_bytes(32));
+}
+
 const COTIZACION_ESTATUS = [
     'preparacion' => 'En preparación',
     'enviada' => 'Enviada',
@@ -46,10 +53,14 @@ function cotizacionDetalle(mysqli $conexion, int $id): ?array
     $consulta = $conexion->prepare(
         'SELECT c.*,
                 oc.oportunidad_id,
-                o.numero_oportunidad
+                o.numero_oportunidad,
+                o.estatus AS oportunidad_estatus,
+                ov.id AS orden_venta_id,
+                ov.numero_venta
          FROM cotizaciones AS c
          LEFT JOIN oportunidad_cotizaciones AS oc ON oc.cotizacion_id = c.id_coti
          LEFT JOIN oportunidades_comerciales AS o ON o.id = oc.oportunidad_id
+         LEFT JOIN ordenes_venta AS ov ON ov.cotizacion_id = c.id_coti
          WHERE c.id_coti = ?
          LIMIT 1'
     );

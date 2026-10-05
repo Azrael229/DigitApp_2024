@@ -6,6 +6,10 @@ var botonGuardarContacto = document.getElementById('btn_guardar_contacto');
 var selectorDepartamento = document.getElementById('id_departamento');
 var selectorEmpresas = document.getElementById('empresas');
 var selectorPrincipal = document.getElementById('empresa_principal');
+var selectorDirecciones = document.getElementById('direcciones');
+var catalogoDirecciones = Array.from(selectorDirecciones.options).map(function (opcion) {
+    return {value: opcion.value, label: opcion.textContent, companyId: opcion.dataset.companyId};
+});
 var botonCancelarContacto = document.getElementById('btn_cancelar_contacto');
 
 // Muestra mensajes del formulario sin insertar texto remoto como HTML.
@@ -50,6 +54,30 @@ function sincronizarEmpresaPrincipal(preferida) {
         : empresas[0];
 }
 
+// Limita las direcciones a las empresas asociadas y conserva selecciones válidas.
+function sincronizarDirecciones(preferidas) {
+    var empresas = obtenerEmpresasSeleccionadas();
+    var seleccionadas = preferidas || Array.from(selectorDirecciones.selectedOptions).map(function (opcion) {
+        return opcion.value;
+    });
+    selectorDirecciones.replaceChildren();
+    catalogoDirecciones.forEach(function (direccion) {
+        if (!empresas.includes(String(direccion.companyId))) {
+            return;
+        }
+        var opcion = document.createElement('option');
+        opcion.value = direccion.value;
+        opcion.textContent = direccion.label;
+        opcion.dataset.companyId = direccion.companyId;
+        opcion.selected = seleccionadas.includes(String(direccion.value));
+        selectorDirecciones.appendChild(opcion);
+    });
+    selectorDirecciones.disabled = empresas.length === 0;
+    if (window.jQuery && jQuery.fn.select2) {
+        jQuery(selectorDirecciones).trigger('change.select2');
+    }
+}
+
 // Preselecciona la empresa de origen solo durante el alta de un nuevo contacto.
 function aplicarEmpresaContextual(idEmpresa) {
     var opcion = selectorEmpresas.querySelector('option[value="' + idEmpresa + '"]');
@@ -65,6 +93,7 @@ function aplicarEmpresaContextual(idEmpresa) {
         jQuery(selectorEmpresas).trigger('change');
     }
     sincronizarEmpresaPrincipal(idEmpresa);
+    sincronizarDirecciones();
 }
 
 // Define un retorno interno a empresa solo cuando la relacion del contacto lo confirma.
@@ -132,6 +161,9 @@ function cargarContactoParaEdicion(idContacto) {
                 return String(empresa.es_principal) === '1';
             });
             sincronizarEmpresaPrincipal(principal ? principal.id_empresa : null);
+            sincronizarDirecciones((contacto.direcciones || []).map(function (direccion) {
+                return String(direccion.direccion_id);
+            }));
             if (empresaRetorno) {
                 aplicarRetornoEmpresa(empresaRetorno, contacto.empresas);
             }
@@ -148,10 +180,13 @@ if (window.jQuery && jQuery.fn.select2) {
     });
     jQuery(selectorEmpresas).on('change', function () {
         sincronizarEmpresaPrincipal();
+        sincronizarDirecciones();
     });
+    jQuery(selectorDirecciones).select2({width: '100%', placeholder: 'Selecciona una o varias direcciones'});
 } else {
     selectorEmpresas.addEventListener('change', function () {
         sincronizarEmpresaPrincipal();
+        sincronizarDirecciones();
     });
 }
 
@@ -181,6 +216,7 @@ cargarCatalogoDepartamentos()
                 botonCancelarContacto.href = 'ver_empresa.php?id=' + encodeURIComponent(empresaContextual);
             } else {
                 sincronizarEmpresaPrincipal();
+                sincronizarDirecciones();
             }
             return null;
         }

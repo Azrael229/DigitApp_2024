@@ -29,6 +29,16 @@ if ($empresaParametroId !== false && $empresaParametroId !== null && $empresaPar
 }
 
 require __DIR__ . '/../backend/empresas/query_all_empresas.php';
+require __DIR__ . '/../config/conexion.php';
+$consultaDireccionesContacto = $conexion->query(
+    'SELECT d.id, d.empresa_id, d.tipo_direccion, d.alias, d.calle, d.numero_exterior,
+            d.colonia, d.ciudad, d.estado, e.empresa
+     FROM empresa_direcciones d
+     JOIN empresas e ON e.id_e = d.empresa_id
+     ORDER BY e.empresa, d.es_principal DESC, d.tipo_direccion, d.id'
+);
+$direccionesContacto = $consultaDireccionesContacto->fetch_all(MYSQLI_ASSOC);
+mysqli_close($conexion);
 require __DIR__ . '/../construct/header.php';
 ?>
 
@@ -51,6 +61,7 @@ require __DIR__ . '/../construct/header.php';
     <form id="form_contacto" action="<?= $prefijoRuta ?>backend/contactos/add_contacto.php" method="POST" novalidate>
         <input type="hidden" id="contacto_id" name="contacto_id" value="<?= $idContacto && $idContacto > 0 ? (int) $idContacto : '' ?>">
         <input type="hidden" name="empresas_presentes" value="1">
+        <input type="hidden" name="direcciones_presentes" value="1">
         <?php if (!$empresaContextoInvalida && $empresaContextoId): ?>
             <input type="hidden" name="empresa_contexto" value="<?= (int) $empresaContextoId ?>">
         <?php endif; ?>
@@ -119,6 +130,16 @@ require __DIR__ . '/../construct/header.php';
                                 <?php endforeach; ?>
                             </select>
                         </div>
+                        <div class="col-12 contacto-empresas-select">
+                            <label for="direcciones" class="form-label fw-semibold">Direcciones asociadas</label>
+                            <select class="form-select" id="direcciones" name="direcciones[]" multiple>
+                                <?php foreach ($direccionesContacto as $direccion): ?>
+                                    <?php $etiquetaDireccion = implode(' · ', array_filter([$direccion['empresa'], $direccion['alias'], $direccion['tipo_direccion'], trim((string) $direccion['calle'] . ' ' . (string) $direccion['numero_exterior']), $direccion['ciudad'], $direccion['estado']])); ?>
+                                    <option value="<?= (int) $direccion['id'] ?>" data-company-id="<?= (int) $direccion['empresa_id'] ?>"><?= htmlspecialchars($etiquetaDireccion, ENT_QUOTES, 'UTF-8') ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="form-text">Solo se muestran direcciones pertenecientes a las empresas seleccionadas.</div>
+                        </div>
                         <div class="col-12 col-md-6">
                             <label for="empresa_principal" class="form-label fw-semibold">Empresa principal</label>
                             <select class="form-select" id="empresa_principal" name="empresa_principal" disabled>
@@ -146,6 +167,6 @@ require __DIR__ . '/../construct/header.php';
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="<?= $prefijoRuta ?>js/form_contacto.js"></script>
+<script src="<?= $prefijoRuta ?>js/form_contacto.js?v=20261004-2"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

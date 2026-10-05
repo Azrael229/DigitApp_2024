@@ -160,6 +160,38 @@ if ($empresas !== []) {
     $consultaEmpresa->close();
 }
 
+$usarDireccionesExplicitas = array_key_exists('direcciones', $_POST)
+    || array_key_exists('direcciones_presentes', $_POST);
+$direcciones = [];
+if ($usarDireccionesExplicitas) {
+    $direccionesEntrada = $_POST['direcciones'] ?? [];
+    $direccionesEntrada = is_array($direccionesEntrada) ? $direccionesEntrada : [$direccionesEntrada];
+    foreach ($direccionesEntrada as $direccionEntrada) {
+        if ($direccionEntrada === null || $direccionEntrada === '') {
+            continue;
+        }
+        $direccionId = obtenerIdOpcional($direccionEntrada);
+        if ($direccionId === null) {
+            mysqli_close($conexion);
+            responderErrorContacto('Una dirección asociada no es válida.');
+        }
+        $direcciones[$direccionId] = $direccionId;
+    }
+    $direcciones = array_values($direcciones);
+    $consultaDireccion = $conexion->prepare('SELECT empresa_id FROM empresa_direcciones WHERE id = ? LIMIT 1');
+    foreach ($direcciones as $direccionId) {
+        $consultaDireccion->bind_param('i', $direccionId);
+        $consultaDireccion->execute();
+        $direccion = $consultaDireccion->get_result()->fetch_assoc();
+        if ($direccion === null || !in_array((int) $direccion['empresa_id'], $empresas, true)) {
+            $consultaDireccion->close();
+            mysqli_close($conexion);
+            responderErrorContacto('Una dirección no pertenece a las empresas asociadas.');
+        }
+    }
+    $consultaDireccion->close();
+}
+
 $activoSolicitado = null;
 if (array_key_exists('activo', $_POST) && $_POST['activo'] !== '') {
     $activoSolicitado = filter_var($_POST['activo'], FILTER_VALIDATE_INT);
@@ -284,6 +316,35 @@ try {
                 }
                 $definirPrincipal->close();
             }
+        }
+    }
+
+    if ($usarDireccionesExplicitas) {
+        $desactivarDirecciones = $conexion->prepare(
+            'UPDATE empresa_direccion_contactos
+             SET activo = 0, es_principal = 0, updated_at = NOW()
+             WHERE contacto_id = ? AND activo = 1'
+        );
+        $desactivarDirecciones->bind_param('i', $idContacto);
+        if (!$desactivarDirecciones->execute()) {
+            throw new RuntimeException('No fue posible actualizar las direcciones del contacto.');
+        }
+        $desactivarDirecciones->close();
+
+        if ($direcciones !== []) {
+            $guardarDireccion = $conexion->prepare(
+                'INSERT INTO empresa_direccion_contactos
+                    (direccion_id, contacto_id, activo, es_principal, created_at, updated_at)
+                 VALUES (?, ?, 1, 0, NOW(), NOW())
+                 ON DUPLICATE KEY UPDATE activo = 1, updated_at = NOW()'
+            );
+            foreach ($direcciones as $direccionId) {
+                $guardarDireccion->bind_param('ii', $direccionId, $idContacto);
+                if (!$guardarDireccion->execute()) {
+                    throw new RuntimeException('No fue posible guardar una dirección del contacto.');
+                }
+            }
+            $guardarDireccion->close();
         }
     }
 

@@ -120,7 +120,10 @@ function cotCostosEnvio($tipo): string
 require __DIR__ . '/../construct/header.php';
 ?>
 
-<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle cotizacion-detail-page">
+<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle cotizacion-detail-page"
+     data-cotizacion-id="<?= (int) $cotizacion['id_coti'] ?>"
+     data-oportunidad-id="<?= (int) ($cotizacion['oportunidad_id'] ?? 0) ?>"
+     data-cotizacion-status-csrf="<?= cotEscapar($_SESSION['cotizacion_status_csrf']) ?>">
     <div class="row align-items-center pt-3 pb-4 mb-4 empresa-detalle-header">
         <div class="col empresa-header-copy">
             <p class="empresa-header-kicker mb-1">Gestión comercial</p>
@@ -139,6 +142,50 @@ require __DIR__ . '/../construct/header.php';
             <a href="tablaCotizaciones.php" class="btn btn-secondary text-nowrap"><i class="bi bi-arrow-left" aria-hidden="true"></i> Cotizaciones</a>
         </div>
     </div>
+
+    <section class="card mb-4 empresa-form-card empresa-detail-section cotizacion-sale-panel">
+      <div class="card-body empresa-card-body">
+        <div class="empresa-section-heading mb-3">
+            <p class="empresa-section-kicker mb-1">Formalización comercial</p>
+            <h2 class="h5 card-title mb-0">Estatus y orden de venta</h2>
+        </div>
+        <div id="cot-status-message" class="alert d-none" role="status" aria-live="polite"></div>
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-lg">
+                <label class="form-label" for="cot-detail-status">Estatus de la cotización</label>
+                <select id="cot-detail-status" class="form-select"<?= !empty($cotizacion['orden_venta_id']) ? ' disabled' : '' ?>>
+                    <?php foreach (COTIZACION_ESTATUS as $clave => $etiqueta): ?>
+                        <option value="<?= cotEscapar($clave) ?>"<?= cotizacionEstatusClave($cotizacion['cot_status'] ?? '') === $clave ? ' selected' : '' ?>><?= cotEscapar($etiqueta) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-12 col-lg-auto d-grid">
+                <button id="cot-save-status" class="btn btn-secondary" type="button"<?= !empty($cotizacion['orden_venta_id']) ? ' disabled' : '' ?>><i class="bi bi-check2-circle" aria-hidden="true"></i> Guardar estatus</button>
+            </div>
+            <div class="col-12 col-lg-auto d-grid">
+                <?php if (!empty($cotizacion['orden_venta_id'])): ?>
+                    <a class="btn btn-success" href="ver_orden_venta.php?id=<?= (int) $cotizacion['orden_venta_id'] ?>"><i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Ver <?= cotEscapar($cotizacion['numero_venta']) ?></a>
+                <?php else: ?>
+                    <?php $puedeCrearOrden = !empty($cotizacion['oportunidad_id']) && cotizacionEstatusClave($cotizacion['cot_status'] ?? '') === 'aceptada'; ?>
+                    <a id="cot-create-sale" class="btn btn-success<?= $puedeCrearOrden ? '' : ' disabled' ?>"
+                       href="form_orden_venta.php?oportunidad_id=<?= (int) $cotizacion['oportunidad_id'] ?>&amp;cotizacion_id=<?= (int) $cotizacion['id_coti'] ?>"
+                       aria-disabled="<?= $puedeCrearOrden ? 'false' : 'true' ?>"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva orden de venta</a>
+                <?php endif; ?>
+            </div>
+        </div>
+        <p id="cot-sale-help" class="empresa-notes-help mt-3 mb-0">
+            <?php if (!empty($cotizacion['orden_venta_id'])): ?>
+                Esta cotización ya está vinculada con una orden de venta.
+            <?php elseif (empty($cotizacion['oportunidad_id'])): ?>
+                Vincula primero la cotización con una oportunidad comercial.
+            <?php elseif (cotizacionEstatusClave($cotizacion['cot_status'] ?? '') !== 'aceptada'): ?>
+                Cambia el estatus a Aceptada para generar la orden de venta. La oportunidad relacionada quedará marcada como Ganada.
+            <?php else: ?>
+                La cotización está lista para generar una orden de venta con sus datos precargados.
+            <?php endif; ?>
+        </p>
+      </div>
+    </section>
 
     <section class="card mb-4 empresa-form-card empresa-detail-section">
       <div class="card-body empresa-card-body">
@@ -249,6 +296,6 @@ require __DIR__ . '/../construct/header.php';
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="../js/datatable-filters.js"></script>
 <script src="../js/datatable-config.js"></script>
-<script src="../js/ver_cotizacion.js?v=20261003-1"></script>
+<script src="../js/ver_cotizacion.js?v=20261004-2"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

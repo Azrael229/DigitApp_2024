@@ -35,7 +35,9 @@
 .table {
     --bs-table-bg: transparent;
     --bs-table-striped-bg: rgba(255, 255, 255, 0.04);
+    --bs-table-striped-color: #ffffff;
     --bs-table-hover-bg: rgba(89, 182, 255, 0.14);
+    --bs-table-hover-color: #ffffff;
     --bs-table-color: #ffffff;
     margin-bottom: 0;
 }

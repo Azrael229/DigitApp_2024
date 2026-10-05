@@ -29,6 +29,7 @@
         if (linkedQuotesTable.responsive) { linkedQuotesTable.responsive.recalc(); }
         Op.select(quoteSelect, data.available.map(q => ({id: q.id_coti, text: [q.cot_numero || '#' + q.id_coti, Op.date(q.cot_fecha), q.cot_total].filter(Boolean).join(' · ')})), data.available.length ? 'Seleccionar cotización' : 'No hay cotizaciones disponibles de esta empresa');
         quoteSelect.disabled = !data.available.length; linkButton.disabled = !data.available.length;
+        return data;
     }
     // Vincula o desvincula una cotización y refresca el detalle sin borrar archivos.
     async function mutate(action, quoteId) {
@@ -78,7 +79,15 @@
         document.getElementById('op-importe').textContent = Op.money(op.importe);
         document.getElementById('op-auditoria').textContent = Op.audit(op);
         document.getElementById('op-detalle').classList.remove('d-none');
-        try { await loadQuotes(); } catch (error) { Op.message('mensaje_cotizaciones', error.message); }
+        try {
+            const quotes = await loadQuotes();
+            const accepted = quotes.linked.some(quote => CotStatus.key(quote.cot_status) === 'aceptada');
+            if (op.estatus === 'ganada' && accepted) {
+                const createOrder = document.getElementById('op-crear-orden');
+                createOrder.href = 'form_orden_venta.php?oportunidad_id=' + encodeURIComponent(id);
+                createOrder.classList.remove('d-none');
+            }
+        } catch (error) { Op.message('mensaje_cotizaciones', error.message); }
         if (window.jQuery && jQuery.fn.select2) { jQuery(quoteSelect).select2({width: '100%'}); }
     } catch (error) { Op.message('mensaje_oportunidad', error.message); }
 })();

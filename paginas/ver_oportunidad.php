@@ -15,6 +15,7 @@ require __DIR__ . '/../construct/header.php';
             <p class="empresa-header-subtitle mb-0">Información general y actividad relacionada</p>
         </div>
         <div class="col-12 col-md-auto mt-3 mt-md-0 d-flex flex-column flex-sm-row gap-2 empresa-header-actions">
+            <a id="op-crear-orden" class="btn btn-success d-none text-nowrap"><i class="bi bi-clipboard2-check" aria-hidden="true"></i> Crear orden de venta</a>
             <a id="op-editar" class="btn btn-secondary d-none text-nowrap"><i class="bi bi-pencil" aria-hidden="true"></i> Editar oportunidad</a>
             <a href="oportunidades.php" class="btn btn-secondary text-nowrap"><i class="bi bi-arrow-left" aria-hidden="true"></i> Oportunidades</a>
         </div>
@@ -85,5 +86,5 @@ require __DIR__ . '/../construct/header.php';
 <script src="../js/datatable-config.js"></script>
 <script src="../js/oportunidades-common.js"></script>
 <script src="../js/cotizaciones-status.js?v=20261003-1"></script>
-<script src="../js/ver_oportunidad.js?v=20261003-5"></script>
+<script src="../js/ver_oportunidad.js?v=20261004-1"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>
