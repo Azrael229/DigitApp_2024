@@ -16,7 +16,7 @@ $quoteId = filter_input(INPUT_GET, 'cotizacion_id', FILTER_VALIDATE_INT);
         <div class="col-12 col-md-auto mt-3 mt-md-0"><a href="ordenes_venta.php" class="btn btn-secondary"><i class="bi bi-arrow-left" aria-hidden="true"></i> Órdenes de venta</a></div>
     </div>
     <div id="mensaje_form_orden" class="alert alert-info" role="status" aria-live="polite">Preparando el formulario...</div>
-    <form id="form_orden_venta" class="d-none" novalidate>
+    <form id="form_orden_venta" data-local-draft="1" class="d-none" novalidate>
         <input type="hidden" id="ov-id" value="<?= ov_escape($orderId ?: '') ?>">
         <input type="hidden" id="ov-version" value="">
 

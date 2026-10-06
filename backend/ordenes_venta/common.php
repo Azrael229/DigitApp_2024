@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('comercial');
+
 date_default_timezone_set('America/Mexico_City');
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();

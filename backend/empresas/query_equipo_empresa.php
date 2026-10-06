@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('productos');
 require __DIR__ . '/../../config/conexion.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -49,7 +51,7 @@ if ($equipoId !== false && $equipoId !== null && $equipoId > 0) {
     $consultaEquipo = $conexion->prepare(
         'SELECT id, empresa_id, direccion_id, ubicacion, descripcion_id, marca_id, modelo,
                 identificacion, numero_serie, unidad, capacidad_maxima,
-                division_real, division_verificacion, clase_exactitud, estatus
+                division_real, division_verificacion, clase_exactitud, estatus, version
          FROM empresa_equipos
          WHERE id = ? AND empresa_id = ?
          LIMIT 1'

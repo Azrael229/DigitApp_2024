@@ -1,5 +1,6 @@
 /config/conexion.php
 /conexion.php
+/config/correo.php
 
 # Datos locales, documentos generados y archivos protegidos.
 /database/

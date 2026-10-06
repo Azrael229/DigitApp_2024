@@ -46,7 +46,7 @@ try {
         throw new InvalidArgumentException('Una cotización con orden de venta debe permanecer Aceptada.');
     }
 
-    $actualizar = $conexion->prepare('UPDATE cotizaciones SET cot_status = ? WHERE id_coti = ?');
+    $actualizar = $conexion->prepare('UPDATE cotizaciones SET cot_status = ?, version = version + 1 WHERE id_coti = ?');
     $actualizar->bind_param('si', $estatus, $id);
     $actualizar->execute();
     $actualizar->close();

@@ -34,7 +34,7 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
 ?>
 
 <div class="container my-5 contain shadow-lg informe-contenedor">
-    <form action="<?= $prefijoRuta ?>fpdf/informePDF.php" method="post" id="form_informe">
+    <form action="<?= $prefijoRuta ?>fpdf/informePDF.php" method="post" id="form_informe" data-local-draft="1">
         <div class="row">
             <div class="col text-center mt-3 mb-4">
                 <h3><i class="bi bi-patch-check" id="ico_informe"></i></h3>

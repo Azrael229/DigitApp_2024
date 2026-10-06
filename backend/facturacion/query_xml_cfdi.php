@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('facturacion');
 $xmlDirectory = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'global_xml';
 $facturas = [];
 

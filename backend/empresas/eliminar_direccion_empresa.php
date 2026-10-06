@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('clientes');
 require(__DIR__ . "/../../config/conexion.php");
 
 function redirigirEmpresaTrasEliminar(int $empresaId, string $parametro): void

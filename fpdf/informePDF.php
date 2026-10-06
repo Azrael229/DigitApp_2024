@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../backend/auth/bootstrap.php';
+auth_require_permission('informes');
 require __DIR__ . '/fpdf.php';
 require_once __DIR__ . '/../backend/helpers/folio_informe.php';
 

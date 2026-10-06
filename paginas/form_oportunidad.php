@@ -8,7 +8,7 @@ require __DIR__ . '/../construct/header.php';
 <div class="container mt-5 mb-5 contain shadow-lg oportunidades-page" data-csrf="<?= op_escape($_SESSION['oportunidades_csrf']) ?>" data-id="<?= $id ? (int) $id : '' ?>">
     <div class="contacto-form-header"><p class="contactos-kicker mb-1">Gestión comercial</p><h1 class="h2 mb-0"><?= $id ? 'Editar oportunidad' : 'Nueva oportunidad' ?></h1></div>
     <div id="mensaje_oportunidad" class="alert <?= $invalid ? 'alert-danger' : 'd-none' ?> mt-4" role="status" aria-live="polite"><?= $invalid ? 'El identificador de oportunidad no es válido.' : '' ?></div>
-    <form id="form-oportunidad" class="mt-4" <?= $invalid ? 'data-invalid="1"' : '' ?>>
+    <form id="form-oportunidad" data-local-draft="1" class="mt-4" <?= $invalid ? 'data-invalid="1"' : '' ?>>
         <input type="hidden" name="id" value="<?= $id ? (int) $id : '' ?>">
         <input type="hidden" name="version" id="op-version" value="">
         <fieldset disabled id="op-fields">

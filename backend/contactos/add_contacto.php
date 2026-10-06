@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('clientes');
+
 require_once __DIR__ . '/../helpers/normalizador_datos.php';
 require __DIR__ . '/../../config/conexion.php';
 
@@ -50,6 +53,7 @@ function redirigirContacto(?int $empresaContexto, ?int $empresaRetorno, bool $es
 $idContactoEntrada = $_POST['contacto_id'] ?? null;
 $idContacto = obtenerIdOpcional($idContactoEntrada);
 $esNuevo = $idContacto === null;
+$version = filter_var($_POST['version'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 $empresaContexto = $esNuevo ? obtenerIdOpcional($_POST['empresa_contexto'] ?? null) : null;
 $empresaRetorno = obtenerIdOpcional($_POST['return_empresa_id'] ?? null);
 $nombre = normalizarNombrePersona($_POST['contacto_nombre'] ?? null);
@@ -222,7 +226,7 @@ try {
         $guardarContacto->close();
     } else {
         $consultaActual = $conexion->prepare(
-            'SELECT activo, id_departamento, puesto FROM contactos WHERE id = ? LIMIT 1'
+            'SELECT activo, id_departamento, puesto, version FROM contactos WHERE id = ? LIMIT 1'
         );
         $consultaActual->bind_param('i', $idContacto);
         $consultaActual->execute();
@@ -231,6 +235,9 @@ try {
 
         if ($contactoActual === null) {
             throw new RuntimeException('El contacto no existe.');
+        }
+        if ($version === false || (int) $contactoActual['version'] !== (int) $version) {
+            throw new RuntimeException('Otra edición modificó este contacto. Recarga la página antes de guardar.');
         }
 
         $activo = $activoSolicitado ?? (int) $contactoActual['activo'];
@@ -245,12 +252,15 @@ try {
         $guardarContacto = $conexion->prepare(
             'UPDATE contactos
              SET nombre = ?, celular = ?, correo = ?, id_departamento = ?, puesto = ?, activo = ?,
-                 fecha_actualizacion = NOW()
-             WHERE id = ?'
+                 fecha_actualizacion = NOW(), version = version + 1
+             WHERE id = ? AND version = ?'
         );
-        $guardarContacto->bind_param('sssisii', $nombre, $telefono, $correo, $idDepartamento, $puesto, $activo, $idContacto);
+        $guardarContacto->bind_param('sssisiii', $nombre, $telefono, $correo, $idDepartamento, $puesto, $activo, $idContacto, $version);
         if (!$guardarContacto->execute()) {
             throw new RuntimeException('No fue posible actualizar el contacto.');
+        }
+        if ($guardarContacto->affected_rows !== 1) {
+            throw new RuntimeException('Otra edición modificó este contacto. Recarga la página antes de guardar.');
         }
         $guardarContacto->close();
     }

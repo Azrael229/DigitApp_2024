@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('productos');
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
@@ -60,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $empresaId = filter_var($_POST['empresa_id'] ?? null, FILTER_VALIDATE_INT);
 $equipoId = filter_var($_POST['equipo_id'] ?? null, FILTER_VALIDATE_INT);
+$version = filter_var($_POST['version'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 
 if ($empresaId === false || $empresaId === null || $empresaId < 1) {
     header('Location: ../../paginas/empresas.php');
@@ -136,11 +139,12 @@ try {
         $guardar = $conexion->prepare(
             'UPDATE empresa_equipos SET direccion_id = ?, ubicacion = ?, descripcion_id = ?, marca_id = ?,
                 modelo = ?, identificacion = ?, numero_serie = ?, unidad = ?, capacidad_maxima = ?,
-                division_real = ?, division_verificacion = ?, clase_exactitud = ?, estatus = ?
-             WHERE id = ? AND empresa_id = ?'
+                division_real = ?, division_verificacion = ?, clase_exactitud = ?, estatus = ?,
+                version = version + 1
+             WHERE id = ? AND empresa_id = ? AND version = ?'
         );
         $guardar->bind_param(
-            'isiisssssssssii',
+            'isiisssssssssiii',
             $direccionId,
             $ubicacion,
             $descripcionId,
@@ -155,13 +159,14 @@ try {
             $clase,
             $estatus,
             $equipoId,
-            $empresaId
+            $empresaId,
+            $version
         );
         $guardar->execute();
-        $guardado = $guardar->affected_rows >= 0;
+        $guardado = $guardar->affected_rows === 1;
         $guardar->close();
         if (!$guardado) {
-            throw new RuntimeException('No fue posible actualizar el equipo.');
+            throw new RuntimeException('Otra edición modificó este equipo. Recarga la página.');
         }
         $parametro = 'equipo_actualizado=1';
     } else {

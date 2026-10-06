@@ -11,7 +11,7 @@ function cargarEmpresaParaEditar() {
         'regimen_fiscal_codigo', 'regimen_fiscal_descripcion', 'regimen_capital',
         'tipo_persona', 'giro_mercantil', 'mercado', 'telefono_principal',
         'email_principal', 'pagina_web', 'estatus', 'origen_registro', 'observaciones',
-        'id_e', 'created_at', 'updated_at'
+        'id_e', 'created_at', 'updated_at', 'version'
     ];
 
     if (!empresaId) {
@@ -28,7 +28,7 @@ function cargarEmpresaParaEditar() {
                 throw new Error(datos.error);
             }
             campos.forEach(function (campo) {
-                var input = document.getElementById(campo);
+                var input = document.getElementById(campo === 'version' ? 'empresa_version' : campo);
                 if (input) {
                     input.value = datos.empresa[campo] || '';
                 }

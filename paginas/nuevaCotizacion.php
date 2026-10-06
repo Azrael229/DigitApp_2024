@@ -24,12 +24,13 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
     </div>
     <!-- titulo  -->
 
-    <form action="<?= $prefijoRuta ?>fpdf/cotizacionPDF.php" method="POST" target="cotizacion_pdf" id="form_cotizacion" class="cotizacion-form" data-oportunidad-id="<?= $oportunidadId ? (int) $oportunidadId : '' ?>" data-cotizacion-id="<?= $editandoCotizacion ? (int) $cotizacionId : '' ?>" data-return-url="<?= htmlspecialchars($paginaRegreso, ENT_QUOTES, 'UTF-8') ?>">
+    <form action="<?= $prefijoRuta ?>fpdf/cotizacionPDF.php" method="POST" target="cotizacion_pdf" id="form_cotizacion" class="cotizacion-form" data-local-draft="1" data-oportunidad-id="<?= $oportunidadId ? (int) $oportunidadId : '' ?>" data-cotizacion-id="<?= $editandoCotizacion ? (int) $cotizacionId : '' ?>" data-return-url="<?= htmlspecialchars($paginaRegreso, ENT_QUOTES, 'UTF-8') ?>">
     <input type="hidden" name="oportunidad_id" id="oportunidad_id" value="<?= $oportunidadId ? (int) $oportunidadId : '' ?>">
     <input type="hidden" name="empresa_id" id="cot_empresa_id">
     <input type="hidden" name="contacto_id" id="cot_contacto_id">
     <input type="hidden" name="direccion_id" id="cot_direccion_id">
     <input type="hidden" name="cotizacion_id" id="cotizacion_id" value="<?= $editandoCotizacion ? (int) $cotizacionId : '' ?>">
+    <input type="hidden" name="version" id="cotizacion_version" value="">
     
     
     <!-- boton submit del formulario -->

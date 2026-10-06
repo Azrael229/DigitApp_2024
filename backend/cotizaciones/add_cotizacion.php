@@ -56,6 +56,7 @@ function cotizacionTexto($valor, int $maximo, string $etiqueta, bool $obligatori
 
 try {
     $cotizacionEditarId = cotizacionId($_POST['cotizacion_id'] ?? '', true);
+    $version = cotizacionId($_POST['version'] ?? '', true);
     $fecha = cotizacionFecha($_POST['coti_fecha'] ?? '', 'La fecha de emisión');
     $vigencia = cotizacionFecha($_POST['coti_vigencia'] ?? '', 'La fecha de vigencia');
     if ($vigencia < $fecha) {
@@ -276,7 +277,7 @@ try {
     }
     if ($cotizacionEditarId !== null) {
         $consultarActual = $conexion->prepare(
-            'SELECT cot_numero FROM cotizaciones WHERE id_coti = ? FOR UPDATE'
+            'SELECT cot_numero, version FROM cotizaciones WHERE id_coti = ? FOR UPDATE'
         );
         $consultarActual->bind_param('i', $cotizacionEditarId);
         $consultarActual->execute();
@@ -284,6 +285,9 @@ try {
         $consultarActual->close();
         if ($actual === null) {
             throw new InvalidArgumentException('La cotización que deseas editar ya no existe.');
+        }
+        if ($version === null || (int) $actual['version'] !== $version) {
+            throw new RuntimeException('Otra edición modificó esta cotización. Recarga la página antes de guardar.');
         }
         $numero = (string) $actual['cot_numero'];
         $cotizacionId = $cotizacionEditarId;
@@ -300,11 +304,11 @@ try {
                 cot_pago_saldo_momento = ?, cot_garantia_tipo = ?,
                 cot_garantia_vigencia = ?, cot_garantia_unidad = ?, cot_costos_envio = ?,
                 cot_formato_version = ?, cot_terminos_version = ?, cot_terminos_snapshot = ?,
-                cot_status = ?
-             WHERE id_coti = ?'
+                cot_status = ?, version = version + 1
+             WHERE id_coti = ? AND version = ?'
         );
         $tiposActualizar = 'iii' . str_repeat('s', 13) . 'i' . str_repeat('s', 3) . 'i'
-            . str_repeat('s', 2) . 'i' . str_repeat('s', 6) . 'i';
+            . str_repeat('s', 2) . 'i' . str_repeat('s', 6) . 'ii';
         $actualizar->bind_param(
             $tiposActualizar,
             $empresaId,
@@ -337,9 +341,13 @@ try {
             $terminosVersion,
             $terminosSnapshot,
             $estatus,
-            $cotizacionId
+            $cotizacionId,
+            $version
         );
         $actualizar->execute();
+        if ($actualizar->affected_rows !== 1) {
+            throw new RuntimeException('Otra edición modificó esta cotización. Recarga la página antes de guardar.');
+        }
         $actualizar->close();
 
         $eliminarPartidas = $conexion->prepare('DELETE FROM cotizacion_partidas WHERE cotizacion_id = ?');
@@ -474,6 +482,9 @@ try {
     $mensaje = 'No fue posible guardar la cotización. Intenta nuevamente.';
     if ($error instanceof InvalidArgumentException) {
         $estado = 422;
+        $mensaje = $error->getMessage();
+    } elseif ($error instanceof RuntimeException) {
+        $estado = 409;
         $mensaje = $error->getMessage();
     } else {
         error_log('Cotizaciones: ' . $error->getMessage());

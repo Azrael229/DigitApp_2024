@@ -23,6 +23,17 @@
     box-shadow: var(--shadow-md);
 }
 
+/* Mantiene accesibles los menús aun si el complemento externo tarda en cargar. */
+.navbar .dropdown:focus-within > .dropdown-menu {
+    display: block;
+}
+
+@media (hover: hover) and (min-width: 1200px) {
+    .navbar .dropdown:hover > .dropdown-menu {
+        display: block;
+    }
+}
+
 .dropdown-item:hover {
     background: linear-gradient(90deg, rgba(89, 182, 255, 0.12), rgba(228, 0, 124, 0.12));
     color: #ffffff !important;

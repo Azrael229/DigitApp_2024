@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('clientes');
+
 require(__DIR__ . "/../../config/conexion.php");
 require_once(__DIR__ . "/../helpers/normalizador_datos.php");
 
@@ -29,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $empresa = valorPost('empresa');
 $empresaId = filter_var($_POST['empresa_id'] ?? null, FILTER_VALIDATE_INT);
 $esEdicion = $empresaId !== false && $empresaId !== null;
+$version = filter_var($_POST['version'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 $rol = valorPost('rol');
 $estatus = valorPost('estatus');
 $telefonoEntrada = valorPost('telefono_principal');
@@ -88,14 +92,19 @@ try {
                 empresa = ?, razon_social = ?, rfc = ?, rol = ?, actividad_economica = ?,
                 regimen_fiscal_codigo = ?, regimen_fiscal_descripcion = ?, regimen_capital = ?,
                 tipo_persona = ?, giro_mercantil = ?, mercado = ?, telefono_principal = ?,
-                email_principal = ?, pagina_web = ?, estatus = ?, origen_registro = ?, observaciones = ?
-            WHERE id_e = ?'
+                email_principal = ?, pagina_web = ?, estatus = ?, origen_registro = ?, observaciones = ?,
+                version = version + 1
+            WHERE id_e = ? AND version = ?'
         );
-        $tiposActualizacion = str_repeat('s', 17) . 'i';
+        $tiposActualizacion = str_repeat('s', 17) . 'ii';
         $camposActualizacion = $camposEmpresa;
         $camposActualizacion[] = $empresaId;
+        $camposActualizacion[] = $version;
         $consultaEmpresa->bind_param($tiposActualizacion, ...$camposActualizacion);
         $consultaEmpresa->execute();
+        if ($consultaEmpresa->affected_rows !== 1) {
+            throw new RuntimeException('Otra edición modificó esta empresa. Recarga la página antes de guardar.');
+        }
         $consultaEmpresa->close();
     } else {
         $consultaEmpresa = $conexion->prepare(

@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/../backend/auth/bootstrap.php';
+auth_require_permission('comercial');
+
 require __DIR__ . '/../config/conexion.php';
 require __DIR__ . '/../paginas/funciones.php';
 require_once __DIR__ . '/../backend/helpers/cotizacion_terminos.php';

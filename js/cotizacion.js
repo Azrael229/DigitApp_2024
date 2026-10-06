@@ -376,6 +376,7 @@ async function cargarCotizacionEdicion() {
           }
           var cotizacion = resultado.cotizacion;
           inputCotizacionId.value = cotizacion.id_coti;
+          document.getElementById('cotizacion_version').value = cotizacion.version || '';
           document.getElementById('oportunidad_id').value = cotizacion.oportunidad_id || '';
           inputNumCotizacion.value = cotizacion.cot_numero || '';
           document.getElementById('coti_fecha').value = cotizacion.cot_fecha || '';

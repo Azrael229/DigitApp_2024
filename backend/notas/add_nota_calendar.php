@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('operacion');
+
 $id_mes = $_POST['sel_id_mes'];
 $nota = $_POST['input_nota'];
 $file = $_FILES['input_file']['name'];

@@ -14,7 +14,7 @@ require __DIR__ . '/../construct/header.php';
         <div class="col-12 col-md-auto mt-3 mt-md-0"><a id="os-back-top" href="ordenes_servicio.php" class="btn btn-secondary"><i class="bi bi-arrow-left" aria-hidden="true"></i> Volver</a></div>
     </div>
     <div id="mensaje_form_servicio" class="alert alert-info" role="status" aria-live="polite">Preparando el formulario...</div>
-    <form id="form_orden_servicio" class="d-none" novalidate>
+    <form id="form_orden_servicio" data-local-draft="1" class="d-none" novalidate>
         <input type="hidden" id="os-version">
         <section class="card mb-4 empresa-form-card"><div class="card-body empresa-card-body p-4">
             <div class="mb-4"><p class="empresa-section-kicker mb-1">Orden de venta de origen</p><h2 id="os-sale-number" class="h4 mb-1">—</h2><p id="os-company" class="op-company-title mb-0">—</p></div>

@@ -69,8 +69,7 @@ try {
             && (string) ($input['version'] ?? '') !== (string) $old['version']) {
             throw new RuntimeException('Otra edición modificó esta oportunidad. Recarga la página antes de guardar.');
         }
-        // Sin sistema de usuarios todavía: no se atribuye la captura a una persona inventada.
-        $actor = null;
+        $actor = (int) ($_SESSION['auth_user_id'] ?? 0);
         if ($action === 'save') {
             $company = op_id($input['empresa_id'] ?? null);
             $contact = op_id($input['contacto_id'] ?? '', true);

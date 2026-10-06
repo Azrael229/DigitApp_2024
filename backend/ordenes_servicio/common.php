@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('operacion');
+
 require_once __DIR__ . '/../ordenes_venta/common.php';
 
 const OS_TIPOS = [

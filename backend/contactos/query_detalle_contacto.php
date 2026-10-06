@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('clientes');
+
 $id = filter_var(trim(file_get_contents('php://input')), FILTER_VALIDATE_INT);
 
 require __DIR__ . '/../../config/conexion.php';
@@ -16,7 +19,7 @@ if ($id === false || $id < 1) {
 $consultaContacto = $conexion->prepare(
     'SELECT c.id, c.nombre, c.celular, c.correo, c.activo, c.fecha_creacion,
             c.fecha_actualizacion, c.id_departamento, COALESCE(d.nombre, c.depto) AS departamento,
-            c.puesto
+            c.puesto, c.version
      FROM contactos AS c
      LEFT JOIN catalogo_departamentos AS d ON d.id = c.id_departamento
      WHERE c.id = ?

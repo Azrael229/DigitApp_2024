@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('clientes');
+
 $id = filter_var(trim(file_get_contents('php://input')), FILTER_VALIDATE_INT);
 
 require __DIR__ . '/../../config/conexion.php';

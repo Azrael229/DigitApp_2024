@@ -145,6 +145,7 @@ function cargarContactoParaEdicion(idContacto) {
             document.getElementById('contacto_email').value = contacto.correo || '';
             document.getElementById('puesto').value = contacto.puesto || '';
             document.getElementById('activo').value = String(contacto.activo) === '0' ? '0' : '1';
+            document.getElementById('contacto_version').value = contacto.version || '';
 
             (contacto.empresas || []).forEach(function (empresa) {
                 var opcion = selectorEmpresas.querySelector('option[value="' + String(empresa.id_empresa) + '"]');

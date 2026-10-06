@@ -18,9 +18,10 @@ $direccionId = filter_input(INPUT_GET, 'direccion_id', FILTER_VALIDATE_INT);
     <?php if ($empresaId === false || $empresaId === null): ?>
         <div class="alert alert-danger">No se indicó una empresa válida.</div>
     <?php else: ?>
-        <form action="<?= $prefijoRuta ?>backend/empresas/guardar_direccion_empresa.php" method="POST">
+        <form data-local-draft="1" action="<?= $prefijoRuta ?>backend/empresas/guardar_direccion_empresa.php" method="POST">
             <input type="hidden" name="empresa_id" value="<?= htmlspecialchars((string) $empresaId) ?>">
             <input type="hidden" name="direccion_id" id="direccion_id" value="<?= htmlspecialchars((string) ($direccionId ?: '')) ?>">
+            <input type="hidden" name="version" id="direccion_version" value="">
 
             <div class="card mb-4 empresa-form-card">
                 <div class="card-body empresa-card-body">

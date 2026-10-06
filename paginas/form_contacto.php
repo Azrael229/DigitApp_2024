@@ -58,8 +58,9 @@ require __DIR__ . '/../construct/header.php';
     <?php endif; ?>
     <div id="mensaje_form_contacto" class="alert d-none mt-4" role="status" aria-live="polite"></div>
 
-    <form id="form_contacto" action="<?= $prefijoRuta ?>backend/contactos/add_contacto.php" method="POST" novalidate>
+    <form id="form_contacto" data-local-draft="1" action="<?= $prefijoRuta ?>backend/contactos/add_contacto.php" method="POST" novalidate>
         <input type="hidden" id="contacto_id" name="contacto_id" value="<?= $idContacto && $idContacto > 0 ? (int) $idContacto : '' ?>">
+        <input type="hidden" id="contacto_version" name="version" value="">
         <input type="hidden" name="empresas_presentes" value="1">
         <input type="hidden" name="direcciones_presentes" value="1">
         <?php if (!$empresaContextoInvalida && $empresaContextoId): ?>

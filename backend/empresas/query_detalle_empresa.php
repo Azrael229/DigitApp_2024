@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('clientes');
 $id = filter_var(trim(file_get_contents('php://input')), FILTER_VALIDATE_INT);
 
 require (__DIR__ . "/../../config/conexion.php");
@@ -17,7 +19,7 @@ $consultaEmpresa = $conexion->prepare(
             regimen_fiscal_codigo, regimen_fiscal_descripcion, regimen_capital,
             tipo_persona, giro_mercantil, mercado, telefono_principal,
             email_principal, pagina_web, estatus, origen_registro, observaciones,
-            created_at, updated_at
+            created_at, updated_at, version
      FROM empresas
      WHERE id_e = ?
      LIMIT 1'
@@ -37,7 +39,7 @@ if ($empresa === null) {
 $consultaDirecciones = $conexion->prepare(
     'SELECT id, tipo_direccion, alias, es_principal, calle, numero_exterior,
             numero_interior, colonia, localidad, municipio, ciudad, estado,
-            codigo_postal, pais, entre_calles, referencia, enlace_maps
+            codigo_postal, pais, entre_calles, referencia, enlace_maps, version
      FROM empresa_direcciones
      WHERE empresa_id = ?
      ORDER BY tipo_direccion, es_principal DESC, id ASC'
@@ -69,7 +71,7 @@ $consultaEquipos = $conexion->prepare(
             COALESCE(ee.identificacion, \'\') AS identificacion,
             COALESCE(ee.numero_serie, \'\') AS numero_serie,
             ee.unidad, ee.capacidad_maxima, ee.division_real, ee.division_verificacion,
-            COALESCE(ee.clase_exactitud, \'\') AS clase_exactitud, ee.estatus,
+            COALESCE(ee.clase_exactitud, \'\') AS clase_exactitud, ee.estatus, ee.version,
             COALESCE(cd.nombre, \'\') AS descripcion, COALESCE(cm.nombre, \'\') AS marca
      FROM empresa_equipos ee
      LEFT JOIN catalogo_descripciones_equipo cd ON cd.id = ee.descripcion_id

@@ -128,6 +128,7 @@ function mostrarEquipoEnFormulario(equipo) {
     campoDivisionRealEquipo.value = normalizarDecimalEquipo(equipo.division_real);
     campoDivisionVerificacionEquipo.value = normalizarDecimalEquipo(equipo.division_verificacion);
     document.getElementById('estatus').value = equipo.estatus || 'activo';
+    document.getElementById('equipo_version').value = equipo.version || '';
     actualizarClaseEquipo();
 }
 

@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('clientes');
 require(__DIR__ . "/../../config/conexion.php");
 
 function valorPostDireccion(string $campo): ?string
@@ -22,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $empresaId = filter_var($_POST['empresa_id'] ?? null, FILTER_VALIDATE_INT);
 $direccionId = filter_var($_POST['direccion_id'] ?? null, FILTER_VALIDATE_INT);
+$version = filter_var($_POST['version'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 $tipoDireccion = valorPostDireccion('tipo_direccion');
 $calle = valorPostDireccion('calle');
 
@@ -66,10 +69,10 @@ if ($direccionId !== false && $direccionId !== null) {
             tipo_direccion = ?, alias = ?, es_principal = ?, calle = ?,
             numero_exterior = ?, numero_interior = ?, colonia = ?, localidad = ?,
             municipio = ?, ciudad = ?, estado = ?, codigo_postal = ?, pais = ?,
-            entre_calles = ?, referencia = ?, enlace_maps = ?
-        WHERE id = ? AND empresa_id = ?'
+            entre_calles = ?, referencia = ?, enlace_maps = ?, version = version + 1
+        WHERE id = ? AND empresa_id = ? AND version = ?'
     );
-    $tiposActualizacion = 'ssi' . str_repeat('s', 13) . 'ii';
+    $tiposActualizacion = 'ssi' . str_repeat('s', 13) . 'iii';
     $consultaDireccion->bind_param(
         $tiposActualizacion,
         $tipoDireccion,
@@ -89,7 +92,8 @@ if ($direccionId !== false && $direccionId !== null) {
         $campos[12],
         $campos[13],
         $direccionId,
-        $empresaId
+        $empresaId,
+        $version
     );
 } else {
     $consultaDireccion = $conexion->prepare(
@@ -123,12 +127,15 @@ if ($direccionId !== false && $direccionId !== null) {
 
 try {
     $consultaDireccion->execute();
+    if ($direccionId !== false && $direccionId !== null && $consultaDireccion->affected_rows !== 1) {
+        throw new RuntimeException('Otra edición modificó esta dirección. Recarga la página.');
+    }
     $consultaDireccion->close();
     mysqli_close($conexion);
     redirigirEmpresaDireccion($empresaId, $direccionId !== false && $direccionId !== null ? 'direccion_actualizada=1' : 'direccion_guardada=1');
 } catch (Throwable $error) {
     $consultaDireccion->close();
     mysqli_close($conexion);
-    redirigirEmpresaDireccion($empresaId, 'error=No%20fue%20posible%20guardar%20la%20direcci%C3%B3n');
+    redirigirEmpresaDireccion($empresaId, 'error=' . rawurlencode($error->getMessage()));
 }
 ?>

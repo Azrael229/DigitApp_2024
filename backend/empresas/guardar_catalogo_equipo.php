@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('productos');
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }

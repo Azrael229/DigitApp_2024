@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('facturacion');
 header('Content-Type: application/json');
 
 $uploadDirectory = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'global_xml' . DIRECTORY_SEPARATOR;

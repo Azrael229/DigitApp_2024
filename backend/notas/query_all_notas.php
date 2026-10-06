@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('operacion');
+
 require (__DIR__ . "/../../config/conexion.php");
 
 $sql = "SELECT * FROM notas_2024 WHERE mes = '1'";

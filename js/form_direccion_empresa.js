@@ -38,6 +38,7 @@ function cargarDireccionParaEditar() {
             document.getElementById('referencia').value = direccion.referencia || '';
             document.getElementById('enlace_maps').value = direccion.enlace_maps || '';
             document.getElementById('es_principal').checked = Number(direccion.es_principal) === 1;
+            document.getElementById('direccion_version').value = direccion.version || '';
             tituloDireccion.textContent = 'Editar dirección';
         })
         .catch(function () {

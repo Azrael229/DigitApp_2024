@@ -1,5 +1,8 @@
 <?php
 
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_permission('clientes');
+
 $id = file_get_contents('php://input');
 
 
