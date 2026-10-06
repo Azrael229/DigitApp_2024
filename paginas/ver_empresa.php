@@ -1,8 +1,6 @@
 <?php
+require_once __DIR__ . '/../backend/auth/bootstrap.php';
 $prefijoRuta = '../';
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
 if (empty($_SESSION['empresa_notas_csrf'])) {
     $_SESSION['empresa_notas_csrf'] = bin2hex(random_bytes(32));
 }

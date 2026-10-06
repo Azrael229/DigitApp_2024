@@ -1,10 +1,8 @@
 <?php
+require_once __DIR__ . '/../backend/auth/bootstrap.php';
 $prefijoRuta = '../';
 $empresaId = filter_input(INPUT_GET, 'empresa_id', FILTER_VALIDATE_INT);
 $equipoId = filter_input(INPUT_GET, 'equipo_id', FILTER_VALIDATE_INT);
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
 if (empty($_SESSION['empresa_equipos_csrf'])) {
     $_SESSION['empresa_equipos_csrf'] = bin2hex(random_bytes(32));
 }
