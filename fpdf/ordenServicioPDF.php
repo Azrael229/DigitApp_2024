@@ -119,6 +119,98 @@ final class OrdenServicioPDF extends FPDF
         $this->Cell(188, 6, $this->pdfText($title), 0, 0, 'L', true);
         $this->SetTextColor(...self::TEXTO);
     }
+
+    // Formatea magnitudes metrológicas sin comas y conserva la unidad maestra del equipo.
+    public function measurement($value, string $unit): string
+    {
+        if ($value === null || $value === '' || (float) $value <= 0) {
+            return '—';
+        }
+        $formatted = rtrim(rtrim(number_format((float) $value, 6, '.', ' '), '0'), '.');
+        return trim($formatted . ' ' . $unit);
+    }
+
+    // Dibuja una etiqueta y su valor completo dentro de una celda informativa.
+    private function equipmentField(float $x, float $y, float $width, float $height, string $label, string $value): void
+    {
+        $this->SetDrawColor(...self::BORDE);
+        $this->SetFillColor(255, 255, 255);
+        $this->Rect($x, $y, $width, $height, 'DF');
+        $this->SetTextColor(...self::AZUL);
+        $this->SetFont('Arial', 'B', 6.8);
+        $this->SetXY($x + 2, $y + 1.2);
+        $this->Cell($width - 4, 3, $this->pdfText($label), 0, 0, 'L');
+        $this->SetTextColor(...self::TEXTO);
+        $this->SetFont('Arial', '', 8.1);
+        $this->SetXY($x + 2, $y + 4.2);
+        $this->MultiCell($width - 4, 3.7, $this->pdfText($value !== '' ? $value : '—'), 0, 'L');
+    }
+
+    // Presenta un equipo como ficha horizontal legible y evita la compresión de diez columnas.
+    public function equipmentCard(float $y, int $number, array $equipment): float
+    {
+        $x = 14.0;
+        $width = 188.0;
+        $headerHeight = 10.0;
+        $rowHeight = 11.0;
+        $metroHeight = 8.0;
+        $notesHeight = 7.0;
+        $numberWidth = 27.0;
+
+        $this->SetDrawColor(...self::AZUL);
+        $this->SetFillColor(...self::AZUL);
+        $this->Rect($x, $y, $numberWidth, $headerHeight, 'DF');
+        $this->SetTextColor(255, 255, 255);
+        $this->SetFont('Arial', 'B', 8.2);
+        $this->SetXY($x + 2, $y + 2.5);
+        $this->Cell($numberWidth - 4, 5, $this->pdfText(sprintf('EQUIPO %02d', $number)), 0, 0, 'L');
+
+        $this->SetFillColor(220, 230, 238);
+        $this->Rect($x + $numberWidth, $y, $width - $numberWidth, $headerHeight, 'DF');
+        $this->SetTextColor(...self::TEXTO);
+        $this->SetFont('Arial', 'B', 8.5);
+        $this->SetXY($x + $numberWidth + 2, $y + 1.5);
+        $this->MultiCell($width - $numberWidth - 4, 3.7, $this->pdfText((string) ($equipment['descripcion'] ?: 'Equipo')), 0, 'L');
+
+        $column = $width / 3;
+        $rowOneY = $y + $headerHeight;
+        $this->equipmentField($x, $rowOneY, $column, $rowHeight, 'Marca', (string) $equipment['marca']);
+        $this->equipmentField($x + $column, $rowOneY, $column, $rowHeight, 'Modelo', (string) $equipment['modelo']);
+        $this->equipmentField($x + 2 * $column, $rowOneY, $column, $rowHeight, 'Número de serie', (string) $equipment['numero_serie']);
+
+        $rowTwoY = $rowOneY + $rowHeight;
+        $this->equipmentField($x, $rowTwoY, $width / 2, $rowHeight, 'Identificación', (string) $equipment['identificacion']);
+        $this->equipmentField($x + $width / 2, $rowTwoY, $width / 2, $rowHeight, 'Ubicación', (string) $equipment['ubicacion']);
+
+        $metroY = $rowTwoY + $rowHeight;
+        $unit = trim((string) $equipment['unidad']);
+        $metroValues = [
+            'Max: ' . $this->measurement($equipment['capacidad_maxima'], $unit),
+            'd: ' . $this->measurement($equipment['division_real'], $unit),
+            'e: ' . $this->measurement($equipment['division_verificacion'], $unit),
+            'Clase: ' . ((string) $equipment['clase_exactitud'] ?: '—'),
+        ];
+        $metroWidth = $width / 4;
+        $this->SetFillColor(231, 238, 244);
+        $this->SetFont('Arial', 'B', 8.0);
+        foreach ($metroValues as $index => $value) {
+            $cellX = $x + $index * $metroWidth;
+            $this->Rect($cellX, $metroY, $metroWidth, $metroHeight, 'DF');
+            $this->SetXY($cellX + 2, $metroY + 2);
+            $this->Cell($metroWidth - 4, 4, $this->pdfText($value), 0, 0, 'L');
+        }
+
+        $notesY = $metroY + $metroHeight;
+        $this->SetFillColor(255, 255, 255);
+        $this->Rect($x, $notesY, $width, $notesHeight, 'DF');
+        $this->SetTextColor(102, 116, 130);
+        $this->SetFont('Arial', '', 6.7);
+        $this->SetXY($x + 2, $notesY + 1.5);
+        $this->Cell($width - 4, 4, $this->pdfText('Corrección o anotación en campo:'), 0, 0, 'L');
+        $this->SetTextColor(...self::TEXTO);
+
+        return $headerHeight + 2 * $rowHeight + $metroHeight + $notesHeight;
+    }
 }
 
 $types = OS_TIPOS;
@@ -138,7 +230,7 @@ $pdf->Cell(188, 10, $pdf->pdfText($typeLabel), 0, 1, 'C', true);
 $pdf->SetTextColor(24, 50, 75);
 $pdf->SetFont('Arial', '', 8);
 $pdf->SetXY(14, 41);
-$pdf->Cell(188, 5, $pdf->pdfText('Fecha: ' . date('d/m/Y', strtotime((string) $orden['fecha_generacion']))), 0, 0, 'L');
+$pdf->Cell(188, 5, $pdf->pdfText('Fecha de emisión: ' . date('d/m/Y', strtotime((string) $orden['fecha_generacion']))), 0, 0, 'L');
 
 // Datos fiscales y de entrega se distinguen en columnas independientes.
 $fiscalBody = implode("\n", array_filter([
@@ -169,70 +261,30 @@ $pdf->SetFont('Arial', '', 7.2);
 $pdf->SetXY(16, 102);
 $pdf->MultiCell(184, 4, $pdf->pdfText($pdf->compact((string) ($orden['instrucciones'] ?: 'Sin instrucciones adicionales.'), 520)), 0, 'L');
 
-// Tabla de equipos con crecimiento dinámico y encabezados repetidos.
+// Fichas de equipo con un máximo de dos en la portada y cuatro por página de continuación.
 $pdf->section(124, 'EQUIPOS INCLUIDOS EN EL SERVICIO');
-$widths = [34, 17, 21, 24, 22, 18, 14, 10, 10, 18];
-$headers = ['Descripción', 'Marca', 'Modelo', 'Serie', 'Identificación', 'Ubicación', 'Max', 'd', 'e', 'Clase'];
-$equipmentHeaderHeight = 8.0;
-$equipmentRowHeight = 8.0;
-$drawEquipmentHeader = static function (OrdenServicioPDF $document, float $y) use ($widths, $headers, $equipmentHeaderHeight): void {
-    $document->SetFillColor(198, 209, 219);
-    $document->SetTextColor(24, 50, 75);
-    $document->SetFont('Arial', 'B', 6.6);
-    $document->SetXY(14, $y);
-    foreach ($headers as $index => $header) {
-        $document->Cell($widths[$index], $equipmentHeaderHeight, $document->pdfText($header), 1, 0, 'C', true);
-    }
-    $document->Ln($equipmentHeaderHeight);
-};
-$drawEquipmentHeader($pdf, 130);
-$pdf->SetFont('Arial', '', 6.6);
+$equipmentY = 133.0;
 if (!$orden['equipos']) {
-    $pdf->Cell(188, $equipmentRowHeight, $pdf->pdfText('Sin equipos registrados.'), 1, 1, 'C');
+    $pdf->SetXY(14, $equipmentY);
+    $pdf->SetFont('Arial', '', 8);
+    $pdf->Cell(188, 12, $pdf->pdfText('Sin equipos registrados.'), 1, 1, 'C');
 } else {
     foreach ($orden['equipos'] as $index => $equipment) {
-        if ($pdf->GetY() + $equipmentRowHeight > 250) {
+        if ($index === 2 || ($index > 2 && ($index - 2) % 4 === 0)) {
             $pdf->AddPage();
             $pdf->section(29, 'EQUIPOS INCLUIDOS EN EL SERVICIO · CONTINUACIÓN');
-            $drawEquipmentHeader($pdf, 35);
-            $pdf->SetFont('Arial', '', 6.6);
+            $equipmentY = 38.0;
         }
-        $capacity = (float) $equipment['capacidad_maxima'] > 0
-            ? rtrim(rtrim(number_format((float) $equipment['capacidad_maxima'], 3, '.', ','), '0'), '.') . ' ' . $equipment['unidad']
-            : '—';
-        $divisionReal = (float) $equipment['division_real'] > 0
-            ? rtrim(rtrim((string) $equipment['division_real'], '0'), '.')
-            : '—';
-        $divisionVerification = (float) $equipment['division_verificacion'] > 0
-            ? rtrim(rtrim((string) $equipment['division_verificacion'], '0'), '.')
-            : '—';
-        $values = [
-            $pdf->compact((string) $equipment['descripcion'], 29),
-            $pdf->compact((string) $equipment['marca'], 14),
-            $pdf->compact((string) $equipment['modelo'], 16),
-            $pdf->compact((string) $equipment['numero_serie'], 16),
-            $pdf->compact((string) $equipment['identificacion'], 18),
-            $pdf->compact((string) $equipment['ubicacion'], 15),
-            $pdf->compact($capacity, 12),
-            $pdf->compact($divisionReal, 8),
-            $pdf->compact($divisionVerification, 8),
-            $pdf->compact((string) $equipment['clase_exactitud'], 14),
-        ];
-        foreach ($values as $column => $value) {
-            $pdf->Cell($widths[$column], $equipmentRowHeight, $pdf->pdfText($value), 1, 0, $column >= 6 ? 'C' : 'L');
-        }
-        $pdf->Ln($equipmentRowHeight);
+        $equipmentY += $pdf->equipmentCard($equipmentY, $index + 1, $equipment) + 4;
     }
 }
 
-// Reserva al final del documento una zona amplia para observaciones y firmas.
-if ($pdf->GetY() > 154) {
-    $pdf->AddPage();
-}
-$observationsY = max(160.0, $pdf->GetY() + 6);
+// Reserva una página final con un área de observaciones 50% mayor y firmas independientes.
+$pdf->AddPage();
+$observationsY = 65.0;
 $pdf->section($observationsY, 'OBSERVACIONES Y ANOTACIONES MANUALES');
 $pdf->SetDrawColor(130, 145, 160);
-$pdf->Rect(14, $observationsY + 6, 188, 219 - ($observationsY + 6));
+$pdf->Rect(14, $observationsY + 6, 188, 79.5);
 $pdf->SetFont('Arial', '', 6.5);
 $pdf->SetTextColor(102, 116, 130);
 $pdf->SetXY(16, $observationsY + 8);
@@ -240,19 +292,21 @@ $pdf->Cell(184, 4, $pdf->pdfText('Espacio para anotaciones del técnico o del cl
 
 $pdf->SetTextColor(24, 50, 75);
 $pdf->SetFont('Arial', 'B', 7.5);
-$pdf->SetXY(14, 222);
+$pdf->SetXY(14, 163);
 $pdf->Cell(88, 5, $pdf->pdfText('ACEPTACIÓN DEL CLIENTE'), 0, 0, 'C');
 $pdf->Cell(12, 5, '', 0, 0);
 $pdf->Cell(88, 5, $pdf->pdfText('PERSONAL QUE ENTREGA EL TRABAJO'), 0, 1, 'C');
 $pdf->SetFont('Arial', '', 7);
-$pdf->SetXY(14, 239);
+$pdf->SetXY(14, 190);
 $pdf->Cell(88, 4, '________________________________________', 0, 0, 'C');
 $pdf->Cell(12, 4, '', 0, 0);
 $pdf->Cell(88, 4, '________________________________________', 0, 1, 'C');
-$pdf->SetXY(14, 244);
+$pdf->SetXY(14, 195);
 $pdf->Cell(88, 4, $pdf->pdfText('Nombre y firma'), 0, 0, 'C');
 $pdf->Cell(12, 4, '', 0, 0);
 $pdf->Cell(88, 4, $pdf->pdfText('Nombre y firma'), 0, 0, 'C');
+$pdf->SetXY(14, 202);
+$pdf->Cell(88, 4, $pdf->pdfText('Fecha de ejecución: ____ / ____ / ______'), 0, 0, 'C');
 
 $filename = preg_replace('/[^A-Za-z0-9_-]/', '_', (string) $orden['numero_servicio']) . '.pdf';
 $pdf->Output('I', $filename);
