@@ -3,6 +3,10 @@ $prefijoRuta = '../';
 $idContacto = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 $idInvalido = isset($_GET['id']) && ($idContacto === false || $idContacto < 1);
 $empresaParametroId = filter_input(INPUT_GET, 'empresa_id', FILTER_VALIDATE_INT);
+$returnUrl = (string) ($_GET['return_url'] ?? '');
+if ($returnUrl !== '' && !preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
+    $returnUrl = '';
+}
 $origenEmpresa = ($_GET['from'] ?? '') === 'empresa';
 $empresaContextoId = $idContacto ? null : $empresaParametroId;
 $empresaRetornoId = $origenEmpresa ? $empresaParametroId : null;
@@ -42,7 +46,7 @@ mysqli_close($conexion);
 require __DIR__ . '/../construct/header.php';
 ?>
 
-<div class="container mt-5 mb-5 contain shadow-lg contacto-form-page" data-contact-id="<?= $idContacto ? (int) $idContacto : '' ?>" data-context-company-id="<?= !$empresaContextoInvalida && $empresaContextoId ? (int) $empresaContextoId : '' ?>" data-return-company-id="<?= !$empresaContextoInvalida && $empresaRetornoId ? (int) $empresaRetornoId : '' ?>">
+<div class="container mt-5 mb-5 contain shadow-lg contacto-form-page" data-contact-id="<?= $idContacto ? (int) $idContacto : '' ?>" data-context-company-id="<?= !$empresaContextoInvalida && $empresaContextoId ? (int) $empresaContextoId : '' ?>" data-return-company-id="<?= !$empresaContextoInvalida && $empresaRetornoId ? (int) $empresaRetornoId : '' ?>" data-return-url="<?= htmlspecialchars($returnUrl, ENT_QUOTES, 'UTF-8') ?>">
     <div class="row align-items-center contacto-form-header">
         <div class="col">
             <p class="contactos-kicker mb-1">Directorio de contactos</p>
@@ -64,6 +68,7 @@ require __DIR__ . '/../construct/header.php';
         <input type="hidden" id="contacto_csrf" name="csrf" value="<?= htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') ?>">
         <input type="hidden" name="empresas_presentes" value="1">
         <input type="hidden" name="direcciones_presentes" value="1">
+        <input type="hidden" name="return_url" value="<?= htmlspecialchars($returnUrl, ENT_QUOTES, 'UTF-8') ?>">
         <?php if (!$empresaContextoInvalida && $empresaContextoId): ?>
             <input type="hidden" name="empresa_contexto" value="<?= (int) $empresaContextoId ?>">
         <?php endif; ?>
@@ -176,6 +181,6 @@ require __DIR__ . '/../construct/header.php';
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="<?= $prefijoRuta ?>js/duplicate-warning.js?v=20261006-1"></script>
-<script src="<?= $prefijoRuta ?>js/form_contacto.js?v=20261006-1"></script>
+<script src="<?= $prefijoRuta ?>js/form_contacto.js?v=20261006-2"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

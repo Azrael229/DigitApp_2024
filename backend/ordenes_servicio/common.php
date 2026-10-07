@@ -64,6 +64,46 @@ function os_get(mysqli $db, int $id, bool $lock = false): array
         throw new OutOfBoundsException('Orden de servicio no encontrada.');
     }
     $order = $rows[0];
+    $companies = ov_rows($db, 'SELECT empresa, razon_social, rfc, dir_fiscal,
+            regimen_fiscal_codigo, regimen_fiscal_descripcion
+        FROM empresas WHERE id_e = ?', 'i', [(int) $order['empresa_id']]);
+    if ($companies) {
+        $company = $companies[0];
+        $order['empresa_nombre'] = trim((string) $company['empresa']);
+        $order['fiscal_razon_social'] = trim((string) ($company['razon_social'] ?: $company['empresa']));
+        $order['fiscal_rfc'] = trim((string) $company['rfc']);
+        $order['fiscal_regimen'] = trim(implode(' · ', array_filter([
+            $company['regimen_fiscal_codigo'] ?? '', $company['regimen_fiscal_descripcion'] ?? '',
+        ], static fn($value) => trim((string) $value) !== '')));
+        $fiscalAddresses = ov_rows($db, 'SELECT * FROM empresa_direcciones
+            WHERE empresa_id = ? AND tipo_direccion = \'fiscal\'
+            ORDER BY es_principal DESC, id LIMIT 1', 'i', [(int) $order['empresa_id']]);
+        $order['fiscal_direccion'] = $fiscalAddresses
+            ? os_address($fiscalAddresses[0])
+            : trim((string) $company['dir_fiscal']);
+    }
+    $deliveryContactId = (int) ($order['entrega_contacto_id'] ?: $order['contacto_id']);
+    if ($deliveryContactId > 0) {
+        $contacts = ov_rows($db, 'SELECT c.nombre, c.celular, c.correo, c.puesto,
+                COALESCE(cd.nombre, c.depto) AS departamento
+            FROM contactos c LEFT JOIN catalogo_departamentos cd ON cd.id = c.id_departamento
+            WHERE c.id = ?', 'i', [$deliveryContactId]);
+        if ($contacts) {
+            $order['entrega_contacto'] = trim((string) $contacts[0]['nombre']);
+            $order['entrega_telefono'] = trim((string) ($contacts[0]['celular'] ?? ''));
+            $order['entrega_correo'] = trim((string) ($contacts[0]['correo'] ?? ''));
+            $order['entrega_puesto_mostrado'] = trim((string) ($contacts[0]['puesto'] ?? ''));
+            $order['entrega_departamento_mostrado'] = trim((string) ($contacts[0]['departamento'] ?? ''));
+        }
+    }
+    $deliveryAddressId = (int) ($order['entrega_direccion_id'] ?: $order['direccion_id']);
+    if ($deliveryAddressId > 0) {
+        $addresses = ov_rows($db, 'SELECT * FROM empresa_direcciones WHERE id = ? AND empresa_id = ?',
+            'ii', [$deliveryAddressId, (int) $order['empresa_id']]);
+        if ($addresses) {
+            $order['entrega_direccion'] = os_address($addresses[0]);
+        }
+    }
     $order['equipos'] = ov_rows($db, 'SELECT * FROM orden_servicio_equipos
         WHERE orden_servicio_id = ? ORDER BY posicion, id', 'i', [$id]);
     return $order;

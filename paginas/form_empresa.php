@@ -2,6 +2,10 @@
 
 $prefijoRuta = '../';
 $empresaId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+$returnUrl = (string) ($_GET['return_url'] ?? '');
+if ($returnUrl !== '' && !preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
+    $returnUrl = '';
+}
 $contactoRetornoId = filter_input(INPUT_GET, 'contacto_id', FILTER_VALIDATE_INT);
 if ($contactoRetornoId === false || $contactoRetornoId < 1) {
     $contactoRetornoId = null;
@@ -41,6 +45,7 @@ require(__DIR__ . "/../construct/header.php");
     <input type="hidden" name="empresa_id" id="empresa_id" value="<?= htmlspecialchars((string) ($empresaId ?: '')) ?>">
     <input type="hidden" name="version" id="empresa_version" value="">
     <input type="hidden" name="contacto_retorno_id" id="contacto_retorno_id" value="<?= $contactoRetornoId ? (int) $contactoRetornoId : '' ?>">
+    <input type="hidden" name="return_url" value="<?= htmlspecialchars($returnUrl, ENT_QUOTES, 'UTF-8') ?>">
     <!-- row de botones de formulario empresas  -->
     <div class="row border-top justify-content-center">
         <!-- bloque de botones -->
@@ -51,7 +56,7 @@ require(__DIR__ . "/../construct/header.php");
                     <button id="btn_guardar_empresa" type="submit" class="btn btn-outline-success btn-empresa-guardar px-4">
                         Guardar
                     </button>
-                    <a id="btn_cancelar_empresa" href="<?= $contactoRetornoId ? 'ver_contacto.php?id=' . (int) $contactoRetornoId : 'empresas.php' ?>" class="btn btn-danger px-4">
+                    <a id="btn_cancelar_empresa" href="<?= htmlspecialchars($returnUrl !== '' ? $returnUrl : ($contactoRetornoId ? 'ver_contacto.php?id=' . (int) $contactoRetornoId : 'empresas.php'), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-danger px-4">
                         Cancelar
                     </a>
                 </div>

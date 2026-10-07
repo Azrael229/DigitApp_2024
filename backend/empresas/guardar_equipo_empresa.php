@@ -7,8 +7,13 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 require __DIR__ . '/../../config/conexion.php';
 
-function redirigirEquipoEmpresa(int $empresaId, string $parametro): void
+function redirigirEquipoEmpresa(int $empresaId, string $parametro, string $returnUrl = ''): void
 {
+    if ($returnUrl !== '' && preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
+        $separador = str_contains($returnUrl, '?') ? '&' : '?';
+        header('Location: ../../paginas/' . $returnUrl . $separador . $parametro);
+        exit;
+    }
     header('Location: ../../paginas/ver_empresa.php?id=' . $empresaId . '&' . $parametro . '#equipos');
     exit;
 }
@@ -63,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $empresaId = filter_var($_POST['empresa_id'] ?? null, FILTER_VALIDATE_INT);
 $equipoId = filter_var($_POST['equipo_id'] ?? null, FILTER_VALIDATE_INT);
 $version = filter_var($_POST['version'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+$returnUrl = trim((string) ($_POST['return_url'] ?? ''));
 
 if ($empresaId === false || $empresaId === null || $empresaId < 1) {
     header('Location: ../../paginas/empresas.php');
@@ -72,7 +78,7 @@ if ($empresaId === false || $empresaId === null || $empresaId < 1) {
 $token = (string) ($_POST['csrf'] ?? '');
 if (empty($_SESSION['empresa_equipos_csrf']) || !hash_equals($_SESSION['empresa_equipos_csrf'], $token)) {
     mysqli_close($conexion);
-    redirigirEquipoEmpresa($empresaId, 'error_equipo=La%20sesión%20del%20formulario%20expiró');
+    redirigirEquipoEmpresa($empresaId, 'error_equipo=La%20sesión%20del%20formulario%20expiró', $returnUrl);
 }
 
 $direccionId = idOpcionalEquipo($_POST['direccion_id'] ?? null);
@@ -95,7 +101,7 @@ if (
     || !in_array($estatus, ['activo', 'fuera_servicio', 'inactivo'], true)
 ) {
     mysqli_close($conexion);
-    redirigirEquipoEmpresa($empresaId, 'error_equipo=Revise%20los%20datos%20obligatorios%20del%20equipo');
+    redirigirEquipoEmpresa($empresaId, 'error_equipo=Revise%20los%20datos%20obligatorios%20del%20equipo', $returnUrl);
 }
 
 $direccionValida = true;
@@ -129,7 +135,7 @@ if ($marcaId !== null) {
 
 if (!$direccionValida || !$descripcionValida || !$marcaValida) {
     mysqli_close($conexion);
-    redirigirEquipoEmpresa($empresaId, 'error_equipo=La%20dirección%2C%20descripción%20o%20marca%20no%20es%20válida');
+    redirigirEquipoEmpresa($empresaId, 'error_equipo=La%20dirección%2C%20descripción%20o%20marca%20no%20es%20válida', $returnUrl);
 }
 
 $clase = $divisionVerificacion === null ? null : claseExactitudEquipo($capacidad, $divisionVerificacion);
@@ -200,9 +206,9 @@ try {
     }
 } catch (Throwable $error) {
     mysqli_close($conexion);
-    redirigirEquipoEmpresa($empresaId, 'error_equipo=No%20fue%20posible%20guardar%20el%20equipo');
+    redirigirEquipoEmpresa($empresaId, 'error_equipo=No%20fue%20posible%20guardar%20el%20equipo', $returnUrl);
 }
 
 mysqli_close($conexion);
-redirigirEquipoEmpresa($empresaId, $parametro);
+redirigirEquipoEmpresa($empresaId, $parametro, $returnUrl);
 ?>

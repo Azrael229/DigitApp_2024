@@ -102,15 +102,40 @@ function ov_datetime($value): ?string
 
 function ov_address(array $row): string
 {
-    if (trim((string) ($row['cot_direccion'] ?? '')) !== '') {
-        return trim((string) $row['cot_direccion']);
-    }
     $parts = array_filter([
         trim((string) ($row['calle'] ?? '')) . ' ' . trim((string) ($row['numero_exterior'] ?? '')),
-        $row['numero_interior'] ?? '', $row['colonia'] ?? '', $row['ciudad'] ?? '',
-        $row['estado'] ?? '', $row['codigo_postal'] ?? '', $row['pais'] ?? '',
+        trim((string) ($row['numero_interior'] ?? '')) !== '' ? 'Int. ' . trim((string) $row['numero_interior']) : '',
+        $row['colonia'] ?? '', $row['localidad'] ?? '', $row['municipio'] ?? '', $row['ciudad'] ?? '',
+        $row['estado'] ?? '', trim((string) ($row['codigo_postal'] ?? '')) !== '' ? 'C.P. ' . trim((string) $row['codigo_postal']) : '',
+        $row['pais'] ?? '', $row['entre_calles'] ?? '', $row['referencia'] ?? '',
     ], static fn($value) => trim((string) $value) !== '');
-    return implode(', ', array_map('trim', $parts));
+    $address = implode(', ', array_map('trim', $parts));
+    return $address !== '' ? $address : trim((string) ($row['direccion_original'] ?? ''));
+}
+
+function ov_company_contacts(mysqli $db, int $companyId): array
+{
+    return ov_rows($db, 'SELECT c.id, c.nombre, c.celular, c.correo, c.puesto,
+            COALESCE(cd.nombre, c.depto) AS departamento, ec.es_principal
+        FROM empresa_contactos ec
+        JOIN contactos c ON c.id = ec.id_contacto
+        LEFT JOIN catalogo_departamentos cd ON cd.id = c.id_departamento
+        WHERE ec.id_empresa = ? AND ec.activo = 1 AND c.activo = 1
+        ORDER BY ec.es_principal DESC, c.nombre, c.id', 'i', [$companyId]);
+}
+
+function ov_company_addresses(mysqli $db, int $companyId): array
+{
+    $addresses = ov_rows($db, 'SELECT id, tipo_direccion, alias, es_principal, calle,
+            numero_exterior, numero_interior, colonia, localidad, municipio, ciudad,
+            estado, codigo_postal, pais, entre_calles, referencia, direccion_original
+        FROM empresa_direcciones WHERE empresa_id = ?
+        ORDER BY es_principal DESC, tipo_direccion, alias, id', 'i', [$companyId]);
+    foreach ($addresses as &$address) {
+        $address['direccion_texto'] = ov_address($address);
+    }
+    unset($address);
+    return $addresses;
 }
 
 function ov_get(mysqli $db, int $id, bool $lock = false): array
@@ -131,6 +156,28 @@ function ov_get(mysqli $db, int $id, bool $lock = false): array
         throw new OutOfBoundsException('Orden de venta no encontrada.');
     }
     $order = $rows[0];
+    $companies = ov_rows($db, 'SELECT empresa FROM empresas WHERE id_e = ?', 'i', [(int) $order['empresa_id']]);
+    if ($companies) {
+        $order['empresa_nombre'] = trim((string) $companies[0]['empresa']);
+    }
+    if ($order['contacto_id'] !== null) {
+        $contacts = ov_rows($db, 'SELECT nombre, celular, correo FROM contactos WHERE id = ?',
+            'i', [(int) $order['contacto_id']]);
+        if ($contacts) {
+            $order['contacto_nombre'] = trim((string) $contacts[0]['nombre']);
+            $order['contacto_telefono'] = trim((string) ($contacts[0]['celular'] ?? ''));
+            $order['contacto_correo'] = trim((string) ($contacts[0]['correo'] ?? ''));
+        }
+    }
+    if ($order['direccion_id'] !== null) {
+        $addresses = ov_company_addresses($db, (int) $order['empresa_id']);
+        foreach ($addresses as $address) {
+            if ((int) $address['id'] === (int) $order['direccion_id']) {
+                $order['direccion_texto'] = $address['direccion_texto'];
+                break;
+            }
+        }
+    }
     $order['conceptos'] = ov_rows($db, 'SELECT * FROM orden_venta_conceptos
         WHERE orden_venta_id = ? ORDER BY posicion, id', 'i', [$id]);
     $order['seguimiento'] = ov_rows($db, 'SELECT * FROM orden_venta_seguimiento

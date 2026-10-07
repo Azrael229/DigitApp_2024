@@ -11,7 +11,7 @@ $paginaRegreso = $editandoCotizacion
 require_once __DIR__ . '/../backend/cotizaciones/common.php';
 ?>
 <?php  require (__DIR__ . "/../construct/header.php")   ?>
-<?php  require (__DIR__ . "/../backend/contactos/query_all_contactos.php")  ?>
+<?php  require (__DIR__ . "/../backend/empresas/query_all_empresas.php")  ?>
 
 
 <div class="container mt-5 mb-5 contain shadow-lg cotizacion-form-page">
@@ -102,18 +102,26 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
                 <div class="col-12">
                     <div class="cotizacion-section-heading mb-4">
                         <h2 class="h4 mb-1">Datos del cliente</h2>
-                        <p class="contactos-muted mb-0">Selecciona el contacto y confirma los datos que se incluirán en la cotización.</p>
+                        <p class="contactos-muted mb-0">Empresa, contacto y dirección se toman de sus registros maestros. Para corregirlos, actualiza primero el detalle correspondiente.</p>
+                    </div>
+
+                    <div class="row text-center mb-3">
+                        <div class="col mb-4">
+                            <label class="form-label" for="select_empresa_cot">Empresa</label>
+                            <select class="form-control" id="select_empresa_cot" required>
+                                <option value="">Seleccionar empresa</option>
+                                <?php foreach ($result_empresas as $fila): ?>
+                                    <option value="<?= (int) $fila['id_e'] ?>"><?= htmlspecialchars($fila['empresa'], ENT_QUOTES, 'UTF-8') ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Select Contacto -->
                     <div class="row text-center mb-3">
                         <div class="col  mb-4 ">
-                            <select class=" form-control" name="select_contacto" id="select_contacto" onchange="selectContacto()">
-
-                                <option value="">Seleccionar Contacto</option>
-                                <?php foreach($result_contactos as $fila):  ?>
-                                <option value="<?php echo $fila['id']; ?>"> <?php echo $fila['nombre']; ?>  </option>
-                                <?php endforeach; ?>
+                            <select class="form-control" name="select_contacto" id="select_contacto" disabled required>
+                                <option value="">Selecciona primero una empresa</option>
                             </select>
                         </div>
                     </div>
@@ -127,7 +135,7 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
                                     <label>Nombre</label>
                                 </div>
                                 <div class="col">
-                                    <textarea name="nombre_contacto" id="nombre_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
+                                    <textarea name="nombre_contacto" id="nombre_contacto" cols="40" rows="1" readonly aria-readonly="true"></textarea>
                                 </div>
                             </div>
                             <div class="row">
@@ -135,7 +143,7 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
                                     <label>Teléfono</label>
                                 </div>
                                 <div class="col">
-                                    <textarea name="cel_contacto" id="cel_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
+                                    <textarea name="cel_contacto" id="cel_contacto" cols="40" rows="1" readonly aria-readonly="true"></textarea>
                                 </div>
                             </div>
                             <div class="row">
@@ -143,7 +151,7 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
                                     <label>Correo</label>
                                 </div>
                                 <div class="col">
-                                    <textarea name="correo_contacto" id="correo_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
+                                    <textarea name="correo_contacto" id="correo_contacto" cols="40" rows="1" readonly aria-readonly="true"></textarea>
                                 </div>
                             </div>
                             <div class="row mb-4">
@@ -151,7 +159,7 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
                                     <label>Departamento</label>
                                 </div>
                                 <div class="col">
-                                    <textarea name="depto_contacto" id="depto_contacto" cols="40" rows="1" style="resize: none;" ></textarea>
+                                    <textarea name="depto_contacto" id="depto_contacto" cols="40" rows="1" readonly aria-readonly="true"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -164,7 +172,7 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
                                     <label>Empresa</label>
                                 </div>
                                 <div class="col">
-                                    <textarea name="nombre_empresa" id="nombre_empresa" cols="40" rows="1" style="resize: none;" ></textarea>
+                                    <textarea name="nombre_empresa" id="nombre_empresa" cols="40" rows="1" readonly aria-readonly="true"></textarea>
                                 </div>
                             </div>
                             <div class="row">
@@ -172,8 +180,8 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
                                     <label>Dirección a utilizar</label>
                                 </div>
                                 <div class="col">
-                                    <select class="form-control" name="tipo_direccion_empresa" id="select_direccion">
-                                        <option value="">Selecciona un contacto primero</option>
+                                    <select class="form-control" name="tipo_direccion_empresa" id="select_direccion" disabled required>
+                                        <option value="">Selecciona primero una empresa</option>
                                     </select>
                                 </div>
                             </div>
@@ -182,7 +190,7 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
                                     <label>Dirección</label>
                                 </div>
                                 <div class="col">
-                                    <textarea name="dir_empresa" id="dir_empresa" cols="40" rows="3" style="resize: none;" ></textarea>
+                                    <textarea name="dir_empresa" id="dir_empresa" cols="40" rows="3" readonly aria-readonly="true"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -378,6 +386,6 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
-<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261003-9"></script>
+<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261006-1"></script>
 
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>

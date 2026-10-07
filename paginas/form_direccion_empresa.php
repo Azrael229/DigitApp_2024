@@ -2,6 +2,10 @@
 $prefijoRuta = '../';
 $empresaId = filter_input(INPUT_GET, 'empresa_id', FILTER_VALIDATE_INT);
 $direccionId = filter_input(INPUT_GET, 'direccion_id', FILTER_VALIDATE_INT);
+$returnUrl = (string) ($_GET['return_url'] ?? '');
+if ($returnUrl !== '' && !preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
+    $returnUrl = '';
+}
 ?>
 <?php require (__DIR__ . "/../construct/header.php"); ?>
 
@@ -11,7 +15,7 @@ $direccionId = filter_input(INPUT_GET, 'direccion_id', FILTER_VALIDATE_INT);
             <h3 id="titulo_direccion">Nueva dirección</h3>
         </div>
         <div class="col-12 col-md-auto mt-2 mt-md-0">
-            <a href="ver_empresa.php?id=<?= htmlspecialchars((string) $empresaId) ?>" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Volver a empresa</a>
+            <a href="<?= htmlspecialchars($returnUrl !== '' ? $returnUrl : 'ver_empresa.php?id=' . (string) $empresaId, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> <?= $returnUrl !== '' ? 'Volver al informe' : 'Volver a empresa' ?></a>
         </div>
     </div>
 
@@ -22,6 +26,7 @@ $direccionId = filter_input(INPUT_GET, 'direccion_id', FILTER_VALIDATE_INT);
             <input type="hidden" name="empresa_id" value="<?= htmlspecialchars((string) $empresaId) ?>">
             <input type="hidden" name="direccion_id" id="direccion_id" value="<?= htmlspecialchars((string) ($direccionId ?: '')) ?>">
             <input type="hidden" name="version" id="direccion_version" value="">
+            <input type="hidden" name="return_url" value="<?= htmlspecialchars($returnUrl, ENT_QUOTES, 'UTF-8') ?>">
 
             <div class="card mb-4 empresa-form-card">
                 <div class="card-body empresa-card-body">

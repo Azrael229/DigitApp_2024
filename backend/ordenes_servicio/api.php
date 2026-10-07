@@ -31,11 +31,14 @@ try {
 
     if ($action === 'list') {
         $result = ['data' => ov_rows($conexion, 'SELECT os.id, os.numero_servicio,
-            os.fecha_generacion, os.tipo, os.estatus, os.entrega_contacto,
+            os.fecha_generacion, os.tipo, os.estatus,
+            COALESCE(ct.nombre, os.entrega_contacto) AS entrega_contacto,
             os.updated_at, ov.id AS orden_venta_id, ov.numero_venta,
-            ov.empresa_id, ov.empresa_nombre
+            ov.empresa_id, COALESCE(e.empresa, ov.empresa_nombre) AS empresa_nombre
             FROM ordenes_servicio os
             JOIN ordenes_venta ov ON ov.id = os.orden_venta_id
+            LEFT JOIN empresas e ON e.id_e = ov.empresa_id
+            LEFT JOIN contactos ct ON ct.id = COALESCE(os.entrega_contacto_id, ov.contacto_id)
             ORDER BY os.created_at DESC, os.id DESC')];
     } elseif ($action === 'get') {
         $order = os_get($conexion, ov_id($input['id'] ?? null));

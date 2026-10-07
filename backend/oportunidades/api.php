@@ -34,8 +34,11 @@ try {
         $result['companies'] = op_rows($conexion, 'SELECT id_e AS id, empresa FROM empresas ORDER BY empresa, id_e');
     } elseif ($action === 'options') {
         $company = op_id($input['empresa_id'] ?? null);
-        $result['contacts'] = op_rows($conexion, 'SELECT c.id, c.nombre FROM contactos c JOIN empresa_contactos ec
-            ON ec.id_contacto = c.id WHERE ec.id_empresa = ? AND ec.activo = 1 AND c.activo = 1
+        $result['contacts'] = op_rows($conexion, 'SELECT c.id, c.nombre, c.celular, c.correo,
+            COALESCE(cd.nombre, c.depto) AS departamento, c.puesto, ec.es_principal
+            FROM contactos c JOIN empresa_contactos ec ON ec.id_contacto = c.id
+            LEFT JOIN catalogo_departamentos cd ON cd.id = c.id_departamento
+            WHERE ec.id_empresa = ? AND ec.activo = 1 AND c.activo = 1
             ORDER BY ec.es_principal DESC, c.nombre, c.id', 'i', [$company]);
         $result['addresses'] = op_rows($conexion, 'SELECT * FROM empresa_direcciones WHERE empresa_id = ?
             ORDER BY es_principal DESC, tipo_direccion, id', 'i', [$company]);

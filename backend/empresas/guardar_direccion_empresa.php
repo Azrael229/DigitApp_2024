@@ -13,6 +13,13 @@ function valorPostDireccion(string $campo): ?string
 
 function redirigirEmpresaDireccion(int $empresaId, string $parametro = ''): void
 {
+    $returnUrl = trim((string) ($_POST['return_url'] ?? ''));
+    if ($returnUrl !== '' && preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
+        $separador = str_contains($returnUrl, '?') ? '&' : '?';
+        $sufijo = $parametro === '' ? '' : $separador . $parametro;
+        header('Location: ../../paginas/' . $returnUrl . $sufijo);
+        exit;
+    }
     $sufijo = $parametro === '' ? '' : '&' . $parametro;
     header('Location: ../../paginas/ver_empresa.php?id=' . $empresaId . $sufijo);
     exit;

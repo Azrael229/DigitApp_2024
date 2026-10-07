@@ -36,6 +36,11 @@ function normalizarTelefonoContacto($valor): ?string
 
 function redirigirContacto(?int $empresaContexto, ?int $empresaRetorno, bool $esNuevo, array $empresas): void
 {
+    $returnUrl = trim((string) ($_POST['return_url'] ?? ''));
+    if ($returnUrl !== '' && preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
+        header('Location: ../../paginas/' . $returnUrl);
+        exit;
+    }
     if ($esNuevo && $empresaContexto !== null && in_array($empresaContexto, $empresas, true)) {
         header('Location: ../../paginas/ver_empresa.php?id=' . $empresaContexto);
         exit;

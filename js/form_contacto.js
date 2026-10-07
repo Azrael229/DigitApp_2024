@@ -11,6 +11,7 @@ var catalogoDirecciones = Array.from(selectorDirecciones.options).map(function (
     return {value: opcion.value, label: opcion.textContent, companyId: opcion.dataset.companyId};
 });
 var botonCancelarContacto = document.getElementById('btn_cancelar_contacto');
+var retornoInformeContacto = contenedorFormularioContacto.dataset.returnUrl || '';
 var campoTelefonoContacto = document.getElementById('contacto_cel');
 var campoCorreoContacto = document.getElementById('contacto_email');
 var entradaDepartamento = document.getElementById('nuevo_departamento');
@@ -104,6 +105,10 @@ function aplicarEmpresaContextual(idEmpresa) {
 
 // Define un retorno interno a empresa solo cuando la relacion del contacto lo confirma.
 function aplicarRetornoEmpresa(idEmpresa, empresas) {
+    if (retornoInformeContacto) {
+        botonCancelarContacto.href = retornoInformeContacto;
+        return;
+    }
     var relacionada = (empresas || []).some(function (empresa) {
         return String(empresa.id_empresa) === String(idEmpresa);
     });
@@ -279,6 +284,9 @@ entradaDepartamento.addEventListener('keydown', function (evento) {
 var idContacto = contenedorFormularioContacto.dataset.contactId;
 var empresaContextual = contenedorFormularioContacto.dataset.contextCompanyId;
 var empresaRetorno = contenedorFormularioContacto.dataset.returnCompanyId;
+if (retornoInformeContacto) {
+    botonCancelarContacto.href = retornoInformeContacto;
+}
 DigitAppDuplicateWarning.protegerFormulario({
     formulario: formularioContacto,
     boton: botonGuardarContacto,
@@ -301,7 +309,9 @@ cargarCatalogoDepartamentos()
         if (!idContacto) {
             if (empresaContextual) {
                 aplicarEmpresaContextual(empresaContextual);
-                botonCancelarContacto.href = 'ver_empresa.php?id=' + encodeURIComponent(empresaContextual);
+                if (!retornoInformeContacto) {
+                    botonCancelarContacto.href = 'ver_empresa.php?id=' + encodeURIComponent(empresaContextual);
+                }
             } else {
                 sincronizarEmpresaPrincipal();
                 sincronizarDirecciones();

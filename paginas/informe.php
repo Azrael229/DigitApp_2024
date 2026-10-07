@@ -59,7 +59,12 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
         </section>
 
         <section class="informe-seccion">
-            <h2 class="informe-titulo-seccion">Datos del cliente</h2>
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+                <h2 class="informe-titulo-seccion mb-0">Datos del cliente</h2>
+                <button type="button" class="btn btn-secondary btn-sm" id="btn_editar_cliente_informe" disabled>
+                    <i class="bi bi-pencil" aria-hidden="true"></i> Editar datos del cliente
+                </button>
+            </div>
             <div class="row g-3 mb-3">
                 <div class="col-lg-6">
                     <label class="form-label" for="select_empresa">Empresa</label>
@@ -80,13 +85,14 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
             <div class="row g-3">
                 <div class="col-lg-6">
                     <label class="form-label" for="nombre_empresa">Razón social</label>
-                    <textarea class="form-control" name="nombre_empresa" id="nombre_empresa" rows="2" required></textarea>
+                    <textarea class="form-control" name="nombre_empresa" id="nombre_empresa" rows="2" readonly aria-readonly="true" required></textarea>
                 </div>
                 <div class="col-lg-6">
                     <label class="form-label" for="dir_empresa">Dirección</label>
                     <select class="form-select" name="dir_empresa" id="dir_empresa" required disabled>
                         <option value="">Seleccione primero una empresa</option>
                     </select>
+                    <input type="hidden" name="direccion_id" id="informe_direccion_id">
                 </div>
                 <div class="col-lg-6">
                     <label class="form-label" for="nombre_contacto">Nombre del contacto</label>
@@ -108,6 +114,9 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
                         <option value="">Seleccione primero una empresa y una dirección</option>
                     </select>
                     <div class="form-text">Los datos se toman del registro del equipo. Para corregirlos, edite el equipo desde la empresa correspondiente.</div>
+                    <button type="button" class="btn btn-secondary btn-sm mt-2" id="btn_editar_equipo_informe" disabled>
+                        <i class="bi bi-pencil" aria-hidden="true"></i> Editar equipo seleccionado
+                    </button>
                 </div>
                 <div class="col-md-6"><label class="form-label" for="desc_inst">Descripción</label><input class="form-control" type="text" name="desc_inst" id="desc_inst" readonly aria-readonly="true" required></div>
                 <div class="col-md-3"><label class="form-label" for="marca_inst">Marca</label><input class="form-control" type="text" name="marca_inst" id="marca_inst" readonly aria-readonly="true"></div>
@@ -231,12 +240,15 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
         </section>
 
         <div id="errores_informe" class="alert alert-danger d-none" role="alert" tabindex="-1"></div>
-        <div class="d-grid gap-2 col-lg-5 mx-auto py-4"><button type="submit" class="btn btn-success btn-lg">GENERAR Y DESCARGAR PDF</button></div>
+        <div class="d-grid gap-2 col-lg-7 mx-auto py-4">
+            <button type="submit" class="btn btn-success btn-lg" data-informe-accion="descargar">GENERAR Y DESCARGAR PDF</button>
+            <button type="submit" class="btn btn-secondary btn-lg" data-informe-accion="continuar">GENERAR PDF Y CONTINUAR CON OTRO EQUIPO</button>
+        </div>
     </form>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="<?= $prefijoRuta ?>js/informe.js?v=20261002-2"></script>
+<script src="<?= $prefijoRuta ?>js/informe.js?v=20261006-2"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

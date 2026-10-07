@@ -64,20 +64,20 @@ try {
     }
 
     $oportunidadId = cotizacionId($_POST['oportunidad_id'] ?? '', true);
-    $empresaId = cotizacionId($_POST['empresa_id'] ?? '', true);
+    $empresaId = cotizacionId($_POST['empresa_id'] ?? '');
     $contactoEntrada = trim((string) ($_POST['contacto_id'] ?? ''));
     if ($contactoEntrada === '') {
         $contactoEntrada = trim((string) ($_POST['select_contacto'] ?? ''));
     }
-    $contactoId = cotizacionId($contactoEntrada, true);
-    $direccionId = cotizacionId($_POST['direccion_id'] ?? '', true);
+    $contactoId = cotizacionId($contactoEntrada);
+    $direccionId = cotizacionId($_POST['direccion_id'] ?? '');
 
-    $empresaNombre = cotizacionTexto($_POST['nombre_empresa'] ?? '', 255, 'El nombre de la empresa', true);
-    $contactoNombre = cotizacionTexto($_POST['nombre_contacto'] ?? '', 255, 'El nombre del contacto');
-    $telefono = cotizacionTexto($_POST['cel_contacto'] ?? '', 30, 'El teléfono');
-    $correo = cotizacionTexto($_POST['correo_contacto'] ?? '', 150, 'El correo');
-    $departamento = cotizacionTexto($_POST['depto_contacto'] ?? '', 100, 'El departamento');
-    $direccionTexto = cotizacionTexto($_POST['dir_empresa'] ?? '', 10000, 'La dirección');
+    $empresaNombre = '';
+    $contactoNombre = '';
+    $telefono = '';
+    $correo = '';
+    $departamento = '';
+    $direccionTexto = '';
     $tiempoEntregaTipo = trim((string) ($_POST['tiempo_entrega_tipo'] ?? ''));
     if (!in_array($tiempoEntregaTipo, ['inmediato', 'dias_habiles', 'semanas'], true)) {
         throw new InvalidArgumentException('Selecciona un tiempo de entrega válido.');
@@ -196,23 +196,7 @@ try {
     $conexion->begin_transaction();
     $transaccion = true;
 
-    if ($empresaId === null && $contactoId !== null) {
-        $resolverEmpresa = $conexion->prepare(
-            'SELECT id_empresa FROM empresa_contactos
-             WHERE id_contacto = ? AND activo = 1
-             ORDER BY es_principal DESC, id ASC LIMIT 1'
-        );
-        $resolverEmpresa->bind_param('i', $contactoId);
-        $resolverEmpresa->execute();
-        $relacion = $resolverEmpresa->get_result()->fetch_assoc();
-        $resolverEmpresa->close();
-        $empresaId = $relacion === null ? null : (int) $relacion['id_empresa'];
-    }
-    if ($empresaId === null) {
-        throw new InvalidArgumentException('Selecciona una empresa válida para la cotización.');
-    }
-
-    $validarEmpresa = $conexion->prepare('SELECT id_e FROM empresas WHERE id_e = ?');
+    $validarEmpresa = $conexion->prepare('SELECT id_e, empresa FROM empresas WHERE id_e = ?');
     $validarEmpresa->bind_param('i', $empresaId);
     $validarEmpresa->execute();
     $empresaExiste = $validarEmpresa->get_result()->fetch_assoc();
@@ -220,11 +204,13 @@ try {
     if ($empresaExiste === null) {
         throw new InvalidArgumentException('La empresa seleccionada ya no existe.');
     }
+    $empresaNombre = trim((string) $empresaExiste['empresa']);
 
     if ($contactoId !== null) {
         $validarContacto = $conexion->prepare(
-            'SELECT c.id FROM contactos c
+            'SELECT c.id, c.nombre, c.celular, c.correo, COALESCE(cd.nombre, c.depto) AS departamento FROM contactos c
              JOIN empresa_contactos ec ON ec.id_contacto = c.id
+             LEFT JOIN catalogo_departamentos cd ON cd.id = c.id_departamento
              WHERE c.id = ? AND ec.id_empresa = ? AND c.activo = 1 AND ec.activo = 1 LIMIT 1'
         );
         $validarContacto->bind_param('ii', $contactoId, $empresaId);
@@ -234,11 +220,15 @@ try {
         if ($contactoExiste === null) {
             throw new InvalidArgumentException('El contacto no pertenece a la empresa seleccionada.');
         }
+        $contactoNombre = trim((string) $contactoExiste['nombre']);
+        $telefono = trim((string) ($contactoExiste['celular'] ?? ''));
+        $correo = trim((string) ($contactoExiste['correo'] ?? ''));
+        $departamento = trim((string) ($contactoExiste['departamento'] ?? ''));
     }
 
     if ($direccionId !== null) {
         $validarDireccion = $conexion->prepare(
-            'SELECT id FROM empresa_direcciones WHERE id = ? AND empresa_id = ? LIMIT 1'
+            'SELECT * FROM empresa_direcciones WHERE id = ? AND empresa_id = ? LIMIT 1'
         );
         $validarDireccion->bind_param('ii', $direccionId, $empresaId);
         $validarDireccion->execute();
@@ -247,6 +237,7 @@ try {
         if ($direccionExiste === null) {
             throw new InvalidArgumentException('La dirección no pertenece a la empresa seleccionada.');
         }
+        $direccionTexto = cotizacionDireccionActual($direccionExiste);
     }
 
     if ($oportunidadId !== null) {

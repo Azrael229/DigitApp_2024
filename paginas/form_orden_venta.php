@@ -38,12 +38,12 @@ $quoteId = filter_input(INPUT_GET, 'cotizacion_id', FILTER_VALIDATE_INT);
         </div></section>
 
         <section class="card mb-4 empresa-form-card"><div class="card-body empresa-card-body p-4">
-            <div class="mb-4"><p class="empresa-section-kicker mb-1">Datos relacionados · Cliente y proyecto</p><h2 id="ov-company" class="op-company-title mb-1">—</h2><p class="empresa-notes-help mb-0">Empresa relacionada con la oportunidad y la cotización seleccionadas.</p></div>
+            <div class="mb-4"><p class="empresa-section-kicker mb-1">Datos relacionados · Cliente y proyecto</p><h2 id="ov-company" class="op-company-title mb-1">—</h2><p class="empresa-notes-help mb-0">Selecciona el contacto y la dirección entre los registros vigentes de la empresa.</p></div>
             <div class="row g-3">
-                <div class="col-md-6 empresa-data-field"><div class="empresa-data-label">Contacto</div><div id="ov-contact" class="empresa-data-value">—</div></div>
+                <div class="col-md-6"><label class="form-label" for="ov-contact">Contacto <span class="required-mark">*</span></label><select class="form-select" id="ov-contact" required disabled><option value="">Selecciona primero una cotización</option></select></div>
                 <div class="col-md-6 empresa-data-field"><div class="empresa-data-label">Correo electrónico</div><div id="ov-email" class="empresa-data-value">—</div></div>
                 <div class="col-md-6 empresa-data-field"><div class="empresa-data-label">Teléfono</div><div id="ov-phone" class="empresa-data-value">—</div></div>
-                <div class="col-12 empresa-data-field"><div class="empresa-data-label">Dirección</div><div id="ov-address" class="empresa-data-value ov-multiline">—</div></div>
+                <div class="col-12"><label class="form-label" for="ov-address">Dirección <span class="required-mark">*</span></label><select class="form-select" id="ov-address" required disabled><option value="">Selecciona primero una cotización</option></select></div>
                 <div class="col-12 empresa-data-field"><div class="empresa-data-label">Descripción breve</div><div id="ov-short-description" class="empresa-data-value ov-multiline">—</div></div>
                 <div class="col-12 empresa-data-field"><div class="empresa-data-label">Descripción larga</div><div id="ov-long-description" class="empresa-data-value ov-multiline">—</div></div>
                 <div class="col-md-6 empresa-data-field"><div class="empresa-data-label">Importe sin IVA</div><div id="ov-amount" class="empresa-data-value">—</div></div>
@@ -63,5 +63,5 @@ $quoteId = filter_input(INPUT_GET, 'cotizacion_id', FILTER_VALIDATE_INT);
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="../js/ordenes-venta-common.js?v=20261004-1"></script>
-<script src="../js/formOrdenVenta.js?v=20261004-5"></script>
+<script src="../js/formOrdenVenta.js?v=20261006-1"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

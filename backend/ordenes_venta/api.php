@@ -18,7 +18,7 @@ try {
     }
     $input = $method === 'POST' ? $_POST : $_GET;
     $action = (string) ($input['action'] ?? 'list');
-    $reads = ['list', 'get', 'sources', 'equipment'];
+    $reads = ['list', 'get', 'sources', 'client_options', 'equipment'];
     $writes = ['save', 'followup'];
     if (!in_array($action, $method === 'GET' ? $reads : $writes, true)) {
         throw new InvalidArgumentException('Acción no válida.');
@@ -34,10 +34,12 @@ try {
     $result = [];
 
     if ($action === 'list') {
-        $result['data'] = ov_rows($conexion, 'SELECT ov.*, o.numero_oportunidad, c.cot_numero
+        $result['data'] = ov_rows($conexion, 'SELECT ov.*, o.numero_oportunidad, c.cot_numero,
+                COALESCE(e.empresa, ov.empresa_nombre) AS empresa_nombre
             FROM ordenes_venta ov
             JOIN oportunidades_comerciales o ON o.id = ov.oportunidad_id
             JOIN cotizaciones c ON c.id_coti = ov.cotizacion_id
+            LEFT JOIN empresas e ON e.id_e = ov.empresa_id
             ORDER BY ov.created_at DESC, ov.id DESC');
     } elseif ($action === 'get') {
         $result['order'] = ov_get($conexion, ov_id($input['id'] ?? null));
@@ -67,6 +69,12 @@ try {
         }
         unset($source);
         $result['sources'] = $sources;
+    } elseif ($action === 'client_options') {
+        $opportunityId = ov_id($input['oportunidad_id'] ?? null);
+        $quoteId = ov_id($input['cotizacion_id'] ?? null);
+        $source = ov_source($conexion, $opportunityId, $quoteId);
+        $result['contacts'] = ov_company_contacts($conexion, (int) $source['empresa_id']);
+        $result['addresses'] = ov_company_addresses($conexion, (int) $source['empresa_id']);
     } elseif ($action === 'equipment') {
         $opportunityId = ov_id($input['oportunidad_id'] ?? null);
         $quoteId = ov_id($input['cotizacion_id'] ?? null);
@@ -129,6 +137,35 @@ try {
             ? ov_text($input['instrucciones'], 60000)
             : ($old['instrucciones'] ?? null);
         $notes = ov_text($input['notas'] ?? '', 60000);
+        $contactId = ov_id($input['contacto_id'] ?? null);
+        $addressId = ov_id($input['direccion_id'] ?? null);
+        $contacts = ov_company_contacts($conexion, (int) $source['empresa_id']);
+        $addresses = ov_company_addresses($conexion, (int) $source['empresa_id']);
+        $contact = null;
+        $addressRow = null;
+        foreach ($contacts as $candidate) {
+            if ((int) $candidate['id'] === $contactId) {
+                $contact = $candidate;
+                break;
+            }
+        }
+        foreach ($addresses as $candidate) {
+            if ((int) $candidate['id'] === $addressId) {
+                $addressRow = $candidate;
+                break;
+            }
+        }
+        if ($contact === null) {
+            throw new InvalidArgumentException('El contacto seleccionado no está asociado actualmente con la empresa.');
+        }
+        if ($addressRow === null) {
+            throw new InvalidArgumentException('La dirección seleccionada no pertenece actualmente a la empresa.');
+        }
+        $companyName = trim((string) $source['empresa']);
+        $contactName = trim((string) $contact['nombre']);
+        $contactEmail = trim((string) ($contact['correo'] ?? ''));
+        $contactPhone = trim((string) ($contact['celular'] ?? ''));
+        $address = trim((string) $addressRow['direccion_texto']);
         $followup = ov_text($input['seguimiento'] ?? '', 20000);
         $items = null;
         if (array_key_exists('conceptos', $input)) {
@@ -140,9 +177,13 @@ try {
 
         if ($old) {
             ov_query($conexion, 'UPDATE ordenes_venta SET fecha_generacion = ?, fecha_programada = ?,
-                estatus = ?, instrucciones = ?, notas = ?, updated_at = CURRENT_TIMESTAMP,
-                version = version + 1 WHERE id = ?', 'sssssi',
-                [$generationDate, $scheduledDate, $status, $instructions, $notes, $id])->close();
+                contacto_id = ?, direccion_id = ?, empresa_nombre = ?, contacto_nombre = ?,
+                contacto_correo = ?, contacto_telefono = ?, direccion_texto = ?, estatus = ?,
+                instrucciones = ?, notas = ?, updated_at = CURRENT_TIMESTAMP,
+                version = version + 1 WHERE id = ?', 'ssiissssssssi',
+                [$generationDate, $scheduledDate, $contactId, $addressId, $companyName,
+                $contactName, $contactEmail, $contactPhone, $address, $status,
+                $instructions, $notes, $id])->close();
             if ($items !== null) {
                 ov_query($conexion, 'DELETE FROM orden_venta_conceptos WHERE orden_venta_id = ?', 'i', [$id])->close();
             }
@@ -154,11 +195,6 @@ try {
             }
         } else {
             $number = reservarFolioComercial($conexion, 'OV', $generationDate);
-            $companyName = trim((string) $source['empresa']);
-            $contactName = trim((string) ($source['cot_contacto'] ?: $source['contacto']));
-            $contactEmail = trim((string) ($source['cot_correo'] ?: $source['correo']));
-            $contactPhone = trim((string) ($source['cot_telefono'] ?: $source['celular']));
-            $address = ov_address($source);
             $amount = (float) $source['cot_subtotal'] > 0
                 ? number_format((float) $source['cot_subtotal'], 2, '.', '')
                 : number_format((float) $source['oportunidad_importe'], 2, '.', '');
@@ -169,8 +205,8 @@ try {
                  estatus, instrucciones, notas)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 'sssiiiiisssssdsss', [$number, $generationDate, $scheduledDate,
-                $opportunityId, $quoteId, $source['empresa_id'], $source['contacto_id'],
-                $source['direccion_id'], $companyName, $contactName, $contactEmail, $contactPhone,
+                $opportunityId, $quoteId, $source['empresa_id'], $contactId,
+                $addressId, $companyName, $contactName, $contactEmail, $contactPhone,
                 $address, $amount, $status, $instructions, $notes])->close();
             $id = (int) $conexion->insert_id;
             ov_query($conexion, 'INSERT INTO orden_venta_seguimiento

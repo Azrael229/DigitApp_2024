@@ -3,6 +3,70 @@ require_once __DIR__ . '/../backend/auth/bootstrap.php';
 auth_require_permission('informes');
 require __DIR__ . '/fpdf.php';
 require_once __DIR__ . '/../backend/helpers/folio_informe.php';
+require __DIR__ . '/../config/conexion.php';
+
+// Sustituye los textos recibidos por los datos vigentes de empresa, contacto, dirección y equipo.
+function cargarDatosMaestrosInforme(mysqli $conexion): void
+{
+    $empresaId = filter_var($_POST['select_empresa'] ?? null, FILTER_VALIDATE_INT);
+    $contactoId = filter_var($_POST['select_contacto'] ?? null, FILTER_VALIDATE_INT);
+    $direccionId = filter_var($_POST['direccion_id'] ?? null, FILTER_VALIDATE_INT);
+    $equipoId = filter_var($_POST['equipo_id'] ?? null, FILTER_VALIDATE_INT);
+    if (!$empresaId || !$contactoId || !$direccionId || !$equipoId) {
+        throw new InvalidArgumentException('Selecciona empresa, contacto, dirección y equipo registrados.');
+    }
+    $consulta = $conexion->prepare('SELECT razon_social, empresa FROM empresas WHERE id_e = ?');
+    $consulta->bind_param('i', $empresaId);
+    $consulta->execute();
+    $empresa = $consulta->get_result()->fetch_assoc();
+    $consulta->close();
+    $consulta = $conexion->prepare('SELECT c.nombre, c.correo FROM contactos c
+        JOIN empresa_contactos ec ON ec.id_contacto = c.id
+        WHERE c.id = ? AND ec.id_empresa = ? AND c.activo = 1 AND ec.activo = 1 LIMIT 1');
+    $consulta->bind_param('ii', $contactoId, $empresaId);
+    $consulta->execute();
+    $contacto = $consulta->get_result()->fetch_assoc();
+    $consulta->close();
+    $consulta = $conexion->prepare('SELECT * FROM empresa_direcciones WHERE id = ? AND empresa_id = ?');
+    $consulta->bind_param('ii', $direccionId, $empresaId);
+    $consulta->execute();
+    $direccion = $consulta->get_result()->fetch_assoc();
+    $consulta->close();
+    $consulta = $conexion->prepare('SELECT ee.*, COALESCE(cd.nombre, \'\') AS descripcion,
+            COALESCE(cm.nombre, \'\') AS marca
+        FROM empresa_equipos ee
+        LEFT JOIN catalogo_descripciones_equipo cd ON cd.id = ee.descripcion_id
+        LEFT JOIN catalogo_marcas_equipo cm ON cm.id = ee.marca_id
+        WHERE ee.id = ? AND ee.empresa_id = ? AND ee.direccion_id = ? LIMIT 1');
+    $consulta->bind_param('iii', $equipoId, $empresaId, $direccionId);
+    $consulta->execute();
+    $equipo = $consulta->get_result()->fetch_assoc();
+    $consulta->close();
+    if (!$empresa || !$contacto || !$direccion || !$equipo) {
+        throw new InvalidArgumentException('Los datos seleccionados ya no corresponden entre sí. Actualiza el formulario.');
+    }
+    $primera = trim(implode(' ', array_filter([$direccion['calle'] ?? '',
+        !empty($direccion['numero_exterior']) ? 'No. ' . $direccion['numero_exterior'] : '',
+        !empty($direccion['numero_interior']) ? 'Int. ' . $direccion['numero_interior'] : ''])));
+    $ubicacion = implode(', ', array_filter([$direccion['colonia'] ?? '', $direccion['localidad'] ?? '',
+        $direccion['municipio'] ?? '', $direccion['ciudad'] ?? '', $direccion['estado'] ?? '',
+        !empty($direccion['codigo_postal']) ? 'C.P. ' . $direccion['codigo_postal'] : '', $direccion['pais'] ?? '']));
+    $_POST['nombre_empresa'] = trim((string) ($empresa['razon_social'] ?: $empresa['empresa']));
+    $_POST['nombre_contacto'] = trim((string) $contacto['nombre']);
+    $_POST['correo_contacto'] = trim((string) ($contacto['correo'] ?? ''));
+    $_POST['dir_empresa'] = implode(', ', array_filter([$primera, $ubicacion,
+        $direccion['entre_calles'] ?? '', $direccion['referencia'] ?? '']));
+    $_POST['desc_inst'] = $equipo['descripcion'];
+    $_POST['marca_inst'] = $equipo['marca'];
+    $_POST['modelo_inst'] = $equipo['modelo'];
+    $_POST['id_inst'] = $equipo['identificacion'];
+    $_POST['serie_inst'] = $equipo['numero_serie'];
+    $_POST['unidad'] = $equipo['unidad'];
+    $_POST['max'] = $equipo['capacidad_maxima'];
+    $_POST['d'] = $equipo['division_real'];
+    $_POST['e'] = $equipo['division_verificacion'];
+    $_POST['clase'] = $equipo['clase_exactitud'];
+}
 
 // Obtiene un valor escalar del POST sin emitir avisos por claves ausentes.
 function datoPost(string $clave, string $predeterminado = ''): string
@@ -686,6 +750,18 @@ function dibujarPaginaPruebas(InformePDF $pdf, string $fase, string $tituloPagin
     dibujarExcentricidadFija($pdf, $fase);
     dibujarExactitudFija($pdf, $fase);
     $pdf->graficaExactitud($fase, 14, 191, 188, 53, $tituloGrafica);
+}
+
+try {
+    $conexion->set_charset('utf8mb4');
+    cargarDatosMaestrosInforme($conexion);
+    $conexion->close();
+} catch (InvalidArgumentException $error) {
+    if (isset($conexion) && $conexion instanceof mysqli) {
+        $conexion->close();
+    }
+    http_response_code(422);
+    exit($error->getMessage());
 }
 
 $erroresDivisionReal = validarIndicacionesPost();

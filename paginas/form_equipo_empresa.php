@@ -3,6 +3,10 @@ require_once __DIR__ . '/../backend/auth/bootstrap.php';
 $prefijoRuta = '../';
 $empresaId = filter_input(INPUT_GET, 'empresa_id', FILTER_VALIDATE_INT);
 $equipoId = filter_input(INPUT_GET, 'equipo_id', FILTER_VALIDATE_INT);
+$returnUrl = (string) ($_GET['return_url'] ?? '');
+if ($returnUrl !== '' && !preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
+    $returnUrl = '';
+}
 if (empty($_SESSION['empresa_equipos_csrf'])) {
     $_SESSION['empresa_equipos_csrf'] = bin2hex(random_bytes(32));
 }
@@ -17,8 +21,8 @@ if (empty($_SESSION['empresa_equipos_csrf'])) {
             <p id="subtitulo_equipo" class="empresa-header-subtitle mb-0">Cargando información de la empresa...</p>
         </div>
         <div class="col-12 col-md-auto mt-3 mt-md-0">
-            <a href="ver_empresa.php?id=<?= htmlspecialchars((string) ($empresaId ?: '')) ?>#equipos" class="btn btn-secondary">
-                <i class="bi bi-arrow-left" aria-hidden="true"></i> Volver a empresa
+            <a href="<?= htmlspecialchars($returnUrl !== '' ? $returnUrl : 'ver_empresa.php?id=' . (string) ($empresaId ?: '') . '#equipos', ENT_QUOTES, 'UTF-8') ?>" class="btn btn-secondary">
+                <i class="bi bi-arrow-left" aria-hidden="true"></i> <?= $returnUrl !== '' ? 'Volver al informe' : 'Volver a empresa' ?>
             </a>
         </div>
     </div>
@@ -33,6 +37,7 @@ if (empty($_SESSION['empresa_equipos_csrf'])) {
             <input type="hidden" name="equipo_id" id="equipo_id" value="<?= htmlspecialchars((string) ($equipoId ?: '')) ?>">
             <input type="hidden" name="version" id="equipo_version" value="">
             <input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['empresa_equipos_csrf'], ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="return_url" value="<?= htmlspecialchars($returnUrl, ENT_QUOTES, 'UTF-8') ?>">
 
             <div class="card mb-4 empresa-form-card">
                 <div class="card-body empresa-card-body p-4">
@@ -148,7 +153,7 @@ if (empty($_SESSION['empresa_equipos_csrf'])) {
             </div>
 
             <div class="d-flex flex-column flex-sm-row justify-content-sm-end gap-2 pb-4">
-                <a href="ver_empresa.php?id=<?= htmlspecialchars((string) $empresaId) ?>#equipos" class="btn btn-danger">Cancelar</a>
+                <a href="<?= htmlspecialchars($returnUrl !== '' ? $returnUrl : 'ver_empresa.php?id=' . (string) $empresaId . '#equipos', ENT_QUOTES, 'UTF-8') ?>" class="btn btn-danger">Cancelar</a>
                 <button id="btn_guardar_equipo" class="btn btn-secondary" type="submit">Guardar equipo</button>
             </div>
         </form>

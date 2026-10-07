@@ -4,12 +4,16 @@ const ovPage = document.querySelector('[data-ov-csrf]');
 const ovForm = document.getElementById('form_orden_venta');
 const ovOpportunity = document.getElementById('ov-opportunity');
 const ovQuote = document.getElementById('ov-quote');
+const ovContact = document.getElementById('ov-contact');
+const ovAddress = document.getElementById('ov-address');
 const ovOrderId = ovPage.dataset.orderId;
 const ovPreferredOpportunity = ovPage.dataset.opportunityId;
 const ovPreferredQuote = ovPage.dataset.quoteId;
 let ovSources = [];
 let ovExistingOrder = null;
 let ovSyncingSelectors = false;
+let ovContacts = [];
+let ovAddresses = [];
 
 // Devuelve la fuente seleccionada a partir de la oportunidad y la cotización actuales.
 function ovSelectedSource() {
@@ -40,6 +44,16 @@ function ovInitSourceSelectors() {
         placeholder: 'Buscar o seleccionar oportunidad',
         language: {noResults: () => 'No se encontraron oportunidades'}
     });
+    jQuery(ovContact).select2({
+        width: '100%', minimumResultsForSearch: 0,
+        placeholder: 'Seleccionar contacto',
+        language: {noResults: () => 'No se encontraron contactos asociados'}
+    });
+    jQuery(ovAddress).select2({
+        width: '100%', minimumResultsForSearch: 0,
+        placeholder: 'Seleccionar dirección',
+        language: {noResults: () => 'No se encontraron direcciones registradas'}
+    });
 }
 
 // Carga todas las oportunidades relacionadas, ordenadas desde la generación más reciente.
@@ -62,29 +76,73 @@ function ovPopulateOpportunities(selectedOpportunity = '') {
     return opportunities;
 }
 
-// Construye la dirección visible usando primero la fotografía de la cotización.
-function ovSourceAddress(source) {
-    if (!source) { return '—'; }
-    if (String(source.cot_direccion || '').trim()) { return source.cot_direccion.trim(); }
-    return [
-        [source.calle, source.numero_exterior].filter(Boolean).join(' '), source.numero_interior,
-        source.colonia, source.ciudad, source.estado, source.codigo_postal, source.pais
-    ].filter(value => String(value || '').trim()).join(', ') || 'Sin dirección';
+// Limpia los selectores del cliente cuando todavía no existe un origen comercial completo.
+function ovResetClientOptions() {
+    ovContacts = [];
+    ovAddresses = [];
+    ovContact.replaceChildren(new Option('Selecciona primero una cotización', ''));
+    ovAddress.replaceChildren(new Option('Selecciona primero una cotización', ''));
+    ovContact.disabled = true;
+    ovAddress.disabled = true;
+    document.getElementById('ov-email').textContent = '—';
+    document.getElementById('ov-phone').textContent = '—';
+    ovRefreshSelect(ovContact);
+    ovRefreshSelect(ovAddress);
 }
 
-// Presenta en una sección independiente los datos relacionados con el origen comercial.
+// Presenta los datos fijos del origen comercial y deja contacto y dirección a los catálogos vigentes.
 function ovShowSource(source) {
     const values = {
         'ov-company': source?.empresa || '—',
-        'ov-contact': source ? (source.cot_contacto || source.contacto || 'Sin contacto') : '—',
-        'ov-email': source ? (source.cot_correo || source.correo || 'Sin correo electrónico') : '—',
-        'ov-phone': source ? (source.cot_telefono || source.celular || 'Sin teléfono') : '—',
-        'ov-address': ovSourceAddress(source),
         'ov-short-description': source?.descripcion_corta || 'Sin descripción breve',
         'ov-long-description': source?.descripcion_larga || 'Sin descripción larga',
         'ov-amount': source ? OV.money(source.importe_sin_iva) : '—'
     };
     Object.entries(values).forEach(([id, value]) => { document.getElementById(id).textContent = value; });
+}
+
+// Refleja correo y teléfono del contacto vigente seleccionado.
+function ovShowSelectedContact() {
+    const contact = ovContacts.find(item => String(item.id) === ovContact.value);
+    document.getElementById('ov-email').textContent = contact?.correo || 'Sin correo electrónico';
+    document.getElementById('ov-phone').textContent = contact?.celular || 'Sin teléfono';
+}
+
+// Llena contacto y dirección con los registros actuales asociados a la empresa seleccionada.
+async function ovLoadClientOptions(source, selectedContact = '', selectedAddress = '') {
+    ovResetClientOptions();
+    if (!source) { return; }
+    const result = await OV.request('client_options', {
+        oportunidad_id: source.oportunidad_id,
+        cotizacion_id: source.cotizacion_id
+    });
+    ovContacts = result.contacts || [];
+    ovAddresses = result.addresses || [];
+    ovContact.replaceChildren(new Option('Seleccionar contacto', ''));
+    ovContacts.forEach(contact => {
+        const role = [contact.departamento, contact.puesto].filter(Boolean).join(' · ');
+        const principal = Number(contact.es_principal) === 1 ? ' · Principal' : '';
+        ovContact.add(new Option(`${contact.nombre}${role ? ` · ${role}` : ''}${principal}`, contact.id));
+    });
+    ovAddress.replaceChildren(new Option('Seleccionar dirección', ''));
+    ovAddresses.forEach(address => {
+        const label = [address.alias || address.tipo_direccion, address.direccion_texto,
+            Number(address.es_principal) === 1 ? 'Principal' : ''].filter(Boolean).join(' · ');
+        ovAddress.add(new Option(label, address.id));
+    });
+    const preferredContact = String(selectedContact || source.contacto_id || '');
+    const preferredAddress = String(selectedAddress || source.direccion_id || '');
+    const contact = ovContacts.find(item => String(item.id) === preferredContact)
+        || ovContacts.find(item => Number(item.es_principal) === 1) || ovContacts[0];
+    const address = ovAddresses.find(item => String(item.id) === preferredAddress)
+        || ovAddresses.find(item => Number(item.es_principal) === 1) || ovAddresses[0];
+    ovContact.value = contact ? String(contact.id) : '';
+    ovAddress.value = address ? String(address.id) : '';
+    ovContact.disabled = ovContacts.length === 0;
+    ovAddress.disabled = ovAddresses.length === 0;
+    ovRefreshSelect(ovContact);
+    ovRefreshSelect(ovAddress);
+    ovShowSelectedContact();
 }
 
 // Refleja la fecha elegida y resume si la orden existente ha recibido actualizaciones.
@@ -121,6 +179,14 @@ function ovUpdateSourceAvailability(source) {
     const message = document.getElementById('mensaje_form_orden');
     const save = document.getElementById('ov-save');
     if (ovExistingOrder || source?.eligible) {
+        if (ovContacts.length === 0 || ovAddresses.length === 0) {
+            save.disabled = true;
+            message.textContent = ovContacts.length === 0
+                ? 'La empresa necesita al menos un contacto activo asociado antes de guardar la orden.'
+                : 'La empresa necesita al menos una dirección registrada antes de guardar la orden.';
+            message.className = 'alert alert-warning';
+            return;
+        }
         save.disabled = false;
         message.classList.add('d-none');
         return;
@@ -150,6 +216,7 @@ async function ovFillOrder(order) {
     document.getElementById('ov-notas').value = order.notas || '';
     const source = ovSelectedSource();
     ovShowSource(source);
+    await ovLoadClientOptions(source, order.contacto_id, order.direccion_id);
     ovUpdateSourceAvailability(source);
     ovUpdateTracking(order);
 }
@@ -177,6 +244,7 @@ async function ovPrepareForm() {
         ovRefreshSelect(ovOpportunity);
         ovPopulateQuotes(preferred.cotizacion_id, preferred.oportunidad_id);
         ovShowSource(preferred);
+        await ovLoadClientOptions(preferred);
         ovUpdateSourceAvailability(preferred);
     } else if (ovPreferredOpportunity) {
         if (!opportunities.has(String(ovPreferredOpportunity))) {
@@ -186,9 +254,11 @@ async function ovPrepareForm() {
         ovRefreshSelect(ovOpportunity);
         ovPopulateQuotes('', ovPreferredOpportunity);
         ovShowSource(null);
+        ovResetClientOptions();
         ovUpdateSourceAvailability(null);
     } else {
         ovShowSource(null);
+        ovResetClientOptions();
         ovUpdateSourceAvailability(null);
     }
     ovForm.classList.remove('d-none');
@@ -199,11 +269,12 @@ function ovHandleOpportunityChange() {
     if (ovSyncingSelectors) { return; }
     ovPopulateQuotes('', ovOpportunity.value);
     ovShowSource(null);
+    ovResetClientOptions();
     ovUpdateSourceAvailability(null);
 }
 
 // Selecciona la oportunidad relacionada y carga los datos al elegir una cotización.
-function ovHandleQuoteChange() {
+async function ovHandleQuoteChange() {
     if (ovSyncingSelectors) { return; }
     const source = ovSources.find(item => String(item.cotizacion_id) === ovQuote.value);
     if (source) {
@@ -214,6 +285,7 @@ function ovHandleQuoteChange() {
         ovSyncingSelectors = false;
     }
     ovShowSource(source || null);
+    await ovLoadClientOptions(source || null);
     ovUpdateSourceAvailability(source || null);
 }
 
@@ -233,6 +305,9 @@ document.getElementById('ov-fecha').addEventListener('change', function () {
     ovUpdateTracking(ovExistingOrder);
 });
 
+// Mantiene visibles los datos actuales del contacto elegido por el usuario.
+ovContact.addEventListener('change', ovShowSelectedContact);
+
 // Valida y envía la creación o edición completa de la orden de venta.
 ovForm.addEventListener('submit', async function (event) {
     event.preventDefault();
@@ -243,6 +318,7 @@ ovForm.addEventListener('submit', async function (event) {
         const result = await OV.request('save', {
             id: ovOrderId, version: document.getElementById('ov-version').value,
             oportunidad_id: ovOpportunity.value, cotizacion_id: ovQuote.value,
+            contacto_id: ovContact.value, direccion_id: ovAddress.value,
             fecha_generacion: document.getElementById('ov-fecha').value,
             estatus: document.getElementById('ov-estatus').value,
             notas: document.getElementById('ov-notas').value

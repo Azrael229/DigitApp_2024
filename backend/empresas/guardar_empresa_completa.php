@@ -18,12 +18,22 @@ function redirigirFormulario(string $parametro, ?int $contactoId = null): void
     if ($contactoId !== null) {
         $parametro .= '&contacto_id=' . $contactoId;
     }
+    $returnUrl = trim((string) ($_POST['return_url'] ?? ''));
+    if ($returnUrl !== '' && preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
+        $parametro .= '&return_url=' . rawurlencode($returnUrl);
+    }
     header('Location: ../../paginas/form_empresa.php?' . $parametro);
     exit;
 }
 
 function redirigirVistaEmpresa(int $empresaId, string $parametro): void
 {
+    $returnUrl = trim((string) ($_POST['return_url'] ?? ''));
+    if ($returnUrl !== '' && preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
+        $separador = str_contains($returnUrl, '?') ? '&' : '?';
+        header('Location: ../../paginas/' . $returnUrl . $separador . $parametro);
+        exit;
+    }
     header('Location: ../../paginas/ver_empresa.php?id=' . $empresaId . '&' . $parametro);
     exit;
 }

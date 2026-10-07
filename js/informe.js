@@ -3,6 +3,7 @@ const selectEmpresa = document.getElementById('select_empresa');
 const selectContacto = document.getElementById('select_contacto');
 const inputEmpresa = document.getElementById('nombre_empresa');
 const selectDireccion = document.getElementById('dir_empresa');
+const inputDireccionIdInforme = document.getElementById('informe_direccion_id');
 const selectEquipo = document.getElementById('select_equipo');
 const inputContacto = document.getElementById('nombre_contacto');
 const inputCorreo = document.getElementById('correo_contacto');
@@ -21,6 +22,11 @@ const inputMin = document.getElementById('min');
 const inputClase = document.getElementById('clase');
 const resumenEmt = document.getElementById('resumen_emt');
 const cuerpoTablaEmt = document.getElementById('tabla_emt_cuerpo');
+const botonEditarCliente = document.getElementById('btn_editar_cliente_informe');
+const botonEditarEquipo = document.getElementById('btn_editar_equipo_informe');
+const botonesGenerarInforme = Array.from(formularioInforme.querySelectorAll('[data-informe-accion]'));
+const claveFlujoInforme = `digitapp:draft:${document.body.dataset.userId || 'usuario'}:informe-flujo`;
+const vigenciaFlujoInforme = 5 * 24 * 60 * 60 * 1000;
 let empresaEnCarga = '';
 let equiposEmpresa = [];
 
@@ -154,6 +160,7 @@ function limpiarContactos(mensaje = 'Seleccione primero una empresa') {
 function limpiarDirecciones(mensaje = 'Seleccione primero una empresa') {
     selectDireccion.innerHTML = `<option value="">${mensaje}</option>`;
     selectDireccion.disabled = true;
+    inputDireccionIdInforme.value = '';
 }
 
 // Borra la ficha del instrumento para impedir que queden datos de otro equipo.
@@ -170,6 +177,7 @@ function limpiarDatosInstrumento() {
 function limpiarEquipos(mensaje = 'Seleccione primero una empresa y una dirección') {
     selectEquipo.innerHTML = `<option value="">${mensaje}</option>`;
     selectEquipo.disabled = true;
+    botonEditarEquipo.disabled = true;
     limpiarDatosInstrumento();
 }
 
@@ -214,6 +222,7 @@ function cargarEquiposDireccion() {
 function cargarEquipoSeleccionado() {
     limpiarDatosInstrumento();
     const equipo = equiposEmpresa.find((registro) => String(registro.id) === selectEquipo.value);
+    botonEditarEquipo.disabled = !equipo;
     if (!equipo) return;
     inputDescripcion.value = equipo.descripcion || '';
     inputMarca.value = equipo.marca || '';
@@ -262,7 +271,7 @@ function cargarDirecciones(direcciones, direccionHistorica = '') {
         const tipo = direccion.tipo_direccion === 'fiscal' ? 'Fiscal' : 'Entrega';
         const alias = direccion.alias ? ` · ${direccion.alias}` : '';
         const principal = Number(direccion.es_principal) === 1 ? ' · Principal' : '';
-        opcion.value = texto;
+        opcion.value = String(direccion.id || '');
         opcion.dataset.id = String(direccion.id || '');
         opcion.textContent = `${tipo}${alias}${principal} — ${texto}`;
         selectDireccion.appendChild(opcion);
@@ -276,6 +285,7 @@ function cargarDirecciones(direcciones, direccionHistorica = '') {
         selectDireccion.selectedIndex = 1;
     }
     selectDireccion.disabled = false;
+    inputDireccionIdInforme.value = selectDireccion.value;
 }
 
 // Carga las opciones de contacto y selecciona el contacto principal devuelto por el backend.
@@ -319,8 +329,10 @@ async function seleccionarEmpresa() {
     limpiarEquipos();
     if (!id) {
         empresaEnCarga = '';
+        botonEditarCliente.disabled = true;
         return;
     }
+    botonEditarCliente.disabled = false;
     try {
         const [respuestaEmpresa, respuestaContactos] = await Promise.all([
             fetch('../backend/empresas/query_id_empresa.php', { method: 'POST', body: id }),
@@ -344,6 +356,94 @@ async function seleccionarEmpresa() {
         empresaEnCarga = '';
     }
 }
+
+// Conserva por un máximo de cinco días el avance del informe cuando se edita un dato maestro.
+function guardarFlujoInforme() {
+    const controles = Array.from(formularioInforme.elements)
+        .filter((control) => control.name && !['submit', 'button'].includes(control.type))
+        .map((control) => ({
+            name: control.name,
+            value: control.value,
+            checked: ['checkbox', 'radio'].includes(control.type) ? control.checked : null,
+        }));
+    localStorage.setItem(claveFlujoInforme, JSON.stringify({ actualizado: Date.now(), controles }));
+}
+
+function leerFlujoInforme() {
+    try {
+        const flujo = JSON.parse(localStorage.getItem(claveFlujoInforme) || 'null');
+        if (!flujo || !Array.isArray(flujo.controles) || Date.now() - Number(flujo.actualizado) > vigenciaFlujoInforme) {
+            localStorage.removeItem(claveFlujoInforme);
+            return null;
+        }
+        return flujo;
+    } catch (error) {
+        localStorage.removeItem(claveFlujoInforme);
+        return null;
+    }
+}
+
+function valorGuardado(flujo, nombre) {
+    return flujo?.controles.find((control) => control.name === nombre)?.value || '';
+}
+
+function restaurarControlesInforme(flujo, omitidos = []) {
+    const indices = {};
+    flujo.controles.forEach((guardado) => {
+        if (omitidos.includes(guardado.name)) return;
+        const coincidencias = Array.from(formularioInforme.elements).filter((control) => control.name === guardado.name);
+        const indice = indices[guardado.name] || 0;
+        const control = coincidencias[indice];
+        indices[guardado.name] = indice + 1;
+        if (!control) return;
+        if (['checkbox', 'radio'].includes(control.type)) control.checked = Boolean(guardado.checked);
+        else control.value = guardado.value;
+    });
+}
+
+async function restaurarFlujoInforme() {
+    const parametros = new URLSearchParams(window.location.search);
+    if (parametros.get('retorno') !== '1') return;
+    const flujo = leerFlujoInforme();
+    if (!flujo) return;
+
+    restaurarControlesInforme(flujo, ['select_empresa', 'select_contacto', 'dir_empresa', 'direccion_id', 'equipo_id']);
+    const empresaId = valorGuardado(flujo, 'select_empresa');
+    if (!empresaId || !selectEmpresa.querySelector(`option[value="${empresaId}"]`)) return;
+    selectEmpresa.value = empresaId;
+    if (window.jQuery && jQuery.fn.select2) jQuery(selectEmpresa).trigger('change.select2');
+    await seleccionarEmpresa();
+
+    const contactoId = valorGuardado(flujo, 'select_contacto');
+    if (contactoId && selectContacto.querySelector(`option[value="${contactoId}"]`)) selectContacto.value = contactoId;
+    actualizarContactoSeleccionado();
+
+    const direccionId = valorGuardado(flujo, 'dir_empresa');
+    if (direccionId && selectDireccion.querySelector(`option[value="${direccionId}"]`)) selectDireccion.value = direccionId;
+    inputDireccionIdInforme.value = selectDireccion.value;
+    cargarEquiposDireccion();
+
+    const equipoId = valorGuardado(flujo, 'equipo_id');
+    if (equipoId && selectEquipo.querySelector(`option[value="${equipoId}"]`)) selectEquipo.value = equipoId;
+    cargarEquipoSeleccionado();
+    restaurarControlesInforme(flujo, ['select_empresa', 'select_contacto', 'dir_empresa', 'direccion_id', 'equipo_id']);
+    actualizarPasoIndicaciones();
+    evaluarInspeccion(false);
+    evaluarTodasLasPruebas(false);
+    localStorage.removeItem(claveFlujoInforme);
+    history.replaceState({}, '', window.location.pathname);
+}
+
+function abrirEdicionDesdeInforme(destino) {
+    guardarFlujoInforme();
+    const retorno = encodeURIComponent('informe.php?retorno=1');
+    window.location.href = `${destino}${destino.includes('?') ? '&' : '?'}return_url=${retorno}`;
+}
+
+// Conserva el identificador de la dirección maestra elegida para la validación del servidor.
+selectDireccion.addEventListener('change', function () {
+    inputDireccionIdInforme.value = selectDireccion.value;
+});
 
 // Obtiene límites en divisiones y factor de Min para la clase calculada.
 function configuracionClase(clase) {
@@ -683,21 +783,92 @@ function mostrarErrores(errores) {
     contenedor.focus();
 }
 
-// Ejecuta la validación integral y permite el POST solo cuando el informe está completo.
-function validarEnvio(evento) {
+// Ejecuta la validación integral antes de solicitar el PDF.
+function validarInforme() {
     const errores = [];
     if (!actualizarParametros(false)) errores.push('El equipo seleccionado debe tener capacidad máxima, división real y división de verificación mayores que cero. Corrija los datos desde el formulario del equipo.');
     evaluarInspeccion(true, errores);
     errores.push(...evaluarTodasLasPruebas(true));
     if (!formularioInforme.checkValidity()) {
-        evento.preventDefault();
         formularioInforme.reportValidity();
         errores.unshift('Complete los campos generales obligatorios marcados por el navegador.');
     }
     if (errores.length) {
-        evento.preventDefault();
         mostrarErrores([...new Set(errores)]);
-    } else mostrarErrores([]);
+        return false;
+    }
+    mostrarErrores([]);
+    return true;
+}
+
+function nombreArchivoInforme(respuesta) {
+    const disposicion = respuesta.headers.get('Content-Disposition') || '';
+    const coincidencia = disposicion.match(/filename\*?=(?:UTF-8''|["']?)([^"';]+)/i);
+    return coincidencia ? decodeURIComponent(coincidencia[1].trim()) : `Informe_SERVICOM_${inputFolio.value}.pdf`;
+}
+
+function descargarPdf(blob, nombre) {
+    const url = URL.createObjectURL(blob);
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = nombre;
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+
+async function prepararOtroEquipo() {
+    const contexto = {
+        empresa: selectEmpresa.value,
+        contacto: selectContacto.value,
+        direccion: selectDireccion.value,
+    };
+    formularioInforme.reset();
+    empresaEnCarga = '';
+    equiposEmpresa = [];
+    limpiarContactos();
+    limpiarDirecciones();
+    limpiarEquipos();
+    establecerFechaActual();
+    if (contexto.empresa) {
+        selectEmpresa.value = contexto.empresa;
+        if (window.jQuery && jQuery.fn.select2) jQuery(selectEmpresa).trigger('change.select2');
+        await seleccionarEmpresa();
+        if (contexto.contacto && selectContacto.querySelector(`option[value="${contexto.contacto}"]`)) selectContacto.value = contexto.contacto;
+        actualizarContactoSeleccionado();
+        if (contexto.direccion && selectDireccion.querySelector(`option[value="${contexto.direccion}"]`)) selectDireccion.value = contexto.direccion;
+        inputDireccionIdInforme.value = selectDireccion.value;
+        cargarEquiposDireccion();
+    }
+    await actualizarFolioPrevisto();
+    actualizarPasoIndicaciones();
+    evaluarInspeccion(false);
+    evaluarTodasLasPruebas(false);
+    selectEquipo.focus();
+}
+
+async function generarInforme(evento) {
+    evento.preventDefault();
+    if (!validarInforme()) return;
+    const accion = evento.submitter?.dataset.informeAccion || 'descargar';
+    botonesGenerarInforme.forEach((boton) => { boton.disabled = true; });
+    try {
+        const respuesta = await fetch(formularioInforme.action, { method: 'POST', body: new FormData(formularioInforme) });
+        const tipo = respuesta.headers.get('Content-Type') || '';
+        if (!respuesta.ok || !tipo.toLowerCase().includes('application/pdf')) {
+            const detalle = (await respuesta.text()).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+            throw new Error(detalle || 'No fue posible generar el PDF del informe.');
+        }
+        descargarPdf(await respuesta.blob(), nombreArchivoInforme(respuesta));
+        localStorage.removeItem(claveFlujoInforme);
+        formularioInforme.dispatchEvent(new CustomEvent('digitapp:draft-saved', { bubbles: true }));
+        if (accion === 'continuar') await prepararOtroEquipo();
+    } catch (error) {
+        mostrarErrores([error.message || 'No fue posible generar el PDF del informe.']);
+    } finally {
+        botonesGenerarInforme.forEach((boton) => { boton.disabled = false; });
+    }
 }
 
 establecerFechaActual();
@@ -709,6 +880,14 @@ selectEmpresa.addEventListener('change', seleccionarEmpresa);
 selectContacto.addEventListener('change', actualizarContactoSeleccionado);
 selectDireccion.addEventListener('change', cargarEquiposDireccion);
 selectEquipo.addEventListener('change', cargarEquipoSeleccionado);
+botonEditarCliente.addEventListener('click', () => {
+    if (!selectEmpresa.value) return;
+    abrirEdicionDesdeInforme(`ver_empresa.php?id=${encodeURIComponent(selectEmpresa.value)}`);
+});
+botonEditarEquipo.addEventListener('click', () => {
+    if (!selectEmpresa.value || !selectEquipo.value) return;
+    abrirEdicionDesdeInforme(`form_equipo_empresa.php?empresa_id=${encodeURIComponent(selectEmpresa.value)}&equipo_id=${encodeURIComponent(selectEquipo.value)}`);
+});
 document.getElementById('btn_analizar').addEventListener('click', () => {
     if (!actualizarParametros(true)) mostrarErrores(['El equipo seleccionado debe tener capacidad máxima, división real y división de verificación mayores que cero. Corrija los datos desde el formulario del equipo.']);
     else {
@@ -742,4 +921,5 @@ document.querySelectorAll('.prueba-card').forEach((tarjeta) => {
     });
 });
 actualizarPasoIndicaciones();
-formularioInforme.addEventListener('submit', validarEnvio);
+formularioInforme.addEventListener('submit', generarInforme);
+restaurarFlujoInforme();

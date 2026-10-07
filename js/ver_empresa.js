@@ -4,6 +4,7 @@ var tituloEmpresa = document.getElementById('titulo_empresa');
 var datosGenerales = document.getElementById('datos_generales');
 var tablaDirecciones = document.getElementById('tabla_direcciones');
 var tablaContactos = document.getElementById('tabla_contactos');
+var retornoEmpresa = document.querySelector('.empresa-detalle').dataset.returnUrl || '';
 var botonAgregarDireccion = document.getElementById('btn_agregar_direccion');
 var botonAgregarContacto = document.getElementById('btn_agregar_contacto');
 var botonAgregarEquipo = document.getElementById('btn_agregar_equipo');
@@ -101,6 +102,7 @@ var equiposEmpresa = new DataTable('#tabla_equipos_empresa', getDataTableOptions
                 }
                 return '<a class="btn btn-secondary btn-sm" href="form_equipo_empresa.php?empresa_id='
                     + encodeURIComponent(obtenerEmpresaId()) + '&equipo_id=' + Number(valor)
+                    + (retornoEmpresa ? '&return_url=' + encodeURIComponent(retornoEmpresa) : '')
                     + '"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</a>';
             }
         },
@@ -430,7 +432,8 @@ function agregarEdicionDireccion(fila, direccion) {
     var enlaceEditar = document.createElement('a');
 
     enlaceEditar.className = 'btn btn-secondary btn-sm';
-    enlaceEditar.href = 'form_direccion_empresa.php?empresa_id=' + empresaId + '&direccion_id=' + direccion.id;
+    enlaceEditar.href = 'form_direccion_empresa.php?empresa_id=' + empresaId + '&direccion_id=' + direccion.id
+        + (retornoEmpresa ? '&return_url=' + encodeURIComponent(retornoEmpresa) : '');
     enlaceEditar.innerHTML = '<i class="bi bi-pencil" aria-hidden="true"></i> Editar';
     enlaceEditar.setAttribute('aria-label', 'Editar dirección ' + (direccion.alias || 'sin alias'));
     celdaEditar.appendChild(enlaceEditar);
@@ -502,7 +505,7 @@ function mostrarContactos(contactos) {
     if (!contactos.length) {
         var filaVacia = document.createElement('tr');
         agregarCelda(filaVacia, 'Sin contactos registrados');
-        filaVacia.cells[0].colSpan = 6;
+        filaVacia.cells[0].colSpan = 7;
         tablaContactos.appendChild(filaVacia);
         return;
     }
@@ -516,6 +519,15 @@ function mostrarContactos(contactos) {
         agregarCelda(fila, contacto.departamento);
         agregarCelda(fila, contacto.puesto);
         agregarCelda(fila, Number(contacto.activo) === 1 ? 'Activo' : 'Inactivo');
+        var celdaEditar = document.createElement('td');
+        var enlaceEditar = document.createElement('a');
+        enlaceEditar.className = 'btn btn-secondary btn-sm';
+        enlaceEditar.href = 'form_contacto.php?id=' + encodeURIComponent(contacto.id)
+            + '&empresa_id=' + encodeURIComponent(obtenerEmpresaId()) + '&from=empresa'
+            + (retornoEmpresa ? '&return_url=' + encodeURIComponent(retornoEmpresa) : '');
+        enlaceEditar.innerHTML = '<i class="bi bi-pencil" aria-hidden="true"></i><span class="visually-hidden"> Editar contacto</span>';
+        celdaEditar.appendChild(enlaceEditar);
+        fila.appendChild(celdaEditar);
         tablaContactos.appendChild(fila);
     });
 }
@@ -546,19 +558,23 @@ function cargarDetalleEmpresa() {
             mostrarEquiposEmpresa(datos.equipos || []);
             mostrarOportunidadesEmpresa(datos.oportunidades || []);
             mostrarCotizacionesEmpresa(datos.cotizaciones || []);
-            botonAgregarDireccion.href = 'form_direccion_empresa.php?empresa_id=' + datos.empresa.id_e;
+            botonAgregarDireccion.href = 'form_direccion_empresa.php?empresa_id=' + datos.empresa.id_e
+                + (retornoEmpresa ? '&return_url=' + encodeURIComponent(retornoEmpresa) : '');
             botonAgregarDireccion.classList.remove('disabled');
             botonAgregarDireccion.removeAttribute('aria-disabled');
-            botonAgregarContacto.href = 'form_contacto.php?empresa_id=' + encodeURIComponent(datos.empresa.id_e);
+            botonAgregarContacto.href = 'form_contacto.php?empresa_id=' + encodeURIComponent(datos.empresa.id_e)
+                + (retornoEmpresa ? '&return_url=' + encodeURIComponent(retornoEmpresa) : '');
             botonAgregarContacto.classList.remove('disabled');
             botonAgregarContacto.removeAttribute('aria-disabled');
-            botonAgregarEquipo.href = 'form_equipo_empresa.php?empresa_id=' + encodeURIComponent(datos.empresa.id_e);
+            botonAgregarEquipo.href = 'form_equipo_empresa.php?empresa_id=' + encodeURIComponent(datos.empresa.id_e)
+                + (retornoEmpresa ? '&return_url=' + encodeURIComponent(retornoEmpresa) : '');
             botonAgregarEquipo.classList.remove('disabled');
             botonAgregarEquipo.removeAttribute('aria-disabled');
             if (!(datos.direcciones || []).length && !(datos.equipos || []).length) {
                 ayudaEquipos.textContent = 'Puedes registrar equipos aunque todavía no tengan una dirección asignada.';
             }
-            botonEditarEmpresa.href = 'form_empresa.php?id=' + datos.empresa.id_e;
+            botonEditarEmpresa.href = 'form_empresa.php?id=' + datos.empresa.id_e
+                + (retornoEmpresa ? '&return_url=' + encodeURIComponent(retornoEmpresa) : '');
             botonEditarEmpresa.classList.remove('disabled');
             botonEditarEmpresa.removeAttribute('aria-disabled');
             mensajeEmpresa.classList.add('d-none');

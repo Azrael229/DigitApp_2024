@@ -14,6 +14,7 @@ var formulario = document.getElementById('form_cotizacion');
 var btnGuardar = document.getElementById('btn_guardar');
 var inputNumCotizacion = document.getElementById('numero_coti');
 var inputNombreEmpresa = document.getElementById('nombre_empresa');
+var selectEmpresaCotizacion = document.getElementById('select_empresa_cot');
 var inputDirEmpresa = document.getElementById('dir_empresa');
 var selectNombContacto = document.getElementById('select_contacto');
 var selectDireccion = document.getElementById('select_direccion');
@@ -50,8 +51,8 @@ var selectCostosEnvio = document.getElementById('costos_envio');
 var inputSubtotal = document.getElementById('subtotal');
 var inputIva = document.getElementById('iva');
 var inputTotal = document.getElementById('total');
-var direccionAntigua = '';
 var direccionesEmpresa = [];
+var contactosEmpresa = [];
 var consecutivoPartida = 0;
 var guardando = false;
 var formularioModificado = false;
@@ -96,30 +97,23 @@ function formatearDireccion(direccion) {
 // Carga las alternativas disponibles para la empresa seleccionada.
 function cargarSelectorDirecciones() {
      selectDireccion.innerHTML = '';
-     if (direccionAntigua) {
-          selectDireccion.add(new Option('Dirección antigua', 'antigua'));
-     }
      direccionesEmpresa.forEach(function (direccion) {
           var etiqueta = direccion.tipo_direccion === 'fiscal' ? 'Dirección fiscal' : 'Dirección de entrega';
           if (direccion.alias) {
                etiqueta += ' - ' + direccion.alias;
           }
-          selectDireccion.add(new Option(etiqueta, 'nueva:' + direccion.id));
+          selectDireccion.add(new Option(etiqueta, String(direccion.id)));
      });
      if (!selectDireccion.options.length) {
           selectDireccion.add(new Option('Sin direcciones registradas', ''));
      }
+     selectDireccion.disabled = direccionesEmpresa.length === 0;
      actualizarDireccionSeleccionada();
 }
 
 // Mantiene sincronizados el texto de dirección y su identificador normalizado.
 function actualizarDireccionSeleccionada() {
-     if (selectDireccion.value === 'antigua') {
-          inputDireccionId.value = '';
-          inputDirEmpresa.value = direccionAntigua;
-          return;
-     }
-     var direccionId = selectDireccion.value.replace('nueva:', '');
+     var direccionId = selectDireccion.value;
      var direccion = direccionesEmpresa.find(function (item) {
           return String(item.id) === direccionId;
      });
@@ -127,53 +121,68 @@ function actualizarDireccionSeleccionada() {
      inputDirEmpresa.value = direccion ? formatearDireccion(direccion) : '';
 }
 
-// Carga los datos del contacto y las direcciones disponibles de su empresa.
-async function selectContacto() {
-     var id = selectNombContacto.value;
-     if (!id) {
-          inputEmpresaId.value = '';
-          inputContactoId.value = '';
-          inputNombreEmpresa.value = '';
-          inputNombreContacto.value = '';
-          inputCorreoContacto.value = '';
-          inputCelContacto.value = '';
-          inputDeptoContacto.value = '';
-          direccionAntigua = '';
-          direccionesEmpresa = [];
-          cargarSelectorDirecciones();
-          return null;
-     }
+// Refleja exclusivamente los datos vigentes del contacto maestro seleccionado.
+function selectContacto() {
+     var contacto = contactosEmpresa.find(function (item) {
+          return String(item.id) === selectNombContacto.value;
+     });
+     inputContactoId.value = contacto ? contacto.id : '';
+     inputNombreContacto.value = contacto ? contacto.nombre || '' : '';
+     inputCorreoContacto.value = contacto ? contacto.correo || '' : '';
+     inputCelContacto.value = contacto ? contacto.celular || '' : '';
+     inputDeptoContacto.value = contacto ? contacto.departamento || '' : '';
+}
 
+// Consulta los contactos y direcciones vigentes de la empresa maestra seleccionada.
+async function cargarEmpresaCotizacion(contactoSeleccionado, direccionSeleccionada) {
+     var id = selectEmpresaCotizacion.value;
+     inputEmpresaId.value = id;
+     inputNombreEmpresa.value = id ? selectEmpresaCotizacion.options[selectEmpresaCotizacion.selectedIndex].textContent.trim() : '';
+     if (!id) {
+          inputContactoId.value = '';
+          contactosEmpresa = [];
+          direccionesEmpresa = [];
+          selectNombContacto.innerHTML = '<option value="">Selecciona primero una empresa</option>';
+          selectNombContacto.disabled = true;
+          cargarSelectorDirecciones();
+          selectContacto();
+          actualizarSelectContactoVisual();
+          return;
+     }
      try {
-          var response = await fetch('../backend/contactos/query_id_contacto.php', {
-               method: 'POST',
-               body: id
-          });
+          var response = await fetch('../backend/oportunidades/api.php?action=options&empresa_id=' + encodeURIComponent(id));
           var data = await response.json();
           if (!response.ok || data.error) {
-               throw new Error(data.error || 'No fue posible cargar el contacto.');
+               throw new Error(data.error || 'No fue posible cargar los datos vigentes de la empresa.');
           }
-          inputEmpresaId.value = data.empresa_id || '';
-          inputContactoId.value = data.id || id;
-          inputNombreEmpresa.value = data.empresa || '';
-          inputNombreContacto.value = data.nombre || '';
-          inputCorreoContacto.value = data.correo || '';
-          inputCelContacto.value = data.celular || '';
-          inputDeptoContacto.value = data.depto || '';
-          direccionAntigua = data.dir_entrega || '';
-          direccionesEmpresa = data.direcciones || [];
+          contactosEmpresa = data.contacts || [];
+          direccionesEmpresa = data.addresses || [];
+          selectNombContacto.innerHTML = '<option value="">Seleccionar contacto</option>';
+          contactosEmpresa.forEach(function (contacto) {
+               selectNombContacto.add(new Option(contacto.nombre, contacto.id));
+          });
+          selectNombContacto.disabled = contactosEmpresa.length === 0;
+          var contacto = contactosEmpresa.find(function (item) { return String(item.id) === String(contactoSeleccionado || ''); })
+               || contactosEmpresa.find(function (item) { return Number(item.es_principal) === 1; }) || contactosEmpresa[0];
+          selectNombContacto.value = contacto ? String(contacto.id) : '';
+          actualizarSelectContactoVisual();
+          selectContacto();
           cargarSelectorDirecciones();
-          return data;
+          var direccion = direccionesEmpresa.find(function (item) { return String(item.id) === String(direccionSeleccionada || ''); })
+               || direccionesEmpresa.find(function (item) { return Number(item.es_principal) === 1; }) || direccionesEmpresa[0];
+          selectDireccion.value = direccion ? String(direccion.id) : '';
+          actualizarDireccionSeleccionada();
      } catch (error) {
-          direccionAntigua = '';
+          contactosEmpresa = [];
           direccionesEmpresa = [];
           cargarSelectorDirecciones();
           alert(error.message);
-          return null;
      }
 }
 
 selectDireccion.addEventListener('change', actualizarDireccionSeleccionada);
+selectNombContacto.addEventListener('change', selectContacto);
+selectEmpresaCotizacion.addEventListener('change', function () { cargarEmpresaCotizacion(); });
 
 // Precarga la empresa, contacto y dirección relacionados con la oportunidad.
 async function precargarOportunidad() {
@@ -189,43 +198,8 @@ async function precargarOportunidad() {
                throw new Error(oportunidadData.error || 'No fue posible cargar la oportunidad.');
           }
           var oportunidad = oportunidadData.opportunity;
-          var opcionesRespuesta = await fetch('../backend/oportunidades/api.php?action=options&empresa_id=' + encodeURIComponent(oportunidad.empresa_id));
-          var opciones = await opcionesRespuesta.json();
-          if (!opcionesRespuesta.ok || opciones.error) {
-               throw new Error(opciones.error || 'No fue posible cargar los datos de la empresa.');
-          }
-
-          inputEmpresaId.value = oportunidad.empresa_id;
-          inputNombreEmpresa.value = oportunidad.empresa || '';
-          direccionAntigua = '';
-          direccionesEmpresa = opciones.addresses || [];
-
-          if (oportunidad.contacto_id) {
-               selectNombContacto.value = String(oportunidad.contacto_id);
-               actualizarSelectContactoVisual();
-               await selectContacto();
-               inputEmpresaId.value = oportunidad.empresa_id;
-               inputNombreEmpresa.value = oportunidad.empresa || '';
-               direccionAntigua = '';
-               direccionesEmpresa = opciones.addresses || [];
-          } else {
-               selectNombContacto.value = '';
-               actualizarSelectContactoVisual();
-               inputContactoId.value = '';
-               inputNombreContacto.value = '';
-               inputCorreoContacto.value = '';
-               inputCelContacto.value = '';
-               inputDeptoContacto.value = '';
-          }
-
-          cargarSelectorDirecciones();
-          if (oportunidad.direccion_id) {
-               var valorDireccion = 'nueva:' + oportunidad.direccion_id;
-               if (Array.from(selectDireccion.options).some(function (opcion) { return opcion.value === valorDireccion; })) {
-                    selectDireccion.value = valorDireccion;
-                    actualizarDireccionSeleccionada();
-               }
-          }
+          selectEmpresaCotizacion.value = String(oportunidad.empresa_id);
+          await cargarEmpresaCotizacion(oportunidad.contacto_id, oportunidad.direccion_id);
           formularioModificado = false;
      } catch (error) {
           alert(error.message);
@@ -387,32 +361,8 @@ async function cargarCotizacionEdicion() {
                     : (cotizacion.cot_status || 'preparacion');
           }
 
-          if (cotizacion.contacto_id) {
-               selectNombContacto.value = String(cotizacion.contacto_id);
-               actualizarSelectContactoVisual();
-               await selectContacto();
-          } else {
-               selectNombContacto.value = '';
-               actualizarSelectContactoVisual();
-               cargarSelectorDirecciones();
-          }
-
-          inputEmpresaId.value = cotizacion.empresa_id || '';
-          inputContactoId.value = cotizacion.contacto_id || '';
-          inputDireccionId.value = cotizacion.direccion_id || '';
-          inputNombreEmpresa.value = cotizacion.cot_empresa || '';
-          inputNombreContacto.value = cotizacion.cot_contacto || '';
-          inputCorreoContacto.value = cotizacion.cot_correo || '';
-          inputCelContacto.value = cotizacion.cot_telefono || '';
-          inputDeptoContacto.value = cotizacion.cot_departamento || '';
-          inputDirEmpresa.value = cotizacion.cot_direccion || '';
-
-          if (cotizacion.direccion_id) {
-               var valorDireccion = 'nueva:' + cotizacion.direccion_id;
-               if (Array.from(selectDireccion.options).some(function (opcion) { return opcion.value === valorDireccion; })) {
-                    selectDireccion.value = valorDireccion;
-               }
-          }
+          selectEmpresaCotizacion.value = String(cotizacion.empresa_id || '');
+          await cargarEmpresaCotizacion(cotizacion.contacto_id, cotizacion.direccion_id);
 
           contenedorPartidas.innerHTML = '';
           (cotizacion.partidas || []).forEach(function (partida) {

@@ -7,6 +7,7 @@ auth_require_permission('comercial');
 require __DIR__ . '/../config/conexion.php';
 require __DIR__ . '/../paginas/funciones.php';
 require_once __DIR__ . '/../backend/helpers/cotizacion_terminos.php';
+require_once __DIR__ . '/../backend/cotizaciones/common.php';
 require __DIR__ . '/fpdf.php';
 
 $cotizacionId = filter_var($_POST['cotizacion_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
@@ -16,15 +17,18 @@ if ($cotizacionId === false || $cotizacionId === null) {
 }
 
 $conexion->set_charset('utf8mb4');
-$consulta = $conexion->prepare('SELECT * FROM cotizaciones WHERE id_coti = ? LIMIT 1');
-$consulta->bind_param('i', $cotizacionId);
-$consulta->execute();
-$cotizacion = $consulta->get_result()->fetch_assoc();
-$consulta->close();
+$cotizacion = cotizacionDetalle($conexion, (int) $cotizacionId);
 if ($cotizacion === null) {
     $conexion->close();
     http_response_code(404);
     exit('La cotización no existe.');
+}
+if (empty($cotizacion['empresa_id']) || empty($cotizacion['contacto_id']) || empty($cotizacion['direccion_id'])
+    || $cotizacion['empresa_actual'] === null || $cotizacion['contacto_actual'] === null
+    || $cotizacion['direccion_actual_id'] === null) {
+    $conexion->close();
+    http_response_code(422);
+    exit('La cotización debe vincularse con una empresa, contacto y dirección vigentes antes de generar nuevamente su PDF.');
 }
 
 $consulta = $conexion->prepare(

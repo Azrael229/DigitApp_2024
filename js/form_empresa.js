@@ -3,6 +3,7 @@ var tituloFormEmpresa = document.getElementById('titulo_form_empresa');
 var botonGuardarEmpresa = document.getElementById('btn_guardar_empresa');
 var botonCancelarEmpresa = document.getElementById('btn_cancelar_empresa');
 var formularioEmpresa = document.getElementById('formEmpresa');
+var retornoInformeEmpresa = formularioEmpresa.querySelector('input[name="return_url"]')?.value || '';
 
 // Llena el formulario con datos generales cuando se abre para editar una empresa.
 function cargarEmpresaParaEditar() {
@@ -41,7 +42,9 @@ function cargarEmpresaParaEditar() {
             });
             tituloFormEmpresa.textContent = 'Editar empresa';
             botonGuardarEmpresa.textContent = 'Guardar cambios';
-            botonCancelarEmpresa.href = 'ver_empresa.php?id=' + empresaId;
+            if (!retornoInformeEmpresa) {
+                botonCancelarEmpresa.href = 'ver_empresa.php?id=' + empresaId;
+            }
         })
         .catch(function () {
             tituloFormEmpresa.textContent = 'No fue posible cargar la empresa';

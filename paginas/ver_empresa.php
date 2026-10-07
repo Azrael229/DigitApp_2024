@@ -1,13 +1,17 @@
 <?php
 require_once __DIR__ . '/../backend/auth/bootstrap.php';
 $prefijoRuta = '../';
+$returnUrl = (string) ($_GET['return_url'] ?? '');
+if ($returnUrl !== '' && !preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
+    $returnUrl = '';
+}
 if (empty($_SESSION['empresa_notas_csrf'])) {
     $_SESSION['empresa_notas_csrf'] = bin2hex(random_bytes(32));
 }
 ?>
 <?php require (__DIR__ . "/../construct/header.php"); ?>
 
-<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle detail-page" data-notas-csrf="<?= htmlspecialchars($_SESSION['empresa_notas_csrf'], ENT_QUOTES, 'UTF-8') ?>">
+<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle detail-page" data-notas-csrf="<?= htmlspecialchars($_SESSION['empresa_notas_csrf'], ENT_QUOTES, 'UTF-8') ?>" data-return-url="<?= htmlspecialchars($returnUrl, ENT_QUOTES, 'UTF-8') ?>">
     <div class="row align-items-center pt-3 pb-4 mb-4 empresa-detalle-header">
         <div class="col empresa-header-copy">
             <p class="empresa-header-kicker mb-1">Directorio de empresas</p>
@@ -16,7 +20,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
         </div>
         <div class="col-12 col-md-auto mt-3 mt-md-0 d-flex flex-column flex-sm-row gap-2 empresa-header-actions">
             <a id="btn_editar_empresa" href="#" class="btn btn-secondary disabled text-nowrap" aria-disabled="true"><i class="bi bi-pencil"></i> Editar datos generales</a>
-            <a href="empresas.php" class="btn btn-secondary text-nowrap"><i class="bi bi-arrow-left"></i> Directorio</a>
+            <a href="<?= htmlspecialchars($returnUrl !== '' ? $returnUrl : 'empresas.php', ENT_QUOTES, 'UTF-8') ?>" class="btn btn-secondary text-nowrap"><i class="bi bi-arrow-left"></i> <?= $returnUrl !== '' ? 'Volver al informe' : 'Directorio' ?></a>
         </div>
     </div>
 
@@ -96,7 +100,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                 <div class="table-responsive empresa-table-wrap">
                     <table class="table table-secondary align-middle empresa-detail-table empresa-contacts-table mb-0">
                         <caption class="visually-hidden">Contactos registrados de la empresa</caption>
-                        <thead><tr><th scope="col">Nombre</th><th scope="col">Teléfono</th><th scope="col">Correo</th><th scope="col">Departamento</th><th scope="col">Puesto</th><th scope="col">Estado</th></tr></thead>
+                        <thead><tr><th scope="col">Nombre</th><th scope="col">Teléfono</th><th scope="col">Correo</th><th scope="col">Departamento</th><th scope="col">Puesto</th><th scope="col">Estado</th><th scope="col">Editar</th></tr></thead>
                         <tbody id="tabla_contactos"></tbody>
                     </table>
                 </div>
@@ -220,6 +224,6 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
-<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261003-1"></script>
+<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261006-1"></script>
 
 <?php require (__DIR__ . "/../construct/footer.html"); ?>
