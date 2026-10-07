@@ -57,6 +57,48 @@ final class OrdenServicioPDF extends FPDF
         return rtrim(mb_substr($clean, 0, max(1, $limit - 1), 'UTF-8')) . '…';
     }
 
+    // Ajusta un texto completo al ancho disponible y conserva los saltos escritos por el usuario.
+    public function wrappedLines(float $width, string $value): array
+    {
+        $text = $this->pdfText(str_replace("\r", '', trim($value)));
+        $availableWidth = max(1.0, $width - 2 * $this->cMargin);
+        $lines = [];
+        foreach (explode("\n", $text) as $paragraph) {
+            if (trim($paragraph) === '') {
+                $lines[] = '';
+                continue;
+            }
+            $current = '';
+            foreach (preg_split('/\s+/', trim($paragraph)) ?: [] as $word) {
+                $candidate = $current === '' ? $word : $current . ' ' . $word;
+                if ($this->GetStringWidth($candidate) <= $availableWidth) {
+                    $current = $candidate;
+                    continue;
+                }
+                if ($current !== '') {
+                    $lines[] = $current;
+                    $current = '';
+                }
+                while ($this->GetStringWidth($word) > $availableWidth) {
+                    $chunk = '';
+                    while ($word !== '' && $this->GetStringWidth($chunk . $word[0]) <= $availableWidth) {
+                        $chunk .= $word[0];
+                        $word = substr($word, 1);
+                    }
+                    $lines[] = $chunk !== '' ? $chunk : substr($word, 0, 1);
+                    if ($chunk === '') {
+                        $word = substr($word, 1);
+                    }
+                }
+                $current = $word;
+            }
+            if ($current !== '') {
+                $lines[] = $current;
+            }
+        }
+        return $lines ?: [''];
+    }
+
     // Dibuja la identidad institucional, título y folio sin referencias comerciales.
     public function Header(): void
     {
@@ -251,31 +293,58 @@ $deliveryBody = implode("\n", array_filter([
 $pdf->infoBox(14, 48, 92, 42, 'DATOS FISCALES DEL CLIENTE', $pdf->compact($fiscalBody, 360), [18, 56, 94]);
 $pdf->infoBox(110, 48, 92, 42, 'ENTREGA Y ATENCIÓN DEL SERVICIO', $pdf->compact($deliveryBody, 360), OrdenServicioPDF::ROJO);
 
-// Instrucciones operativas.
-$pdf->section(94, 'INSTRUCCIONES PARA EJECUTAR EL SERVICIO');
-$pdf->SetDrawColor(205, 213, 221);
-$pdf->SetFillColor(242, 244, 246);
-$pdf->Rect(14, 100, 188, 20, 'DF');
-$pdf->SetTextColor(24, 50, 75);
+// Las instrucciones crecen con el texto y continúan en páginas nuevas sin omitir información.
 $pdf->SetFont('Arial', '', 7.2);
-$pdf->SetXY(16, 102);
-$pdf->MultiCell(184, 4, $pdf->pdfText($pdf->compact((string) ($orden['instrucciones'] ?: 'Sin instrucciones adicionales.'), 520)), 0, 'L');
+$instructionLines = $pdf->wrappedLines(184, (string) ($orden['instrucciones'] ?: 'Sin instrucciones adicionales.'));
+$instructionSectionY = 94.0;
+do {
+    $pdf->section($instructionSectionY, $instructionSectionY === 94.0
+        ? 'INSTRUCCIONES PARA EJECUTAR EL SERVICIO'
+        : 'INSTRUCCIONES PARA EJECUTAR EL SERVICIO · CONTINUACIÓN');
+    $instructionBoxY = $instructionSectionY + 6;
+    $maxLines = max(1, (int) floor((250 - $instructionBoxY - 4) / 4));
+    $pageLines = array_splice($instructionLines, 0, $maxLines);
+    $instructionHeight = max(20.0, 4.0 + count($pageLines) * 4.0);
+    $pdf->SetDrawColor(205, 213, 221);
+    $pdf->SetFillColor(242, 244, 246);
+    $pdf->Rect(14, $instructionBoxY, 188, $instructionHeight, 'DF');
+    $pdf->SetTextColor(24, 50, 75);
+    $pdf->SetFont('Arial', '', 7.2);
+    $lineY = $instructionBoxY + 2;
+    foreach ($pageLines as $line) {
+        $pdf->SetXY(16, $lineY);
+        $pdf->Cell(184, 4, $line, 0, 0, 'L');
+        $lineY += 4;
+    }
+    if ($instructionLines) {
+        $pdf->AddPage();
+        $instructionSectionY = 29.0;
+    }
+} while ($instructionLines);
 
-// Fichas de equipo con un máximo de dos en la portada y cuatro por página de continuación.
-$pdf->section(124, 'EQUIPOS INCLUIDOS EN EL SERVICIO');
-$equipmentY = 133.0;
+// Las fichas aprovechan el espacio restante sin superar cuatro equipos por página.
+$equipmentSectionY = $instructionBoxY + $instructionHeight + 4;
+if ($equipmentSectionY + 6 + 47 > 250) {
+    $pdf->AddPage();
+    $equipmentSectionY = 29.0;
+}
+$pdf->section($equipmentSectionY, 'EQUIPOS INCLUIDOS EN EL SERVICIO');
+$equipmentY = $equipmentSectionY + 9;
 if (!$orden['equipos']) {
     $pdf->SetXY(14, $equipmentY);
     $pdf->SetFont('Arial', '', 8);
     $pdf->Cell(188, 12, $pdf->pdfText('Sin equipos registrados.'), 1, 1, 'C');
 } else {
+    $equipmentOnPage = 0;
     foreach ($orden['equipos'] as $index => $equipment) {
-        if ($index === 2 || ($index > 2 && ($index - 2) % 4 === 0)) {
+        if ($equipmentOnPage >= 4 || $equipmentY + 47 > 250) {
             $pdf->AddPage();
             $pdf->section(29, 'EQUIPOS INCLUIDOS EN EL SERVICIO · CONTINUACIÓN');
             $equipmentY = 38.0;
+            $equipmentOnPage = 0;
         }
         $equipmentY += $pdf->equipmentCard($equipmentY, $index + 1, $equipment) + 4;
+        $equipmentOnPage++;
     }
 }
 

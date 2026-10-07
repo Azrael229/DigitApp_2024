@@ -1,6 +1,7 @@
 'use strict';
 
 const ovDetailId = new URLSearchParams(location.search).get('id');
+let ovCurrentOrder = null;
 const ovServiceTypes = {
     calibracion: 'Calibración', entrega_equipo: 'Entrega de equipo del cliente',
     recoleccion_equipo: 'Recolección de equipo', recepcion_equipo: 'Recepción de equipo',
@@ -60,8 +61,51 @@ function ovRenderFollowups(items) {
     });
 }
 
+// Construye un resumen breve y legible para compartir la orden por correo o WhatsApp.
+function ovShareText(order) {
+    const descriptions = [order.descripcion_corta, order.descripcion_larga]
+        .map(value => String(value || '').trim())
+        .filter((value, index, items) => value && items.indexOf(value) === index)
+        .join('\n');
+    return [
+        `ORDEN DE VENTA ${order.numero_venta || '—'}`,
+        `Estatus: ${OV.statuses[order.estatus] || order.estatus || 'Sin estatus'}`,
+        '',
+        `Cliente: ${order.empresa_nombre || '—'}`,
+        `Dirección: ${order.direccion_texto || '—'}`,
+        `Contacto: ${order.contacto_nombre || '—'}`,
+        `Teléfono: ${order.contacto_telefono || '—'}`,
+        `Correo: ${order.contacto_correo || '—'}`,
+        '',
+        'Descripción del proyecto:',
+        descriptions || '—'
+    ].join('\n');
+}
+
+// Copia el resumen al portapapeles y conserva un respaldo para navegadores sin Clipboard API.
+async function ovCopyOrderInformation() {
+    if (!ovCurrentOrder) { return; }
+    const text = ovShareText(ovCurrentOrder);
+    if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+    } else {
+        const temporary = document.createElement('textarea');
+        temporary.value = text;
+        temporary.setAttribute('readonly', '');
+        temporary.style.position = 'fixed';
+        temporary.style.opacity = '0';
+        document.body.appendChild(temporary);
+        temporary.select();
+        const copied = document.execCommand('copy');
+        temporary.remove();
+        if (!copied) { throw new Error('El navegador no permitió copiar la información.'); }
+    }
+    OV.message('mensaje_orden', 'Información de la orden de venta copiada al portapapeles.', true);
+}
+
 // Llena la pantalla con una orden de venta devuelta por el servidor.
 function ovRenderOrder(order) {
+    ovCurrentOrder = order;
     document.getElementById('ov-number').textContent = order.numero_venta;
     const status = document.getElementById('ov-status');
     status.textContent = OV.statuses[order.estatus] || order.estatus;
@@ -85,6 +129,8 @@ function ovRenderOrder(order) {
     quote.href = 'ver_cotizacion.php?id=' + Number(order.cotizacion_id);
     document.getElementById('ov-short-description').textContent = order.descripcion_corta || 'Sin descripción breve';
     document.getElementById('ov-long-description').textContent = order.descripcion_larga || 'Sin descripción larga';
+    document.getElementById('ov-instructions').textContent = order.instrucciones || 'Sin instrucciones registradas';
+    document.getElementById('ov-notes').textContent = order.notas || 'Sin notas internas';
     document.getElementById('ov-audit').textContent = OV.audit(order);
     ovRenderServiceOrders(order.ordenes_servicio || []);
     ovRenderFollowups(order.seguimiento || []);
@@ -92,6 +138,7 @@ function ovRenderOrder(order) {
     const edit = document.getElementById('ov-edit');
     edit.href = 'form_orden_venta.php?id=' + Number(order.id);
     edit.classList.remove('d-none');
+    document.getElementById('ov-copy').classList.remove('d-none');
     document.getElementById('ov-detail').classList.remove('d-none');
 }
 
@@ -101,5 +148,9 @@ async function ovLoadOrder() {
     const result = await OV.request('get', {id: ovDetailId});
     ovRenderOrder(result.order);
 }
+
+document.getElementById('ov-copy').addEventListener('click', function () {
+    ovCopyOrderInformation().catch(error => OV.message('mensaje_orden', error.message));
+});
 
 ovLoadOrder().catch(error => OV.message('mensaje_orden', error.message));

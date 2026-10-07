@@ -446,7 +446,7 @@ final class CotizacionPDF extends FPDF
         $this->Rect(14, 35, 188, 0.9, 'F');
         $this->SetFillColor(...self::GRIS_CLARO);
         $this->SetDrawColor(...self::GRIS);
-        $this->rectanguloRedondeado(14, 40, 188, 33, 4, 'FD');
+        $this->rectanguloRedondeado(14, 40, 188, 64, 4, 'FD');
         $this->SetFillColor(...self::ROJO);
         $this->rectanguloRedondeado(18, 45.2, 2.4, 2.4, 1.2, 'F');
         $this->SetTextColor(...self::AZUL);
@@ -455,28 +455,56 @@ final class CotizacionPDF extends FPDF
         $this->Cell(78, 5, 'DATOS DEL CLIENTE', 0, 0, 'L');
         $this->SetFont('Arial', 'B', 7);
         $this->SetTextColor(...self::MUTED);
-        $this->SetXY(20, 52);
+        $this->SetXY(20, 51);
         $this->Cell(20, 4, 'EMPRESA', 0, 0, 'L');
         $this->SetTextColor(...self::TEXTO);
         $this->SetFont('Arial', 'B', 8.5);
-        $this->SetXY(20, 57);
-        $this->Cell(86, 4, $this->texto((string) $this->cotizacion['cot_empresa']), 0, 0, 'L');
+        $this->SetXY(20, 55);
+        $this->Cell(91, 4, $this->texto((string) ($this->cotizacion['cot_empresa'] ?? '')), 0, 0, 'L');
+
         $this->SetTextColor(...self::MUTED);
         $this->SetFont('Arial', 'B', 7);
-        $this->SetXY(20, 64);
-        $this->Cell(20, 4, 'CONTACTO', 0, 0, 'L');
+        $this->SetXY(20, 62);
+        $this->Cell(42, 4, 'CONTACTO', 0, 0, 'L');
+        $this->SetXY(65, 62);
+        $this->Cell(46, 4, 'DEPARTAMENTO', 0, 0, 'L');
         $this->SetTextColor(...self::TEXTO);
         $this->SetFont('Arial', '', 7.7);
-        $this->SetXY(41, 64);
-        $this->Cell(65, 4, $this->texto((string) $this->cotizacion['cot_contacto']), 0, 0, 'L');
+        $this->SetXY(20, 66);
+        $this->Cell(42, 4, $this->texto((string) ($this->cotizacion['cot_contacto'] ?? '')), 0, 0, 'L');
+        $this->SetXY(65, 66);
+        $this->Cell(46, 4, $this->texto((string) ($this->cotizacion['cot_departamento'] ?? '')), 0, 0, 'L');
+
+        $this->SetTextColor(...self::MUTED);
+        $this->SetFont('Arial', 'B', 7);
+        $this->SetXY(20, 73);
+        $this->Cell(42, 4, $this->texto('TELÉFONO'), 0, 0, 'L');
+        $this->SetXY(65, 73);
+        $this->Cell(46, 4, 'CORREO', 0, 0, 'L');
+        $this->SetTextColor(...self::TEXTO);
+        $this->SetFont('Arial', '', 7.5);
+        $this->SetXY(20, 77);
+        $this->Cell(42, 4, $this->texto((string) ($this->cotizacion['cot_telefono'] ?? '')), 0, 0, 'L');
+        $this->SetXY(65, 77);
+        $this->Cell(46, 4, $this->texto((string) ($this->cotizacion['cot_correo'] ?? '')), 0, 0, 'L');
+
+        $this->SetTextColor(...self::MUTED);
+        $this->SetFont('Arial', 'B', 7);
+        $this->SetXY(20, 84);
+        $this->Cell(91, 4, $this->texto('DIRECCIÓN ASIGNADA'), 0, 0, 'L');
+        $this->SetTextColor(...self::TEXTO);
+        $this->SetFont('Arial', '', 7.2);
+        $this->SetXY(20, 88);
+        $this->MultiCell(91, 3.4, $this->texto((string) ($this->cotizacion['cot_direccion'] ?? '')), 0, 'L');
+
         $this->SetDrawColor(...self::GRIS);
-        $this->Line(119, 47, 119, 68);
+        $this->Line(119, 47, 119, 98);
         $datos = [
             ['COTIZACIÓN', (string) $this->cotizacion['cot_numero']],
             ['FECHA', $this->fecha((string) $this->cotizacion['cot_fecha'])],
             ['VIGENCIA', $this->fecha((string) $this->cotizacion['cot_vigencia'])],
         ];
-        $y = 48;
+        $y = 51;
         foreach ($datos as [$etiqueta, $valor]) {
             $this->SetTextColor(...self::MUTED);
             $this->SetFont('Arial', 'B', 7);
@@ -486,10 +514,10 @@ final class CotizacionPDF extends FPDF
             $this->SetFont('Arial', $etiqueta === 'COTIZACIÓN' ? 'B' : '', $etiqueta === 'COTIZACIÓN' ? 10 : 7.8);
             $this->SetXY(153, $y);
             $this->Cell(41, 4, $this->texto($valor), 0, 0, 'R');
-            $y += 7;
+            $y += 11;
         }
-        $this->encabezadoTabla(79);
-        $this->SetY(89);
+        $this->encabezadoTabla(110);
+        $this->SetY(120);
     }
 
     private function encabezadoContinuacion(): void

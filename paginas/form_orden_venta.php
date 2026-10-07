@@ -25,6 +25,7 @@ $quoteId = filter_input(INPUT_GET, 'cotizacion_id', FILTER_VALIDATE_INT);
             <div class="row g-3">
                 <div class="col-md-4"><label class="form-label" for="ov-fecha">Fecha de generación <span class="required-mark">*</span></label><input class="form-control" type="date" id="ov-fecha" required></div>
                 <div class="col-md-8"><label class="form-label" for="ov-estatus">Estatus</label><select class="form-select" id="ov-estatus"><?php foreach (OV_ESTATUS as $key => $label): ?><option value="<?= ov_escape($key) ?>"><?= ov_escape($label) ?></option><?php endforeach; ?></select></div>
+                <div class="col-12"><label class="form-label" for="ov-instructions">Instrucciones para realizar el servicio o trabajo</label><textarea class="form-control" id="ov-instructions" rows="4" maxlength="60000" placeholder="Indicaciones operativas que debe conocer el equipo de trabajo."></textarea></div>
                 <div class="col-12"><label class="form-label" for="ov-notas">Notas internas</label><textarea class="form-control" id="ov-notas" rows="3" maxlength="60000" placeholder="Información interna relacionada con esta orden de venta."></textarea></div>
             </div>
         </div></section>
@@ -63,5 +64,5 @@ $quoteId = filter_input(INPUT_GET, 'cotizacion_id', FILTER_VALIDATE_INT);
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="../js/ordenes-venta-common.js?v=20261004-1"></script>
-<script src="../js/formOrdenVenta.js?v=20261006-1"></script>
+<script src="../js/formOrdenVenta.js?v=20261007-1"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

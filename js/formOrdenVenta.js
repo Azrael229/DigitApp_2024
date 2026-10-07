@@ -213,6 +213,7 @@ async function ovFillOrder(order) {
     document.getElementById('ov-version').value = order.version;
     document.getElementById('ov-fecha').value = order.fecha_generacion;
     document.getElementById('ov-estatus').value = order.estatus;
+    document.getElementById('ov-instructions').value = order.instrucciones || '';
     document.getElementById('ov-notas').value = order.notas || '';
     const source = ovSelectedSource();
     ovShowSource(source);
@@ -321,6 +322,7 @@ ovForm.addEventListener('submit', async function (event) {
             contacto_id: ovContact.value, direccion_id: ovAddress.value,
             fecha_generacion: document.getElementById('ov-fecha').value,
             estatus: document.getElementById('ov-estatus').value,
+            instrucciones: document.getElementById('ov-instructions').value,
             notas: document.getElementById('ov-notas').value
         }, true);
         location.href = 'ver_orden_venta.php?id=' + encodeURIComponent(result.order.id);
