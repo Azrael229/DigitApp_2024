@@ -126,6 +126,35 @@ function normalizarCorreo($valor): ?string
 }
 
 /**
+ * Acepta direcciones web con o sin protocolo y conserva únicamente HTTP o HTTPS.
+ */
+function normalizarUrlWeb($valor): ?string
+{
+    $texto = trim((string) $valor);
+    if ($texto === '') {
+        return null;
+    }
+    if (preg_match('/[\x00-\x1F\x7F]/', $texto) === 1) {
+        return null;
+    }
+    if (preg_match('#^https?://#i', $texto) !== 1) {
+        $texto = 'https://' . ltrim($texto, '/');
+    }
+
+    $partes = parse_url($texto);
+    if ($partes === false
+        || !isset($partes['scheme'], $partes['host'])
+        || !in_array(strtolower((string) $partes['scheme']), ['http', 'https'], true)
+        || trim((string) $partes['host']) === ''
+        || isset($partes['user'])
+        || isset($partes['pass'])) {
+        return null;
+    }
+
+    return $texto;
+}
+
+/**
  * Convierte un telefono mexicano a diez digitos con formato ### ### ####.
  */
 function normalizarTelefonoMX($valor): ?string

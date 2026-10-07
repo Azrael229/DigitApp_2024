@@ -3,7 +3,7 @@ $prefijoRuta = '../';
 require __DIR__ . '/../construct/header.php';
 ?>
 
-<div class="container mt-5 mb-5 contain shadow-lg contacto-detalle">
+<div class="container mt-5 mb-5 contain shadow-lg contacto-detalle detail-page">
     <div class="row align-items-center pt-3 pb-4 mb-4 contacto-detail-header">
         <div class="col">
             <p class="contactos-kicker mb-1">Directorio de contactos</p>
@@ -46,7 +46,10 @@ require __DIR__ . '/../construct/header.php';
             <div class="card-body">
                 <div class="contacto-detail-heading mb-3">
                     <p class="contactos-kicker mb-1">Vínculos vigentes</p>
-                    <h2 class="h5 card-title mb-0">Empresas asociadas</h2>
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                        <h2 class="h5 card-title mb-0">Empresas asociadas</h2>
+                        <a id="btn_crear_empresa_contacto" class="btn btn-secondary btn-sm disabled" href="#" aria-disabled="true"><i class="bi bi-plus-lg" aria-hidden="true"></i> Crear empresa y relacionar</a>
+                    </div>
                 </div>
                 <div id="empresas_contacto"></div>
             </div>

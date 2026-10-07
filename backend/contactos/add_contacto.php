@@ -24,7 +24,7 @@ function obtenerIdOpcional($valor): ?int
     return $id === false || $id < 1 ? null : $id;
 }
 
-function normalizarTelefonoObligatorio($valor): ?string
+function normalizarTelefonoContacto($valor): ?string
 {
     $original = limpiarEspacios($valor);
     if ($original === null || $original === '.' || $original === '0') {
@@ -57,7 +57,8 @@ $version = filter_var($_POST['version'] ?? null, FILTER_VALIDATE_INT, ['options'
 $empresaContexto = $esNuevo ? obtenerIdOpcional($_POST['empresa_contexto'] ?? null) : null;
 $empresaRetorno = obtenerIdOpcional($_POST['return_empresa_id'] ?? null);
 $nombre = normalizarNombrePersona($_POST['contacto_nombre'] ?? null);
-$telefono = normalizarTelefonoObligatorio($_POST['contacto_cel'] ?? null);
+$telefonoOriginal = limpiarEspacios($_POST['contacto_cel'] ?? null);
+$telefono = normalizarTelefonoContacto($telefonoOriginal);
 $correoOriginal = limpiarEspacios($_POST['contacto_email'] ?? null);
 $correo = $correoOriginal === null || $correoOriginal === '.' ? null : normalizarCorreo($correoOriginal);
 $recibioDepartamento = array_key_exists('id_departamento', $_POST);
@@ -74,14 +75,19 @@ if ($nombre === null) {
     responderErrorContacto('El nombre del contacto es obligatorio.');
 }
 
-if ($telefono === null) {
+if ($telefonoOriginal !== null && $telefono === null) {
     mysqli_close($conexion);
-    responderErrorContacto('El teléfono es obligatorio y debe contener exactamente 10 dígitos nacionales.');
+    responderErrorContacto('El teléfono debe contener exactamente 10 dígitos nacionales.');
 }
 
 if ($correo !== null && filter_var($correo, FILTER_VALIDATE_EMAIL) === false) {
     mysqli_close($conexion);
     responderErrorContacto('El correo electrónico no es válido.');
+}
+
+if ($telefono === null && $correo === null) {
+    mysqli_close($conexion);
+    responderErrorContacto('Captura al menos un teléfono o un correo electrónico.');
 }
 
 $idDepartamento = null;
@@ -110,7 +116,8 @@ $usarRelacionesExplicitas = array_key_exists('empresas', $_POST) || array_key_ex
 $empresas = [];
 
 if ($usarRelacionesExplicitas) {
-    $empresasEntrada = is_array($_POST['empresas']) ? $_POST['empresas'] : [$_POST['empresas']];
+    $empresasPublicadas = $_POST['empresas'] ?? [];
+    $empresasEntrada = is_array($empresasPublicadas) ? $empresasPublicadas : [$empresasPublicadas];
     foreach ($empresasEntrada as $empresaEntrada) {
         if ($empresaEntrada === null || $empresaEntrada === '') {
             continue;

@@ -61,6 +61,7 @@ require __DIR__ . '/../construct/header.php';
     <form id="form_contacto" data-local-draft="1" action="<?= $prefijoRuta ?>backend/contactos/add_contacto.php" method="POST" novalidate>
         <input type="hidden" id="contacto_id" name="contacto_id" value="<?= $idContacto && $idContacto > 0 ? (int) $idContacto : '' ?>">
         <input type="hidden" id="contacto_version" name="version" value="">
+        <input type="hidden" id="contacto_csrf" name="csrf" value="<?= htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') ?>">
         <input type="hidden" name="empresas_presentes" value="1">
         <input type="hidden" name="direcciones_presentes" value="1">
         <?php if (!$empresaContextoInvalida && $empresaContextoId): ?>
@@ -84,13 +85,14 @@ require __DIR__ . '/../construct/header.php';
                             <input type="text" class="form-control" id="contacto_nombre" name="contacto_nombre" maxlength="50" required autocomplete="name">
                         </div>
                         <div class="col-12 col-md-6">
-                            <label for="contacto_cel" class="form-label fw-semibold">Teléfono <span class="required-mark" aria-hidden="true">*</span></label>
-                            <input type="tel" class="form-control" id="contacto_cel" name="contacto_cel" maxlength="20" required autocomplete="tel">
+                            <label for="contacto_cel" class="form-label fw-semibold">Teléfono</label>
+                            <input type="tel" class="form-control" id="contacto_cel" name="contacto_cel" maxlength="20" autocomplete="tel">
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="contacto_email" class="form-label fw-semibold">Correo</label>
                             <input type="email" class="form-control" id="contacto_email" name="contacto_email" maxlength="50" autocomplete="email">
                         </div>
+                        <div class="col-12"><div class="form-text">Captura al menos un teléfono o un correo electrónico.</div></div>
                     </div>
                 </div>
             </section>
@@ -107,6 +109,11 @@ require __DIR__ . '/../construct/header.php';
                             <select class="form-select" id="id_departamento" name="id_departamento">
                                 <option value="">Sin departamento asignado</option>
                             </select>
+                            <div class="input-group mt-2">
+                                <input class="form-control" type="text" id="nuevo_departamento" maxlength="100" placeholder="Nuevo departamento">
+                                <button class="btn btn-secondary" type="button" id="btn_agregar_departamento">Agregar</button>
+                            </div>
+                            <div id="estado_departamento" class="empresa-notes-status mt-1" role="status" aria-live="polite"></div>
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="puesto" class="form-label fw-semibold">Puesto</label>
@@ -168,6 +175,7 @@ require __DIR__ . '/../construct/header.php';
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="<?= $prefijoRuta ?>js/form_contacto.js?v=20261004-2"></script>
+<script src="<?= $prefijoRuta ?>js/duplicate-warning.js?v=20261006-1"></script>
+<script src="<?= $prefijoRuta ?>js/form_contacto.js?v=20261006-1"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

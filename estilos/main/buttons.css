@@ -28,3 +28,76 @@ button,
     background: linear-gradient(135deg, rgba(228, 0, 124, 0.9), rgba(174, 0, 100, 0.95));
     color: #ffffff;
 }
+
+/* INICIO BLOQUE REVERSIBLE: jerarquia funcional de botones 2026-10-06. */
+.btn-success {
+    border-color: rgba(116, 230, 167, 0.42) !important;
+    background: linear-gradient(135deg, #24965d, #176b45) !important;
+    box-shadow: 0 10px 24px rgba(8, 66, 40, 0.28);
+    color: #f7fff9 !important;
+}
+
+.btn-success:hover,
+.btn-success:focus {
+    background: linear-gradient(135deg, #32ad70, #1d7d50) !important;
+}
+
+.btn-danger {
+    border-color: rgba(255, 158, 139, 0.38) !important;
+    background: linear-gradient(135deg, #a9473b, #742e2a) !important;
+    box-shadow: 0 10px 24px rgba(76, 19, 18, 0.24);
+    color: #fff9f7 !important;
+}
+
+.btn-danger:hover,
+.btn-danger:focus {
+    background: linear-gradient(135deg, #bd5547, #87362f) !important;
+}
+
+.btn-warning {
+    border-color: rgba(255, 214, 122, 0.44) !important;
+    background: linear-gradient(135deg, #d99a34, #a7661f) !important;
+    color: #13243b !important;
+}
+
+.btn-secondary:has(.bi-pencil),
+.btn-secondary:has(.bi-pencil-square) {
+    border-color: rgba(194, 174, 255, 0.4) !important;
+    background: linear-gradient(135deg, #6653b8, #44358c) !important;
+}
+
+.btn-secondary:has(.bi-pencil):hover,
+.btn-secondary:has(.bi-pencil-square):hover {
+    background: linear-gradient(135deg, #7864cc, #5242a1) !important;
+}
+
+.btn:has(.bi-arrow-left),
+.btn:has(.bi-x-lg) {
+    border-color: rgba(172, 196, 219, 0.3) !important;
+    background: linear-gradient(135deg, #50667d, #35485d) !important;
+    color: #f3f8fc !important;
+}
+
+.btn:has(.bi-arrow-left):hover,
+.btn:has(.bi-x-lg):hover {
+    background: linear-gradient(135deg, #60788f, #40566c) !important;
+}
+
+.btn:has(.bi-printer) {
+    border-color: rgba(111, 218, 232, 0.4) !important;
+    background: linear-gradient(135deg, #267f98, #185b70) !important;
+    color: #f4fdff !important;
+}
+
+.btn-outline-success {
+    border-color: rgba(116, 230, 167, 0.48) !important;
+    background: rgba(36, 150, 93, 0.16) !important;
+    color: #c9f5dc !important;
+}
+
+.btn-outline-success:hover,
+.btn-outline-success:focus {
+    background: linear-gradient(135deg, #24965d, #176b45) !important;
+    color: #ffffff !important;
+}
+/* FIN BLOQUE REVERSIBLE: jerarquia funcional de botones 2026-10-06. */

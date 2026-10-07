@@ -120,7 +120,7 @@ function cotCostosEnvio($tipo): string
 require __DIR__ . '/../construct/header.php';
 ?>
 
-<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle cotizacion-detail-page"
+<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle cotizacion-detail-page detail-page"
      data-cotizacion-id="<?= (int) $cotizacion['id_coti'] ?>"
      data-oportunidad-id="<?= (int) ($cotizacion['oportunidad_id'] ?? 0) ?>"
      data-cotizacion-status-csrf="<?= cotEscapar($_SESSION['cotizacion_status_csrf']) ?>">

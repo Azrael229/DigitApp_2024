@@ -83,6 +83,11 @@
     color: #ffe0a6;
 }
 
+.contactos-sin-empresa {
+    background: rgba(255, 184, 84, 0.22);
+    color: #ffe0a6;
+}
+
 .contactos-actions .btn {
     white-space: nowrap;
 }

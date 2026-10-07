@@ -456,16 +456,13 @@ function mostrarDatosGenerales(empresa) {
     campos.forEach(function (campo, indice) {
         var columna = document.createElement('div');
         var campoFormulario = document.createElement('div');
-        var etiqueta = document.createElement('label');
+        var etiqueta = document.createElement('div');
         var valor = document.createElement('span');
         columna.className = 'col-12 col-md-6 col-xl-4';
         campoFormulario.className = 'empresa-data-field';
-        etiqueta.className = 'form-label empresa-data-label';
+        etiqueta.className = 'empresa-data-label';
         valor.className = 'empresa-data-value';
         valor.id = 'empresa-dato-' + indice;
-        valor.setAttribute('role', 'textbox');
-        valor.setAttribute('aria-readonly', 'true');
-        etiqueta.htmlFor = valor.id;
         etiqueta.textContent = campo[0];
         valor.textContent = campo[1] || '-';
         campoFormulario.appendChild(etiqueta);

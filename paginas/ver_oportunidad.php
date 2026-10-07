@@ -3,7 +3,7 @@ require __DIR__ . '/../backend/oportunidades/common.php';
 $prefijoRuta = '../';
 require __DIR__ . '/../construct/header.php';
 ?>
-<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle oportunidades-page" data-csrf="<?= op_escape($_SESSION['oportunidades_csrf']) ?>">
+<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle oportunidades-page detail-page" data-csrf="<?= op_escape($_SESSION['oportunidades_csrf']) ?>">
     <div class="row align-items-center pt-3 pb-4 mb-4 empresa-detalle-header">
         <div class="col empresa-header-copy">
             <p class="empresa-header-kicker mb-1">Gestión comercial</p>

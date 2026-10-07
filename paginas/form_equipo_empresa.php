@@ -156,7 +156,8 @@ if (empty($_SESSION['empresa_equipos_csrf'])) {
 </div>
 
 <?php if ($empresaId !== false && $empresaId !== null): ?>
-<script src="<?= $prefijoRuta ?>js/form_equipo_empresa.js?v=20261002-2"></script>
+<script src="<?= $prefijoRuta ?>js/duplicate-warning.js?v=20261006-1"></script>
+<script src="<?= $prefijoRuta ?>js/form_equipo_empresa.js?v=20261006-1"></script>
 <?php endif; ?>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

@@ -7,6 +7,7 @@ var datosLaborales = document.getElementById('datos_laborales');
 var empresasContacto = document.getElementById('empresas_contacto');
 var botonEditarContacto = document.getElementById('btn_editar_contacto');
 var botonVolverContacto = document.getElementById('btn_volver_contacto');
+var botonCrearEmpresaContacto = document.getElementById('btn_crear_empresa_contacto');
 
 // Obtiene un identificador positivo sin aceptar valores parciales o ambiguos.
 function obtenerIdContacto() {
@@ -42,7 +43,7 @@ function resolverContextoEmpresa(contacto) {
 function agregarCampoContacto(contenedor, etiquetaTexto, valor, columnas) {
     var columna = document.createElement('div');
     var campo = document.createElement('div');
-    var etiqueta = document.createElement('label');
+    var etiqueta = document.createElement('div');
     var contenido = document.createElement('span');
 
     columna.className = columnas || 'col-12 col-md-6';
@@ -143,6 +144,9 @@ function cargarContacto() {
             }
             botonEditarContacto.classList.remove('disabled');
             botonEditarContacto.removeAttribute('aria-disabled');
+            botonCrearEmpresaContacto.href = 'form_empresa.php?contacto_id=' + encodeURIComponent(contacto.id);
+            botonCrearEmpresaContacto.classList.remove('disabled');
+            botonCrearEmpresaContacto.removeAttribute('aria-disabled');
             mensajeContacto.classList.add('d-none');
             contenidoContacto.classList.remove('d-none');
         })

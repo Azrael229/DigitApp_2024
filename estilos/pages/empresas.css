@@ -37,6 +37,101 @@
     padding: 1.5rem;
 }
 
+/* INICIO BLOQUE REVERSIBLE: contraste de vistas de detalle 2026-10-06. */
+.detail-page .empresa-detail-section,
+.detail-page .contacto-detail-card {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 3rem !important;
+    background: linear-gradient(145deg, rgba(5, 27, 63, 0.96), rgba(8, 38, 82, 0.9));
+    border-color: rgba(82, 210, 153, 0.5) !important;
+    box-shadow: 0 18px 38px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(82, 210, 153, 0.08) !important;
+}
+
+.detail-page .empresa-detail-section:nth-child(even),
+.detail-page .contacto-detail-card:nth-child(even) {
+    background: linear-gradient(145deg, rgba(14, 46, 94, 0.96), rgba(10, 34, 72, 0.92));
+    border-color: rgba(112, 224, 172, 0.58) !important;
+}
+
+.detail-page .empresa-detail-section::before,
+.detail-page .contacto-detail-card::before {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: linear-gradient(180deg, #78e0b2, #2d9d6b);
+    content: '';
+}
+
+.detail-page .empresa-section-heading,
+.detail-page .contacto-detail-heading {
+    padding-bottom: 0.95rem;
+    border-bottom: 1px solid rgba(110, 181, 255, 0.18);
+}
+
+.detail-page .empresa-section-heading h2,
+.detail-page .contacto-detail-heading h2 {
+    color: #ffffff;
+    font-size: clamp(1.15rem, 1.8vw, 1.4rem);
+    font-weight: 750;
+    letter-spacing: -0.01em;
+}
+
+.detail-page .empresa-data-field,
+.detail-page .contacto-data-field {
+    height: 100%;
+    padding: 0.3rem 0.2rem 0.7rem;
+    border-bottom: 1px solid rgba(110, 181, 255, 0.18);
+}
+
+.detail-page .empresa-data-label,
+.detail-page .contacto-data-label {
+    margin-bottom: 0.3rem;
+    color: #72c9f4;
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.075em;
+}
+
+.detail-page .empresa-data-value,
+.detail-page .contacto-data-value {
+    display: block;
+    min-height: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    color: #dce8f3;
+    font-size: 1.04rem;
+    font-weight: 650;
+    line-height: 1.5;
+}
+
+.detail-page a.empresa-data-value,
+.detail-page a.contacto-data-value {
+    display: inline-flex;
+    color: #9ed8ff;
+}
+
+.detail-page .op-company-title,
+.detail-page .cotizacion-company-title {
+    font-size: clamp(1.6rem, 2.8vw, 2.25rem);
+    font-weight: 750;
+}
+
+.detail-page .os-client-column > h3 {
+    margin-bottom: 0.8rem;
+    color: #88b8df;
+    font-weight: 700;
+}
+
+.detail-page .os-client-column > .empresa-data-value {
+    color: #dce8f3;
+    font-weight: 600;
+    line-height: 1.7;
+}
+/* FIN BLOQUE REVERSIBLE: contraste de vistas de detalle 2026-10-06. */
+
 #equipos {
     scroll-margin-top: 5.5rem;
 }
@@ -59,6 +154,19 @@
     min-height: 11rem;
     resize: vertical;
     line-height: 1.55;
+}
+
+.empresa-record-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 1.5rem;
+    color: var(--text-soft);
+    font-size: 0.82rem;
+}
+
+.empresa-record-summary strong {
+    color: #b9cce0;
+    font-weight: 600;
 }
 
 .empresa-notes-status {
@@ -249,5 +357,10 @@
     .empresa-header-actions .btn,
     .empresa-section-heading > .btn {
         justify-content: center;
+    }
+
+    .detail-page .empresa-data-value,
+    .detail-page .contacto-data-value {
+        font-size: 1rem;
     }
 }

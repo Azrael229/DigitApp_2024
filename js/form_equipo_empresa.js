@@ -10,6 +10,7 @@ var campoDivisionRealEquipo = document.getElementById('division_real');
 var campoDivisionVerificacionEquipo = document.getElementById('division_verificacion');
 var campoClaseEquipo = document.getElementById('clase_exactitud');
 var mensajeNumerosEquipo = document.getElementById('mensaje_numeros_equipo');
+var botonGuardarEquipo = document.getElementById('btn_guardar_equipo');
 var tokenEquipo = formularioEquipo.querySelector('input[name="csrf"]').value;
 var patronNumeroEquipo = /^(?:0|[1-9]\d*)(?:\.\d{1,9})?$/;
 
@@ -190,6 +191,24 @@ function validarNumerosEquipo(evento) {
     campo.addEventListener('input', actualizarClaseEquipo);
 });
 formularioEquipo.addEventListener('submit', validarNumerosEquipo);
+DigitAppDuplicateWarning.protegerFormulario({
+    formulario: formularioEquipo,
+    boton: botonGuardarEquipo,
+    idAviso: 'aviso-duplicado-equipo',
+    titulo: 'Es posible que este equipo ya exista',
+    crearUrl: function () {
+        return '../backend/helpers/query_posibles_duplicados.php?' + new URLSearchParams({
+            tipo: 'equipo',
+            identificacion: document.getElementById('identificacion').value,
+            numero_serie: document.getElementById('numero_serie').value,
+            excluir_id: campoEquipoId.value || ''
+        }).toString();
+    },
+    mostrarError: function (mensaje) {
+        mensajeNumerosEquipo.textContent = mensaje;
+        mensajeNumerosEquipo.className = 'empresa-notes-status empresa-notes-status-error mt-3';
+    }
+});
 // Vincula el alta rápida de una descripción con su selector.
 document.getElementById('btn_agregar_descripcion').addEventListener('click', function () {
     guardarElementoCatalogo(

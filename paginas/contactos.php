@@ -23,6 +23,17 @@ function escaparContacto($valor): string
         </div>
     </div>
 
+    <div class="row mt-3">
+        <div class="col-12 col-md-4 col-xl-3">
+            <label for="filtro_empresa_contactos" class="form-label">Relación empresarial</label>
+            <select id="filtro_empresa_contactos" class="form-select">
+                <option value="todos">Todos los contactos</option>
+                <option value="con_empresa">Con empresa</option>
+                <option value="sin_empresa">Sin empresa</option>
+            </select>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col">
             <div class="table-responsive data-table-shell contactos-table-wrap">
@@ -50,7 +61,7 @@ function escaparContacto($valor): string
                             }
                             $activo = (int) ($contacto['activo'] ?? 0) === 1;
                             ?>
-                            <tr>
+                            <tr data-company-count="<?= $totalEmpresas ?>">
                                 <td>
                                     <?= renderizarEnlaceEntidad('contacto', $id, (string) $contacto['nombre']) ?>
                                 </td>
@@ -58,7 +69,11 @@ function escaparContacto($valor): string
                                 <td class="contactos-email"><?= escaparContacto($contacto['correo'] ?: '—') ?></td>
                                 <td><?= escaparContacto($contacto['departamento'] ?: '—') ?></td>
                                 <td class="contactos-empresas">
-                                    <?= renderizarEnlaceEntidad('empresa', $contacto['empresa_id'] ?? null, $empresaTexto) ?>
+                                    <?php if ($totalEmpresas === 0): ?>
+                                        <span class="badge contactos-sin-empresa">Sin empresa</span>
+                                    <?php else: ?>
+                                        <?= renderizarEnlaceEntidad('empresa', $contacto['empresa_id'] ?? null, $empresaTexto) ?>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <span class="badge contactos-status <?= $activo ? 'contactos-status-active' : 'contactos-status-inactive' ?>">
@@ -79,6 +94,6 @@ function escaparContacto($valor): string
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
-<script src="<?= $prefijoRuta ?>js/tablaContactos.js?v=20261001-1"></script>
+<script src="<?= $prefijoRuta ?>js/tablaContactos.js?v=20261006-1"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

@@ -59,7 +59,7 @@ $direccionId = filter_input(INPUT_GET, 'direccion_id', FILTER_VALIDATE_INT);
                         <div class="col-12 col-md-6"><label class="form-label" for="pais">País</label><input class="form-control" type="text" name="pais" id="pais" value="México" maxlength="100"></div>
                         <div class="col-12 col-md-6"><label class="form-label" for="entre_calles">Entre calles</label><input class="form-control" type="text" name="entre_calles" id="entre_calles" maxlength="255"></div>
                         <div class="col-12"><label class="form-label" for="referencia">Referencia</label><textarea class="form-control" name="referencia" id="referencia" rows="2"></textarea></div>
-                        <div class="col-12"><label class="form-label" for="enlace_maps">Enlace de Google Maps</label><input class="form-control" type="url" name="enlace_maps" id="enlace_maps" maxlength="500"></div>
+                        <div class="col-12"><label class="form-label" for="enlace_maps">Enlace de Google Maps</label><input class="form-control" type="text" inputmode="url" autocomplete="url" name="enlace_maps" id="enlace_maps" maxlength="500" placeholder="https://maps.app.goo.gl/... o maps.google.com/..."><div class="form-text">Puedes pegar el enlace completo o escribirlo sin https://.</div></div>
                         <div class="col-12"><div class="form-check"><input class="form-check-input" type="checkbox" name="es_principal" id="es_principal"><label class="form-check-label" for="es_principal">Marcar como dirección principal</label></div></div>
                     </div>
                 </div>

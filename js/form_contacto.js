@@ -11,6 +11,11 @@ var catalogoDirecciones = Array.from(selectorDirecciones.options).map(function (
     return {value: opcion.value, label: opcion.textContent, companyId: opcion.dataset.companyId};
 });
 var botonCancelarContacto = document.getElementById('btn_cancelar_contacto');
+var campoTelefonoContacto = document.getElementById('contacto_cel');
+var campoCorreoContacto = document.getElementById('contacto_email');
+var entradaDepartamento = document.getElementById('nuevo_departamento');
+var botonAgregarDepartamento = document.getElementById('btn_agregar_departamento');
+var estadoDepartamento = document.getElementById('estado_departamento');
 
 // Muestra mensajes del formulario sin insertar texto remoto como HTML.
 function mostrarMensajeContacto(texto, tipo) {
@@ -31,6 +36,7 @@ function sincronizarEmpresaPrincipal(preferida) {
     var principalAnterior = preferida || selectorPrincipal.value;
 
     selectorPrincipal.replaceChildren();
+    selectorPrincipal.setCustomValidity('');
     var opcionVacia = document.createElement('option');
     opcionVacia.value = '';
     opcionVacia.textContent = 'Sin empresa principal';
@@ -127,6 +133,47 @@ function cargarCatalogoDepartamentos(valorSeleccionado) {
         });
 }
 
+// Crea un departamento en el catálogo vigente y lo selecciona sin abandonar el formulario.
+function agregarDepartamentoManual() {
+    var nombre = entradaDepartamento.value.trim().replace(/\s+/g, ' ');
+    if (!nombre) {
+        estadoDepartamento.textContent = 'Escribe el nombre del departamento.';
+        estadoDepartamento.className = 'empresa-notes-status empresa-notes-status-error mt-1';
+        entradaDepartamento.focus();
+        return;
+    }
+    botonAgregarDepartamento.disabled = true;
+    estadoDepartamento.textContent = 'Guardando...';
+    fetch('../backend/contactos/query_catalogo_departamentos.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+        body: new URLSearchParams({nombre: nombre, csrf: document.getElementById('contacto_csrf').value})
+    })
+        .then(function (respuesta) { return respuesta.json().then(function (datos) { return {respuesta: respuesta, datos: datos}; }); })
+        .then(function (resultado) {
+            if (!resultado.respuesta.ok || resultado.datos.error) {
+                throw new Error(resultado.datos.error || 'No fue posible guardar el departamento.');
+            }
+            var departamento = resultado.datos.departamento;
+            var opcion = selectorDepartamento.querySelector('option[value="' + departamento.id + '"]');
+            if (!opcion) {
+                opcion = document.createElement('option');
+                opcion.value = departamento.id;
+                selectorDepartamento.appendChild(opcion);
+            }
+            opcion.textContent = departamento.nombre;
+            selectorDepartamento.value = String(departamento.id);
+            entradaDepartamento.value = '';
+            estadoDepartamento.textContent = departamento.nombre + ' quedó disponible y seleccionado.';
+            estadoDepartamento.className = 'empresa-notes-status empresa-notes-status-success mt-1';
+        })
+        .catch(function (error) {
+            estadoDepartamento.textContent = error.message;
+            estadoDepartamento.className = 'empresa-notes-status empresa-notes-status-error mt-1';
+        })
+        .finally(function () { botonAgregarDepartamento.disabled = false; });
+}
+
 // Carga los datos de edicion desde el endpoint especifico del nuevo modelo.
 function cargarContactoParaEdicion(idContacto) {
     return fetch('../backend/contactos/query_detalle_contacto.php', {
@@ -193,11 +240,23 @@ if (window.jQuery && jQuery.fn.select2) {
 
 formularioContacto.addEventListener('submit', function (evento) {
     var empresas = obtenerEmpresasSeleccionadas();
-    if (empresas.length > 0 && !empresas.includes(selectorPrincipal.value)) {
+    var tieneCanal = campoTelefonoContacto.value.trim() !== '' || campoCorreoContacto.value.trim() !== '';
+    campoTelefonoContacto.setCustomValidity(tieneCanal ? '' : 'Captura un teléfono o un correo electrónico.');
+    if (!tieneCanal) {
         evento.preventDefault();
-        mostrarMensajeContacto('Selecciona una empresa principal válida.', 'danger');
+        formularioContacto.classList.add('was-validated');
+        mostrarMensajeContacto('Captura al menos un teléfono o un correo electrónico.', 'danger');
+        campoTelefonoContacto.focus();
         return;
     }
+    if (empresas.length > 0 && !empresas.includes(selectorPrincipal.value)) {
+        evento.preventDefault();
+        selectorPrincipal.setCustomValidity('Selecciona una empresa principal válida.');
+        mostrarMensajeContacto('Selecciona una empresa principal válida.', 'danger');
+        selectorPrincipal.reportValidity();
+        return;
+    }
+    selectorPrincipal.setCustomValidity('');
 
     if (!formularioContacto.checkValidity()) {
         evento.preventDefault();
@@ -206,9 +265,37 @@ formularioContacto.addEventListener('submit', function (evento) {
     }
 });
 
+[campoTelefonoContacto, campoCorreoContacto].forEach(function (campo) {
+    campo.addEventListener('input', function () { campoTelefonoContacto.setCustomValidity(''); });
+});
+botonAgregarDepartamento.addEventListener('click', agregarDepartamentoManual);
+entradaDepartamento.addEventListener('keydown', function (evento) {
+    if (evento.key === 'Enter') {
+        evento.preventDefault();
+        agregarDepartamentoManual();
+    }
+});
+
 var idContacto = contenedorFormularioContacto.dataset.contactId;
 var empresaContextual = contenedorFormularioContacto.dataset.contextCompanyId;
 var empresaRetorno = contenedorFormularioContacto.dataset.returnCompanyId;
+DigitAppDuplicateWarning.protegerFormulario({
+    formulario: formularioContacto,
+    boton: botonGuardarContacto,
+    idAviso: 'aviso-duplicado-contacto',
+    titulo: 'Es posible que este contacto ya exista',
+    crearUrl: function () {
+        var parametros = new URLSearchParams({
+            tipo: 'contacto',
+            nombre: document.getElementById('contacto_nombre').value,
+            telefono: campoTelefonoContacto.value,
+            correo: campoCorreoContacto.value,
+            excluir_id: idContacto || ''
+        });
+        return '../backend/helpers/query_posibles_duplicados.php?' + parametros.toString();
+    },
+    mostrarError: function (mensaje) { mostrarMensajeContacto(mensaje, 'danger'); }
+});
 cargarCatalogoDepartamentos()
     .then(function () {
         if (!idContacto) {

@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../auth/bootstrap.php';
 auth_require_permission('clientes');
 require(__DIR__ . "/../../config/conexion.php");
+require_once __DIR__ . '/../helpers/normalizador_datos.php';
 
 function valorPostDireccion(string $campo): ?string
 {
@@ -27,10 +28,17 @@ $direccionId = filter_var($_POST['direccion_id'] ?? null, FILTER_VALIDATE_INT);
 $version = filter_var($_POST['version'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 $tipoDireccion = valorPostDireccion('tipo_direccion');
 $calle = valorPostDireccion('calle');
+$enlaceMapsEntrada = valorPostDireccion('enlace_maps');
+$enlaceMaps = normalizarUrlWeb($enlaceMapsEntrada);
 
 if ($empresaId === false || $empresaId === null || !in_array($tipoDireccion, ['fiscal', 'entrega'], true) || $calle === null) {
     header('Location: ../../paginas/empresas.php');
     exit;
+}
+
+if ($enlaceMapsEntrada !== null && ($enlaceMaps === null || mb_strlen($enlaceMaps, 'UTF-8') > 500)) {
+    mysqli_close($conexion);
+    redirigirEmpresaDireccion((int) $empresaId, 'error=' . rawurlencode('El enlace de Google Maps no es válido. Usa una dirección HTTP o HTTPS.'));
 }
 
 $consultaEmpresa = $conexion->prepare('SELECT id_e FROM empresas WHERE id_e = ? LIMIT 1');
@@ -60,7 +68,7 @@ $campos = [
     valorPostDireccion('pais') ?? 'México',
     valorPostDireccion('entre_calles'),
     valorPostDireccion('referencia'),
-    valorPostDireccion('enlace_maps'),
+    $enlaceMaps,
 ];
 
 if ($direccionId !== false && $direccionId !== null) {

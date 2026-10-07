@@ -7,7 +7,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
 ?>
 <?php require (__DIR__ . "/../construct/header.php"); ?>
 
-<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle" data-notas-csrf="<?= htmlspecialchars($_SESSION['empresa_notas_csrf'], ENT_QUOTES, 'UTF-8') ?>">
+<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle detail-page" data-notas-csrf="<?= htmlspecialchars($_SESSION['empresa_notas_csrf'], ENT_QUOTES, 'UTF-8') ?>">
     <div class="row align-items-center pt-3 pb-4 mb-4 empresa-detalle-header">
         <div class="col empresa-header-copy">
             <p class="empresa-header-kicker mb-1">Directorio de empresas</p>
