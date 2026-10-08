@@ -62,10 +62,10 @@ try {
                 && is_file(__DIR__ . '/../../filesPDF/' . $file);
         }
         unset($quote);
-        // El sistema anterior solo guarda el nombre de empresa. La vinculación siempre es explícita.
+        // Lista las cotizaciones por la relación estable con la empresa, sin depender de nombres que pueden cambiar.
         $result['available'] = op_rows($conexion, 'SELECT c.id_coti, c.cot_numero, c.cot_fecha, c.cot_total
             FROM cotizaciones c LEFT JOIN oportunidad_cotizaciones oc ON oc.cotizacion_id = c.id_coti
-            WHERE TRIM(c.cot_empresa) = TRIM(?) AND oc.cotizacion_id IS NULL ORDER BY c.id_coti DESC', 's', [$op['empresa']]);
+            WHERE c.empresa_id = ? AND oc.cotizacion_id IS NULL ORDER BY c.id_coti DESC', 'i', [$op['empresa_id']]);
     } else {
         $conexion->begin_transaction();
         $transaction = true;
@@ -121,8 +121,8 @@ try {
         } else {
             $quoteId = op_id($input['cotizacion_id'] ?? null);
             if ($action === 'link') {
-                $quote = op_rows($conexion, 'SELECT id_coti FROM cotizaciones WHERE id_coti = ? AND TRIM(cot_empresa) = TRIM(?) FOR UPDATE',
-                    'is', [$quoteId, $old['empresa']]);
+                $quote = op_rows($conexion, 'SELECT id_coti FROM cotizaciones WHERE id_coti = ? AND empresa_id = ? FOR UPDATE',
+                    'ii', [$quoteId, $old['empresa_id']]);
                 if (!$quote) {
                     throw new InvalidArgumentException('La cotización no corresponde a esta empresa.');
                 }

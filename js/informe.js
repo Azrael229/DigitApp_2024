@@ -275,8 +275,8 @@ function formatearDireccionInforme(direccion) {
     return partes.length ? partes.join(', ') : (direccion.direccion_original || '');
 }
 
-// Carga las direcciones de la empresa y selecciona primero la marcada como principal.
-function cargarDirecciones(direcciones, direccionHistorica = '') {
+// Carga direcciones maestras identificadas por ID y selecciona primero la principal.
+function cargarDirecciones(direcciones) {
     selectDireccion.innerHTML = '<option value="">Seleccionar dirección</option>';
     const opciones = Array.isArray(direcciones) ? direcciones : [];
     opciones.forEach((direccion) => {
@@ -291,9 +291,6 @@ function cargarDirecciones(direcciones, direccionHistorica = '') {
         opcion.textContent = `${tipo}${alias}${principal} — ${texto}`;
         selectDireccion.appendChild(opcion);
     });
-    if (selectDireccion.options.length === 1 && direccionHistorica) {
-        selectDireccion.add(new Option(`Dirección registrada — ${direccionHistorica}`, direccionHistorica));
-    }
     if (selectDireccion.options.length === 1) {
         selectDireccion.innerHTML = '<option value="">Sin direcciones registradas</option>';
     } else {
@@ -359,7 +356,7 @@ async function seleccionarEmpresa() {
         inputEmpresa.value = [empresa.razon_social || empresa.empresa, empresa.regimen_capital].filter(Boolean).join(' ');
         equiposEmpresa = Array.isArray(contactos.equipos) ? contactos.equipos : [];
         cargarContactos(contactos.contactos || []);
-        cargarDirecciones(contactos.direcciones || [], empresa.dir_entrega || '');
+        cargarDirecciones(contactos.direcciones || []);
         cargarEquiposDireccion();
     } catch (error) {
         equiposEmpresa = [];

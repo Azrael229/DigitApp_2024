@@ -57,10 +57,10 @@ try {
             d.estado, d.codigo_postal, d.pais
             FROM oportunidades_comerciales o
             JOIN oportunidad_cotizaciones oc ON oc.oportunidad_id = o.id
-            JOIN cotizaciones q ON q.id_coti = oc.cotizacion_id
+            JOIN cotizaciones q ON q.id_coti = oc.cotizacion_id AND q.empresa_id = o.empresa_id
             JOIN empresas e ON e.id_e = o.empresa_id
             LEFT JOIN contactos c ON c.id = o.contacto_id
-            LEFT JOIN empresa_direcciones d ON d.id = o.direccion_id
+            LEFT JOIN empresa_direcciones d ON d.id = o.direccion_id AND d.empresa_id = o.empresa_id
             LEFT JOIN ordenes_venta ov ON ov.cotizacion_id = q.id_coti
             ORDER BY q.id_coti DESC, o.id DESC');
         foreach ($sources as &$source) {
