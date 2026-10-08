@@ -81,7 +81,7 @@
 <!-- Data Tables 1.13.7 boostrap5 -->
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
-<script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
+<script src="<?= $prefijoRuta ?>js/datatable-filters.js?v=20261008-2"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
 <script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261007-1"></script>

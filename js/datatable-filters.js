@@ -29,6 +29,23 @@ function injectDataTableFilterStyles() {
             display: none !important;
         }
 
+        /* DataTables conserva un encabezado tecnico dentro del cuerpo al usar scrollX. */
+        .dataTables_scrollBody thead .dt-filter-row {
+            height: 0 !important;
+            visibility: hidden !important;
+        }
+
+        .dataTables_scrollBody thead .dt-filter-row th,
+        .dataTables_scrollBody thead .dt-filter-row td {
+            height: 0 !important;
+            padding-block: 0 !important;
+            border: 0 !important;
+        }
+
+        .dataTables_scrollBody thead .dt-filter-row .dt-filter-input {
+            display: none !important;
+        }
+
         /* Estilos de inputs de filtros */
         .dt-filter-input {
             width: 100%;
@@ -81,61 +98,81 @@ function applyColumnFilters(tableInstance) {
         return null;
     }
 
-    const tableNode = api.table().node();
-    const thead = tableNode ? tableNode.querySelector('thead') : null;
-    const headerRow = thead ? thead.querySelector('tr:not(.dt-filter-row)') : null;
-
-    // Prevencion de duplicados
-    if (!thead || !headerRow || thead.querySelector('.dt-filter-row')) {
-        return api;
-    }
-
     injectDataTableFilterStyles();
-
-    // Crear la fila de filtros separada del encabezado real
-    const filterRow = headerRow.cloneNode(true);
-    filterRow.className = 'dt-filter-row';
-
-    api.columns().every(function (columnIndex) {
-        const column = this;
-        const cell = filterRow.children[columnIndex];
-        const columnConfig = api.settings()[0].aoColumns[columnIndex];
-
-        if (!cell) {
-            return;
-        }
-
-        cell.textContent = '';
-
-        // Crear inputs por columna
-        if (columnConfig && columnConfig.bSearchable) {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'dt-filter-input';
-            input.placeholder = 'Filtrar...';
-
-            // Evento de busqueda por columna
-            const applySearch = function () {
-                if (column.search() !== this.value) {
-                    column.search(this.value).draw();
-                }
-            };
-
-            // Evitar que el sort se active al usar los inputs
-            input.addEventListener('click', function (event) {
-                event.stopPropagation();
-            });
-
-            input.addEventListener('keydown', function (event) {
-                event.stopPropagation();
-            });
-
-            input.addEventListener('keyup', applySearch);
-            input.addEventListener('change', applySearch);
-            cell.appendChild(input);
-        }
+    const container = api.table().container();
+    const settings = api.settings()[0];
+    const filterValues = api.columns().indexes().toArray().map(function (columnIndex) {
+        return api.column(columnIndex).search();
     });
+    const timers = new Map();
+    let activeColumn = null;
 
-    thead.appendChild(filterRow);
+    // Sincroniza el valor visible y ejecuta una sola busqueda al terminar de escribir.
+    const scheduleSearch = function (columnIndex, value) {
+        filterValues[columnIndex] = value;
+        container.querySelectorAll(`.dt-filter-input[data-column-index="${columnIndex}"]`).forEach(function (input) {
+            if (input.value !== value) {
+                input.value = value;
+            }
+        });
+        window.clearTimeout(timers.get(columnIndex));
+        timers.set(columnIndex, window.setTimeout(function () {
+            const column = api.column(columnIndex);
+            if (column.search() !== value) {
+                activeColumn = columnIndex;
+                column.search(value).draw();
+            }
+        }, 220));
+    };
+
+    // Reconstruye los filtros en todos los encabezados, incluidos los clonados por scrollX.
+    const renderFilters = function () {
+        container.querySelectorAll('thead').forEach(function (thead) {
+            const headerRow = thead.querySelector('tr:not(.dt-filter-row)');
+            if (!headerRow) {
+                return;
+            }
+            thead.querySelectorAll('.dt-filter-row').forEach(function (row) { row.remove(); });
+            const filterRow = headerRow.cloneNode(true);
+            filterRow.className = 'dt-filter-row';
+
+            Array.from(filterRow.children).forEach(function (cell, columnIndex) {
+                const columnConfig = settings.aoColumns[columnIndex];
+                cell.textContent = '';
+                if (!columnConfig || !columnConfig.bSearchable) {
+                    return;
+                }
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'dt-filter-input';
+                input.placeholder = 'Filtrar...';
+                input.dataset.columnIndex = String(columnIndex);
+                input.value = filterValues[columnIndex] || '';
+                input.addEventListener('click', function (event) { event.stopPropagation(); });
+                input.addEventListener('keydown', function (event) { event.stopPropagation(); });
+                input.addEventListener('input', function () {
+                    activeColumn = columnIndex;
+                    scheduleSearch(columnIndex, this.value);
+                });
+                cell.appendChild(input);
+            });
+            thead.appendChild(filterRow);
+        });
+
+        if (activeColumn !== null) {
+            const visibleInput = Array.from(container.querySelectorAll(`.dt-filter-input[data-column-index="${activeColumn}"]`))
+                .find(function (input) { return input.offsetParent !== null; });
+            if (visibleInput) {
+                visibleInput.focus({ preventScroll: true });
+                visibleInput.setSelectionRange(visibleInput.value.length, visibleInput.value.length);
+            }
+        }
+    };
+
+    api.off('draw.dtColumnFilters');
+    api.on('draw.dtColumnFilters', function () {
+        window.requestAnimationFrame(renderFilters);
+    });
+    renderFilters();
     return api;
 }
