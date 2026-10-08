@@ -43,3 +43,80 @@
     border-color: rgba(110, 181, 255, 0.18) !important;
     color: rgba(255, 255, 255, 0.62) !important;
 }
+
+/* Integra todos los controles de DataTables con el tema oscuro global. */
+html[data-theme="dark"] .dataTables_wrapper :is(.dt-top, .dt-bottom) {
+    background: rgba(10, 14, 20, 0.58);
+    border: 1px solid rgba(159, 177, 198, 0.14);
+    border-radius: 14px;
+    padding: .8rem 1rem;
+}
+
+html[data-theme="dark"] .dataTables_wrapper :is(.dataTables_length, .dataTables_filter, .dataTables_info),
+html[data-theme="dark"] .dataTables_wrapper :is(.dataTables_length, .dataTables_filter, .dataTables_info) * {
+    color: var(--text-main) !important;
+}
+
+html[data-theme="dark"] .dataTables_wrapper :is(input, select, .form-select, .dt-filter-input) {
+    background-color: #151c25 !important;
+    border-color: rgba(159, 177, 198, 0.28) !important;
+    color: #edf3f8 !important;
+}
+
+html[data-theme="dark"] .dataTables_wrapper .pagination .page-link,
+html[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button {
+    background: #151c25 !important;
+    border-color: rgba(159, 177, 198, 0.2) !important;
+    color: #dbe6ee !important;
+}
+
+html[data-theme="dark"] .dataTables_wrapper .pagination .page-link:hover,
+html[data-theme="dark"] .dataTables_wrapper .pagination .page-link:focus,
+html[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #23303d !important;
+    border-color: rgba(103, 199, 232, 0.5) !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .dataTables_wrapper .pagination .page-item.active .page-link,
+html[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+html[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: #277fa0 !important;
+    border-color: #67c7e8 !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .dataTables_wrapper .pagination .page-item.disabled .page-link {
+    background: #10161e !important;
+    border-color: rgba(159, 177, 198, 0.12) !important;
+    color: rgba(221, 231, 239, 0.42) !important;
+}
+
+html[data-theme="dark"] .dataTables_scrollBody {
+    background: rgba(12, 17, 23, 0.72);
+    scrollbar-color: #526476 #151c25;
+}
+
+html[data-theme="dark"] .dataTables_wrapper,
+html[data-theme="dark"] :is(.dataTables_scroll, .dataTables_scrollHead, .dataTables_scrollHeadInner) {
+    background-color: transparent !important;
+    color: var(--text-main) !important;
+}
+
+html[data-theme="dark"] .dataTables_wrapper :is(.dt-top, .dt-bottom) :is(label, span, div) {
+    color: #dce7ef !important;
+}
+
+html[data-theme="dark"] .dataTables_wrapper :is(.pagination, .dataTables_paginate) {
+    background: transparent !important;
+}
+
+html[data-theme="dark"] .dataTables_wrapper .pagination .page-item:not(.active):not(.disabled) .page-link {
+    background: #171f29 !important;
+    color: #dce7ef !important;
+}
+
+html[data-theme="dark"] .dataTables_wrapper .pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+    background: #273442 !important;
+    color: #ffffff !important;
+}

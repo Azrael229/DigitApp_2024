@@ -53,3 +53,21 @@
     background: linear-gradient(135deg, rgba(228, 0, 124, 0.9), rgba(15, 84, 171, 0.95));
     border-color: rgba(255, 255, 255, 0.16);
 }
+
+html[data-theme="dark"] .factura-resumen-item {
+    background: linear-gradient(155deg, rgba(35, 46, 59, 0.96), rgba(18, 24, 32, 0.98));
+    border-color: rgba(159, 177, 198, 0.2);
+    color: #edf3f8;
+}
+
+html[data-theme="dark"] .factura-resumen-total {
+    background: linear-gradient(135deg, rgba(43, 100, 119, 0.96), rgba(45, 54, 70, 0.98));
+    border-color: rgba(103, 199, 232, 0.32);
+}
+
+html[data-theme="dark"] .factura-table-wrap table tfoot th,
+html[data-theme="dark"] .table tfoot :is(th, td) {
+    background: #202b37 !important;
+    border-color: rgba(103, 199, 232, 0.28) !important;
+    color: #edf3f8 !important;
+}

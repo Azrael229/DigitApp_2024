@@ -4,7 +4,7 @@ require (__DIR__ . "/../../config/conexion.php");
 require_once __DIR__ . '/common.php';
 
 $sql = "SELECT c.id_coti, c.cot_numero, c.cot_fecha,
-               COALESCE(e.empresa, c.cot_empresa) AS cot_empresa,
+               CONCAT_WS(' ', COALESCE(NULLIF(TRIM(e.razon_social), ''), e.empresa, c.cot_empresa), NULLIF(TRIM(e.regimen_capital), '')) AS cot_empresa,
                COALESCE(ct.nombre, c.cot_contacto) AS cot_contacto,
                COALESCE(ct.correo, c.cot_correo) AS cot_correo,
                c.cot_total, c.cot_status

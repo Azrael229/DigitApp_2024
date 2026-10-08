@@ -5,6 +5,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const versionKey = 'digitapp:version';
     const draftPrefix = `digitapp:draft:${userId}:`;
     const draftLifetime = 5 * 24 * 60 * 60 * 1000;
+    const themeKey = 'digitapp:theme';
+    const themeSwitch = document.getElementById('digitapp-theme-switch');
+
+    // Aplica y conserva la preferencia visual en este navegador y dispositivo.
+    function applyTheme(theme) {
+        const nextTheme = theme === 'dark' ? 'dark' : 'original';
+        document.documentElement.dataset.theme = nextTheme;
+        if (themeSwitch) themeSwitch.checked = nextTheme === 'dark';
+        localStorage.setItem(themeKey, nextTheme);
+    }
+
+    applyTheme(localStorage.getItem(themeKey));
+    themeSwitch?.addEventListener('change', () => applyTheme(themeSwitch.checked ? 'dark' : 'original'));
 
     // Elimina únicamente los borradores de DigitApp pertenecientes al usuario actual.
     function clearDrafts() {
@@ -104,4 +117,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 300000);
 });
-

@@ -32,3 +32,33 @@
     --bs-table-striped-color: #ffffff;
     --bs-table-hover-color: #ffffff;
 }
+
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --bg-deep: #080b10;
+    --bg-mid: #111720;
+    --bg-soft: #1b2430;
+    --surface: rgba(19, 25, 34, 0.92);
+    --surface-strong: rgba(14, 19, 27, 0.97);
+    --surface-light: rgba(28, 36, 47, 0.96);
+    --border-soft: rgba(159, 177, 198, 0.2);
+    --border-strong: rgba(91, 192, 222, 0.42);
+    --text-main: #edf3f8;
+    --text-soft: rgba(221, 231, 239, 0.7);
+    --accent: #67c7e8;
+    --accent-strong: #2d9fc8;
+    --accent-mint: #7cd5bd;
+    --accent-contrast: #cf6b96;
+    --accent-contrast-soft: rgba(207, 107, 150, 0.16);
+    --shadow-lg: 0 28px 80px rgba(0, 0, 0, 0.52);
+    --shadow-md: 0 16px 34px rgba(0, 0, 0, 0.34);
+    --bs-body-color: #edf3f8;
+    --bs-body-bg: #080b10;
+    --bs-emphasis-color: #ffffff;
+    --bs-secondary-color: rgba(221, 231, 239, 0.7);
+    --bs-border-color: rgba(159, 177, 198, 0.2);
+    --bs-primary: #67c7e8;
+    --bs-primary-rgb: 103, 199, 232;
+    --bs-link-color: #edf3f8;
+    --bs-link-hover-color: #67c7e8;
+}

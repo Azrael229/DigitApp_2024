@@ -443,7 +443,8 @@ function agregarEdicionDireccion(fila, direccion) {
 // Muestra los datos generales de la empresa en la tarjeta superior.
 function mostrarDatosGenerales(empresa) {
     var campos = [
-        ['Razón social', empresa.razon_social],
+        ['Nombre comercial', empresa.empresa],
+        ['Razón social', [empresa.razon_social, empresa.regimen_capital].filter(Boolean).join(' ')],
         ['RFC', empresa.rfc],
         ['Rol', empresa.rol],
         ['Actividad económica', empresa.actividad_economica],
@@ -454,7 +455,7 @@ function mostrarDatosGenerales(empresa) {
         ['Última modificación', formatearFechaEmpresa(empresa.updated_at)]
     ];
 
-    tituloEmpresa.textContent = empresa.empresa || 'Empresa';
+    tituloEmpresa.textContent = [empresa.razon_social || empresa.empresa, empresa.regimen_capital].filter(Boolean).join(' ') || 'Empresa';
     datosGenerales.innerHTML = '';
     campos.forEach(function (campo, indice) {
         var columna = document.createElement('div');
@@ -481,7 +482,7 @@ function mostrarDirecciones(direcciones) {
     if (!direcciones.length) {
         var filaVacia = document.createElement('tr');
         agregarCelda(filaVacia, 'Sin direcciones registradas');
-        filaVacia.cells[0].colSpan = 3;
+        filaVacia.cells[0].colSpan = 4;
         tablaDirecciones.appendChild(filaVacia);
         return;
     }
@@ -491,6 +492,7 @@ function mostrarDirecciones(direcciones) {
         var celdaDireccion = document.createElement('td');
         fila.className = 'empresa-detail-row';
         agregarCelda(fila, formatearTipoDireccion(direccion.tipo_direccion));
+        agregarCelda(fila, direccion.alias || '—');
         celdaDireccion.className = 'empresa-detail-cell empresa-address-cell';
         celdaDireccion.appendChild(formatearDireccionEmpresa(direccion));
         fila.appendChild(celdaDireccion);

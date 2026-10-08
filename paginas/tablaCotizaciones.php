@@ -2,7 +2,7 @@
 <?php $prefijoRuta = '../'; ?>
 <?php  require (__DIR__ . "/../construct/header.php")   ?>
 <?php  require (__DIR__ . "/../backend/cotizaciones/query_all_cotizaciones.php")   ?>
-<div class="container mt-5 mb-5 contain shadow-lg oportunidades-page">
+<div class="container mt-5 mb-5 contain shadow-lg oportunidades-page" data-cot-status-csrf="<?= htmlspecialchars($_SESSION['cotizacion_status_csrf'], ENT_QUOTES, 'UTF-8') ?>">
     <div class="row align-items-center contacto-form-header g-3">
             <div class="col">
                 <p class="contactos-kicker mb-1">Gestión comercial</p>
@@ -31,7 +31,7 @@
                         <tr>
                             <th scope="col">NÚMERO</th>
                             <th scope="col">FECHA</th>
-                            <th scope="col">EMPRESA</th>
+                            <th scope="col">RAZÓN SOCIAL</th>
                             <th scope="col">CONTACTO</th>
                             <th scope="col">CORREO ELECTRÓNICO</th>
                             <th scope="col">IMPORTE</th>
@@ -54,7 +54,7 @@
                             </td>
                             <td data-cot-total="<?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" data-order="<?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>">$ <?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ' '), ENT_QUOTES, 'UTF-8') ?></td>
                             <?php $estatusClave = cotizacionEstatusClave($row_coti['cot_status'] ?? ''); ?>
-                            <td><span class="badge cot-status cot-status-<?= htmlspecialchars($estatusClave, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars(cotizacionEstatusEtiqueta($estatusClave), ENT_QUOTES, 'UTF-8') ?></span></td>
+                            <td><select class="form-select form-select-sm cot-status-select" data-id="<?= (int) $row_coti['id_coti'] ?>" aria-label="Estatus de cotización <?= htmlspecialchars((string) ($row_coti['cot_numero'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"><?php foreach (COTIZACION_ESTATUS as $clave => $etiqueta): ?><option value="<?= $clave ?>"<?= $estatusClave === $clave ? ' selected' : '' ?>><?= htmlspecialchars($etiqueta, ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select></td>
                         </tr>
                         <?php endforeach;  ?>
                         
@@ -83,5 +83,6 @@
 
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
-<script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261003-3"></script>
+<script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
+<script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261007-1"></script>
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>

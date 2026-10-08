@@ -17,7 +17,7 @@ try {
     }
     $input = $method === 'POST' ? $_POST : $_GET;
     $action = (string) ($input['action'] ?? 'list');
-    if (!in_array($action, $method === 'GET' ? ['list', 'get', 'source'] : ['save'], true)) {
+    if (!in_array($action, $method === 'GET' ? ['list', 'get', 'source'] : ['save', 'status'], true)) {
         throw new InvalidArgumentException('Acción no válida.');
     }
     if ($method === 'POST' && !hash_equals($_SESSION['ordenes_venta_csrf'], (string) ($input['csrf'] ?? ''))) {
@@ -31,10 +31,11 @@ try {
 
     if ($action === 'list') {
         $result = ['data' => ov_rows($conexion, 'SELECT os.id, os.numero_servicio,
-            os.fecha_generacion, os.tipo, os.estatus,
+            os.fecha_generacion, os.tipo, os.estatus, os.version,
             COALESCE(ct.nombre, os.entrega_contacto) AS entrega_contacto,
             os.updated_at, ov.id AS orden_venta_id, ov.numero_venta,
-            ov.empresa_id, COALESCE(e.empresa, ov.empresa_nombre) AS empresa_nombre
+            ov.empresa_id,
+            CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa, ov.empresa_nombre), NULLIF(TRIM(e.regimen_capital), \'\')) AS empresa_nombre
             FROM ordenes_servicio os
             JOIN ordenes_venta ov ON ov.id = os.orden_venta_id
             LEFT JOIN empresas e ON e.id_e = ov.empresa_id
@@ -51,6 +52,23 @@ try {
         ];
     } elseif ($action === 'source') {
         $result = os_source($conexion, ov_id($input['orden_venta_id'] ?? null));
+    } elseif ($action === 'status') {
+        $id = ov_id($input['id'] ?? null);
+        $status = (string) ($input['estatus'] ?? '');
+        if (!isset(OS_ESTATUS[$status])) {
+            throw new InvalidArgumentException('El estatus de la orden de servicio no es válido.');
+        }
+        $conexion->begin_transaction();
+        $transaction = true;
+        $old = os_get($conexion, $id, true);
+        if ((string) ($input['version'] ?? '') !== (string) $old['version']) {
+            throw new RuntimeException('Otra edición modificó esta orden. Recarga la página antes de guardar.');
+        }
+        ov_query($conexion, 'UPDATE ordenes_servicio SET estatus = ?, updated_at = CURRENT_TIMESTAMP,
+            version = version + 1 WHERE id = ?', 'si', [$status, $id])->close();
+        $result = ['order' => os_get($conexion, $id)];
+        $conexion->commit();
+        $transaction = false;
     } else {
         $id = ov_id($input['id'] ?? '', true);
         $generationDate = ov_date($input['fecha_generacion'] ?? '');

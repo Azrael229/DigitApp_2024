@@ -1,5 +1,5 @@
-@import url("./main/variables.css");
-@import url("./main/base.css");
+@import url("./main/variables.css?v=20261007-1");
+@import url("./main/base.css?v=20261007-3");
 @import url("./main/layout.css");
 @import url("./main/navbar.css?v=20261005-2");
 @import url("./main/typography.css");
@@ -8,11 +8,11 @@
 @import url("./selects/native-selects.css");
 @import url("./selects/select2.css");
 
-@import url("./main/buttons.css?v=20261006-1");
+@import url("./main/buttons.css?v=20261007-2");
 
-@import url("./tables/base.css?v=20261006-2");
-@import url("./tables/datatables.css");
-@import url("./tables/facturacion.css");
+@import url("./tables/base.css?v=20261007-3");
+@import url("./tables/datatables.css?v=20261007-2");
+@import url("./tables/facturacion.css?v=20261007-1");
 @import url("./tables/cotizacion.css");
 
 @import url("./components/icons.css");

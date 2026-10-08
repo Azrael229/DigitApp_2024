@@ -9,10 +9,13 @@ if (!empty($authUser['debe_cambiar_password']) && $currentScript !== 'mi_cuenta.
 }
 ?>
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="original">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+        try { document.documentElement.dataset.theme = localStorage.getItem('digitapp:theme') === 'dark' ? 'dark' : 'original'; } catch (error) {}
+    </script>
     <title>DigitApp 2024</title>
     <link rel="icon" href="<?= $prefijoRuta ?>imgs/LogoMakr_0mWRyT-1.png" type="image/x-icon">
     <link rel="shortcut icon" href="<?= $prefijoRuta ?>imgs/LogoMakr_0mWRyT-1.png" type="image/x-icon">
@@ -20,9 +23,9 @@ if (!empty($authUser['debe_cambiar_password']) && $currentScript !== 'mi_cuenta.
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?= $prefijoRuta ?>estilos/style.css?v=20261006-7">
+    <link rel="stylesheet" href="<?= $prefijoRuta ?>estilos/style.css?v=20261007-7">
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <script defer src="<?= $prefijoRuta ?>js/app-state.js?v=20261005-1"></script>
+    <script defer src="<?= $prefijoRuta ?>js/app-state.js?v=20261007-1"></script>
 </head>
 <body data-app-version="<?= htmlspecialchars(DIGITAPP_VERSION, ENT_QUOTES, 'UTF-8') ?>" data-user-id="<?= (int) $authUser['id'] ?>">
 <nav class="navbar fixed-top navbar-expand-xl navbar-dark bg-dark">
@@ -49,7 +52,21 @@ if (!empty($authUser['debe_cambiar_password']) && $currentScript !== 'mi_cuenta.
             </ul>
             <div class="dropdown">
                 <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="bi bi-person-circle" aria-hidden="true"></i> <?= htmlspecialchars($authUser['nombre_completo'], ENT_QUOTES, 'UTF-8') ?></button>
-                <ul class="dropdown-menu dropdown-menu-end"><li><span class="dropdown-item-text small text-muted"><?= htmlspecialchars(AUTH_ROLE_LABELS[$authUser['rol']] ?? $authUser['rol'], ENT_QUOTES, 'UTF-8') ?></span></li><li><a class="dropdown-item" href="<?= $prefijoRuta ?>paginas/mi_cuenta.php">Mi cuenta y dispositivos</a></li><li><hr class="dropdown-divider"></li><li><form method="post" action="<?= $prefijoRuta ?>backend/auth/logout.php"><input type="hidden" name="csrf" value="<?= htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') ?>"><button class="dropdown-item text-danger" type="submit">Cerrar sesión</button></form></li></ul>
+                <ul class="dropdown-menu dropdown-menu-end user-menu">
+                    <li><span class="dropdown-item-text small text-muted"><?= htmlspecialchars(AUTH_ROLE_LABELS[$authUser['rol']] ?? $authUser['rol'], ENT_QUOTES, 'UTF-8') ?></span></li>
+                    <li><a class="dropdown-item" href="<?= $prefijoRuta ?>paginas/mi_cuenta.php">Mi cuenta y dispositivos</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <div class="dropdown-item-text theme-switch-row">
+                            <label class="form-check-label" for="digitapp-theme-switch"><i class="bi bi-moon-stars" aria-hidden="true"></i> Tema oscuro</label>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input" type="checkbox" role="switch" id="digitapp-theme-switch" aria-label="Cambiar entre tema original y tema oscuro">
+                            </div>
+                        </div>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><form method="post" action="<?= $prefijoRuta ?>backend/auth/logout.php"><input type="hidden" name="csrf" value="<?= htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') ?>"><button class="dropdown-item text-danger" type="submit">Cerrar sesión</button></form></li>
+                </ul>
             </div>
         </div>
     </div>

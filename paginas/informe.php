@@ -235,12 +235,22 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
         <section class="informe-seccion">
             <h2 class="informe-titulo-seccion">Cierre del servicio</h2>
             <div class="row g-3">
-                <?php foreach (['observaciones' => 'Observaciones', 'trabajo_realizado' => 'Trabajo realizado', 'recomendaciones' => 'Recomendaciones', 'atencion_urgente' => 'Atención / servicios urgentes'] as $campo => $etiqueta): ?><div class="col-12"><label class="form-label" for="<?= $campo ?>"><?= $etiqueta ?></label><textarea class="form-control" name="<?= $campo ?>" id="<?= $campo ?>" rows="3"></textarea></div><?php endforeach; ?>
+                <div class="col-12">
+                    <label class="form-label" for="cierre_servicio">Observaciones y cierre del servicio</label>
+                    <textarea class="form-control" name="cierre_servicio" id="cierre_servicio" rows="7" placeholder="Describa las observaciones encontradas, el trabajo realizado, las recomendaciones y cualquier atención o servicio urgente pendiente."></textarea>
+                    <div class="form-text">Integre en este espacio toda la información útil para el cierre y seguimiento del servicio.</div>
+                </div>
             </div>
         </section>
 
         <div id="errores_informe" class="alert alert-danger d-none" role="alert" tabindex="-1"></div>
         <div class="d-grid gap-2 col-lg-7 mx-auto py-4">
+            <button type="button" class="btn btn-outline-danger btn-lg" id="btn_restablecer_informe">
+                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> RESTABLECER INFORME
+            </button>
+            <button type="submit" class="btn btn-outline-secondary btn-lg" data-informe-accion="formato" formnovalidate>
+                GENERAR FORMATO DE TOMA DE DATOS
+            </button>
             <button type="submit" class="btn btn-success btn-lg" data-informe-accion="descargar">GENERAR Y DESCARGAR PDF</button>
             <button type="submit" class="btn btn-secondary btn-lg" data-informe-accion="continuar">GENERAR PDF Y CONTINUAR CON OTRO EQUIPO</button>
         </div>
@@ -249,6 +259,6 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="<?= $prefijoRuta ?>js/informe.js?v=20261006-2"></script>
+<script src="<?= $prefijoRuta ?>js/informe.js?v=20261007-3"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

@@ -82,12 +82,16 @@ require(__DIR__ . "/../construct/header.php");
                                 </div>
                                 <div class="row g-4">
                                     <div class="col-12 col-md-6">
-                                        <label for="empresa" class="form-label fw-semibold">Empresa <span class="required-mark" aria-hidden="true">*</span></label>
-                                        <input type="text" class="form-control" id="empresa" name="empresa" required>
+                                        <label for="empresa" class="form-label fw-semibold">Nombre comercial <span class="required-mark" aria-hidden="true">*</span></label>
+                                        <input type="text" class="form-control" id="empresa" name="empresa" placeholder="Ejemplo: Raxa" required>
                                     </div>
                                     <div class="col-12 col-md-6">
-                                        <label for="razon_social" class="form-label fw-semibold">Razon social</label>
-                                        <input type="text" class="form-control" id="razon_social" name="razon_social">
+                                        <label for="razon_social" class="form-label fw-semibold">Razón social</label>
+                                        <input type="text" class="form-control" id="razon_social" name="razon_social" placeholder="Ejemplo: Raxa Servicios Industriales">
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label for="regimen_capital" class="form-label fw-semibold">Régimen de capital</label>
+                                        <input type="text" class="form-control" id="regimen_capital" name="regimen_capital" placeholder="Ejemplo: S.A. de C.V.">
                                     </div>
                                     <div class="col-12 col-md-6">
                                         <label for="rfc" class="form-label fw-semibold">RFC</label>
@@ -104,14 +108,6 @@ require(__DIR__ . "/../construct/header.php");
                                             <option value="Otro">Otro</option>
                                         </select>
                                     </div>
-                                    <div class="col-12">
-                                        <label for="actividad_economica" class="form-label fw-semibold">Actividad economica</label>
-                                        <input type="text" class="form-control" id="actividad_economica" name="actividad_economica">
-                                    </div>
-                                    <div class="col-12 col-md-6">
-                                        <label for="regimen_capital" class="form-label fw-semibold">Regimen de capital</label>
-                                        <input type="text" class="form-control" id="regimen_capital" name="regimen_capital">
-                                    </div>
                                     <div class="col-12 col-md-6">
                                         <label for="tipo_persona" class="form-label fw-semibold">Tipo de persona fiscal</label>
                                         <select class="form-select" id="tipo_persona" name="tipo_persona">
@@ -119,6 +115,10 @@ require(__DIR__ . "/../construct/header.php");
                                             <option value="Física">Fisica</option>
                                             <option value="Moral">Moral</option>
                                         </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="actividad_economica" class="form-label fw-semibold">Actividad económica</label>
+                                        <input type="text" class="form-control" id="actividad_economica" name="actividad_economica">
                                     </div>
                                 </div>
                             </div>

@@ -456,7 +456,7 @@ final class CotizacionPDF extends FPDF
         $this->SetFont('Arial', 'B', 7);
         $this->SetTextColor(...self::MUTED);
         $this->SetXY(20, 51);
-        $this->Cell(20, 4, 'EMPRESA', 0, 0, 'L');
+        $this->Cell(30, 4, $this->texto('RAZÓN SOCIAL'), 0, 0, 'L');
         $this->SetTextColor(...self::TEXTO);
         $this->SetFont('Arial', 'B', 8.5);
         $this->SetXY(20, 55);

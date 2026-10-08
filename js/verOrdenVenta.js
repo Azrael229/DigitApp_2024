@@ -78,7 +78,10 @@ function ovShareText(order) {
         `Correo: ${order.contacto_correo || '—'}`,
         '',
         'Descripción del proyecto:',
-        descriptions || '—'
+        descriptions || '—',
+        '',
+        'Instrucciones para realizar el servicio o trabajo:',
+        String(order.instrucciones || '').trim() || '—'
     ].join('\n');
 }
 

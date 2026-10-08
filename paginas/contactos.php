@@ -45,7 +45,7 @@ function escaparContacto($valor): string
                             <th scope="col">Teléfono</th>
                             <th scope="col">Correo</th>
                             <th scope="col">Departamento</th>
-                            <th scope="col">Empresa principal / empresas</th>
+                            <th scope="col">Razón social principal / empresas</th>
                             <th scope="col">Estado</th>
                         </tr>
                     </thead>

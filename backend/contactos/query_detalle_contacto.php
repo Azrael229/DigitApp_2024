@@ -38,11 +38,13 @@ if ($contacto === null) {
 }
 
 $consultaEmpresas = $conexion->prepare(
-    'SELECT ec.id_empresa, e.empresa, ec.es_principal, ec.activo
+    'SELECT ec.id_empresa,
+            CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa), NULLIF(TRIM(e.regimen_capital), \'\')) AS empresa,
+            ec.es_principal, ec.activo
      FROM empresa_contactos AS ec
      INNER JOIN empresas AS e ON e.id_e = ec.id_empresa
      WHERE ec.id_contacto = ? AND ec.activo = 1
-     ORDER BY ec.es_principal DESC, e.empresa ASC, ec.id ASC'
+     ORDER BY ec.es_principal DESC, empresa ASC, ec.id ASC'
 );
 $consultaEmpresas->bind_param('i', $id);
 $consultaEmpresas->execute();

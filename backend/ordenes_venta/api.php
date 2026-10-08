@@ -19,7 +19,7 @@ try {
     $input = $method === 'POST' ? $_POST : $_GET;
     $action = (string) ($input['action'] ?? 'list');
     $reads = ['list', 'get', 'sources', 'client_options', 'equipment'];
-    $writes = ['save', 'followup'];
+    $writes = ['save', 'followup', 'status'];
     if (!in_array($action, $method === 'GET' ? $reads : $writes, true)) {
         throw new InvalidArgumentException('Acción no válida.');
     }
@@ -35,7 +35,7 @@ try {
 
     if ($action === 'list') {
         $result['data'] = ov_rows($conexion, 'SELECT ov.*, o.numero_oportunidad, c.cot_numero,
-                COALESCE(e.empresa, ov.empresa_nombre) AS empresa_nombre
+                CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa, ov.empresa_nombre), NULLIF(TRIM(e.regimen_capital), \'\')) AS empresa_nombre
             FROM ordenes_venta ov
             JOIN oportunidades_comerciales o ON o.id = ov.oportunidad_id
             JOIN cotizaciones c ON c.id_coti = ov.cotizacion_id
@@ -46,7 +46,8 @@ try {
     } elseif ($action === 'sources') {
         $sources = ov_rows($conexion, 'SELECT o.id AS oportunidad_id, o.numero_oportunidad,
             o.descripcion_corta, o.descripcion_larga, o.estatus AS oportunidad_estatus,
-            o.empresa_id, o.contacto_id, o.direccion_id, e.empresa,
+            o.empresa_id, o.contacto_id, o.direccion_id,
+            CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa), NULLIF(TRIM(e.regimen_capital), \'\')) AS empresa,
             c.nombre AS contacto, c.celular, c.correo,
             q.id_coti AS cotizacion_id, q.cot_numero, q.cot_status,
             q.cot_contacto, q.cot_telefono, q.cot_correo, q.cot_direccion,
@@ -100,6 +101,28 @@ try {
             VALUES (?, \'nota\', ?)', 'is', [$id, $note])->close();
         ov_query($conexion, 'UPDATE ordenes_venta SET updated_at = CURRENT_TIMESTAMP,
             version = version + 1 WHERE id = ?', 'i', [$id])->close();
+        $result['order'] = ov_get($conexion, $id);
+        $conexion->commit();
+        $transaction = false;
+    } elseif ($action === 'status') {
+        $conexion->begin_transaction();
+        $transaction = true;
+        $id = ov_id($input['id'] ?? null);
+        $old = ov_get($conexion, $id, true);
+        if ((string) ($input['version'] ?? '') !== (string) $old['version']) {
+            throw new RuntimeException('Otra edición modificó esta orden. Recarga la página antes de guardar.');
+        }
+        $status = (string) ($input['estatus'] ?? '');
+        if (!isset(OV_ESTATUS[$status])) {
+            throw new InvalidArgumentException('El estatus de la orden no es válido.');
+        }
+        ov_query($conexion, 'UPDATE ordenes_venta SET estatus = ?, updated_at = CURRENT_TIMESTAMP,
+            version = version + 1 WHERE id = ?', 'si', [$status, $id])->close();
+        if ($old['estatus'] !== $status) {
+            $note = 'Cambio de ' . (OV_ESTATUS[$old['estatus']] ?? $old['estatus']) . ' a ' . OV_ESTATUS[$status] . '.';
+            ov_query($conexion, 'INSERT INTO orden_venta_seguimiento (orden_venta_id, tipo, estatus, nota)
+                VALUES (?, \'estatus\', ?, ?)', 'iss', [$id, $status, $note])->close();
+        }
         $result['order'] = ov_get($conexion, $id);
         $conexion->commit();
         $transaction = false;

@@ -14,7 +14,10 @@ $consultaContactos = $conexion->prepare(
      LEFT JOIN (
          SELECT ec.id_contacto,
                 COALESCE(MAX(CASE WHEN ec.es_principal = 1 THEN e.id_e END), MIN(e.id_e)) AS empresa_id,
-                COALESCE(MAX(CASE WHEN ec.es_principal = 1 THEN e.empresa END), MIN(e.empresa)) AS empresa,
+                COALESCE(
+                    MAX(CASE WHEN ec.es_principal = 1 THEN CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa), NULLIF(TRIM(e.regimen_capital), \'\')) END),
+                    MIN(CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa), NULLIF(TRIM(e.regimen_capital), \'\')))
+                ) AS empresa,
                 COUNT(*) AS empresas_relacionadas
          FROM empresa_contactos AS ec
          INNER JOIN empresas AS e ON e.id_e = ec.id_empresa

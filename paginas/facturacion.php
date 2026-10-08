@@ -24,6 +24,6 @@ require __DIR__ . '/../backend/facturacion/query_xml_cfdi.php';
     </div></div>
 </div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script><script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script><script src="../js/datatable-filters.js"></script><script src="../js/datatable-config.js"></script><script src="../js/main.js"></script><script src="../js/tablaFacturacion.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script><script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script><script src="../js/datatable-filters.js"></script><script src="../js/datatable-config.js"></script><script src="../js/main.js"></script><script src="../js/tablaFacturacion.js?v=20261007-1"></script>
 <?php if (auth_has_permission('facturacion_graficas', $authUser)): ?><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="../js/facturacion-charts.js"></script><?php endif; ?>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

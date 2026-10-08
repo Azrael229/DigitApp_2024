@@ -15,7 +15,7 @@ require __DIR__ . '/../construct/header.php';
     </div>
     <div class="table-responsive data-table-shell table-wide mt-4">
         <table id="tabla-ordenes-venta" class="table table-striped align-middle mb-0 w-100">
-            <thead><tr><th>Fecha</th><th>Orden</th><th>Empresa</th><th>Contacto</th><th>Correo</th><th>Teléfono</th><th>Importe sin IVA</th><th>Estatus</th><th>Registro</th></tr></thead>
+            <thead><tr><th>Fecha</th><th>Orden</th><th>Razón social</th><th>Contacto</th><th>Correo</th><th>Teléfono</th><th>Importe sin IVA</th><th>Estatus</th><th>Registro</th></tr></thead>
             <tbody></tbody>
         </table>
     </div>
@@ -26,5 +26,5 @@ require __DIR__ . '/../construct/header.php';
 <script src="../js/datatable-filters.js"></script>
 <script src="../js/datatable-config.js"></script>
 <script src="../js/ordenes-venta-common.js?v=20261004-1"></script>
-<script src="../js/tablaOrdenesVenta.js?v=20261004-1"></script>
+<script src="../js/tablaOrdenesVenta.js?v=20261007-1"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

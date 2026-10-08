@@ -275,21 +275,24 @@ $pdf->SetXY(14, 41);
 $pdf->Cell(188, 5, $pdf->pdfText('Fecha de emisión: ' . date('d/m/Y', strtotime((string) $orden['fecha_generacion']))), 0, 0, 'L');
 
 // Datos fiscales y de entrega se distinguen en columnas independientes.
-$fiscalBody = implode("\n", array_filter([
-    $orden['fiscal_razon_social'],
-    trim('RFC: ' . (string) $orden['fiscal_rfc']),
-    $orden['fiscal_regimen'],
-    $orden['fiscal_direccion'],
-]));
+$fiscalBody = implode("\n", [
+    'Razón social: ' . trim((string) ($orden['fiscal_razon_social'] ?? '')),
+    'RFC: ' . trim((string) ($orden['fiscal_rfc'] ?? '')),
+    'Dirección fiscal: ' . trim((string) ($orden['fiscal_direccion'] ?? '')),
+]);
 $role = trim(implode(' · ', array_filter([
     $orden['entrega_puesto_mostrado'] ?? $orden['entrega_puesto'] ?? '',
     $orden['entrega_departamento_mostrado'] ?? $orden['entrega_departamento'] ?? '',
 ])));
-$deliveryBody = implode("\n", array_filter([
-    $orden['entrega_contacto'], $role,
-    trim(implode(' · ', array_filter([$orden['entrega_telefono'], $orden['entrega_correo']]))),
-    $orden['entrega_direccion'],
-]));
+$deliveryBody = implode("\n", [
+    'Contacto: ' . trim((string) ($orden['entrega_contacto'] ?? '')),
+    'Puesto / departamento: ' . $role,
+    'Teléfono: ' . trim((string) ($orden['entrega_telefono'] ?? '')),
+    'Correo: ' . trim((string) ($orden['entrega_correo'] ?? '')),
+    'Dirección entrega:',
+    trim((string) ($orden['entrega_direccion_alias'] ?? '')),
+    trim((string) ($orden['entrega_direccion'] ?? '')),
+]);
 $pdf->infoBox(14, 48, 92, 42, 'DATOS FISCALES DEL CLIENTE', $pdf->compact($fiscalBody, 360), [18, 56, 94]);
 $pdf->infoBox(110, 48, 92, 42, 'ENTREGA Y ATENCIÓN DEL SERVICIO', $pdf->compact($deliveryBody, 360), OrdenServicioPDF::ROJO);
 

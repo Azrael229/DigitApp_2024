@@ -156,9 +156,11 @@ function ov_get(mysqli $db, int $id, bool $lock = false): array
         throw new OutOfBoundsException('Orden de venta no encontrada.');
     }
     $order = $rows[0];
-    $companies = ov_rows($db, 'SELECT empresa FROM empresas WHERE id_e = ?', 'i', [(int) $order['empresa_id']]);
+    $companies = ov_rows($db, 'SELECT empresa, razon_social, regimen_capital FROM empresas WHERE id_e = ?', 'i', [(int) $order['empresa_id']]);
     if ($companies) {
-        $order['empresa_nombre'] = trim((string) $companies[0]['empresa']);
+        $order['empresa_nombre'] = trim(implode(' ', array_filter([
+            $companies[0]['razon_social'] ?: $companies[0]['empresa'], $companies[0]['regimen_capital'],
+        ], static fn($value) => trim((string) $value) !== '')));
     }
     if ($order['contacto_id'] !== null) {
         $contacts = ov_rows($db, 'SELECT nombre, celular, correo FROM contactos WHERE id = ?',

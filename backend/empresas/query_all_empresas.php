@@ -14,6 +14,13 @@ $sql = "SELECT empresas.*,
             LIMIT 1
         ) AS ciudad_principal,
         (
+            SELECT municipio
+            FROM empresa_direcciones
+            WHERE empresa_id = empresas.id_e
+            ORDER BY es_principal DESC, updated_at DESC, id DESC
+            LIMIT 1
+        ) AS municipio_principal,
+        (
             SELECT estado
             FROM empresa_direcciones
             WHERE empresa_id = empresas.id_e

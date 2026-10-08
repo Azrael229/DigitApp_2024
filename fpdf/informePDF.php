@@ -5,67 +5,103 @@ require __DIR__ . '/fpdf.php';
 require_once __DIR__ . '/../backend/helpers/folio_informe.php';
 require __DIR__ . '/../config/conexion.php';
 
-// Sustituye los textos recibidos por los datos vigentes de empresa, contacto, dirección y equipo.
-function cargarDatosMaestrosInforme(mysqli $conexion): void
+// Sustituye los textos recibidos por datos maestros y admite selecciones parciales en el formato de campo.
+function cargarDatosMaestrosInforme(mysqli $conexion, bool $permitirParcial = false): void
 {
     $empresaId = filter_var($_POST['select_empresa'] ?? null, FILTER_VALIDATE_INT);
     $contactoId = filter_var($_POST['select_contacto'] ?? null, FILTER_VALIDATE_INT);
     $direccionId = filter_var($_POST['direccion_id'] ?? null, FILTER_VALIDATE_INT);
     $equipoId = filter_var($_POST['equipo_id'] ?? null, FILTER_VALIDATE_INT);
-    if (!$empresaId || !$contactoId || !$direccionId || !$equipoId) {
+    if (!$permitirParcial && (!$empresaId || !$contactoId || !$direccionId || !$equipoId)) {
         throw new InvalidArgumentException('Selecciona empresa, contacto, dirección y equipo registrados.');
     }
-    $consulta = $conexion->prepare('SELECT razon_social, empresa FROM empresas WHERE id_e = ?');
+    foreach (['nombre_empresa', 'nombre_contacto', 'correo_contacto', 'dir_empresa', 'desc_inst',
+        'marca_inst', 'modelo_inst', 'id_inst', 'serie_inst', 'unidad', 'max', 'd', 'e', 'clase'] as $campo) {
+        $_POST[$campo] = datoPost($campo);
+    }
+    if (!$empresaId) {
+        return;
+    }
+    $consulta = $conexion->prepare('SELECT razon_social, empresa, regimen_capital FROM empresas WHERE id_e = ?');
     $consulta->bind_param('i', $empresaId);
     $consulta->execute();
     $empresa = $consulta->get_result()->fetch_assoc();
     $consulta->close();
-    $consulta = $conexion->prepare('SELECT c.nombre, c.correo FROM contactos c
-        JOIN empresa_contactos ec ON ec.id_contacto = c.id
-        WHERE c.id = ? AND ec.id_empresa = ? AND c.activo = 1 AND ec.activo = 1 LIMIT 1');
-    $consulta->bind_param('ii', $contactoId, $empresaId);
-    $consulta->execute();
-    $contacto = $consulta->get_result()->fetch_assoc();
-    $consulta->close();
-    $consulta = $conexion->prepare('SELECT * FROM empresa_direcciones WHERE id = ? AND empresa_id = ?');
-    $consulta->bind_param('ii', $direccionId, $empresaId);
-    $consulta->execute();
-    $direccion = $consulta->get_result()->fetch_assoc();
-    $consulta->close();
-    $consulta = $conexion->prepare('SELECT ee.*, COALESCE(cd.nombre, \'\') AS descripcion,
+    if (!$empresa) {
+        throw new InvalidArgumentException('La empresa seleccionada ya no existe. Actualiza el formulario.');
+    }
+    $contacto = null;
+    if ($contactoId) {
+        $consulta = $conexion->prepare('SELECT c.nombre, c.correo FROM contactos c
+            JOIN empresa_contactos ec ON ec.id_contacto = c.id
+            WHERE c.id = ? AND ec.id_empresa = ? AND c.activo = 1 AND ec.activo = 1 LIMIT 1');
+        $consulta->bind_param('ii', $contactoId, $empresaId);
+        $consulta->execute();
+        $contacto = $consulta->get_result()->fetch_assoc();
+        $consulta->close();
+    }
+    $direccion = null;
+    if ($direccionId) {
+        $consulta = $conexion->prepare('SELECT * FROM empresa_direcciones WHERE id = ? AND empresa_id = ?');
+        $consulta->bind_param('ii', $direccionId, $empresaId);
+        $consulta->execute();
+        $direccion = $consulta->get_result()->fetch_assoc();
+        $consulta->close();
+    }
+    $equipo = null;
+    if ($equipoId) {
+        $consulta = $conexion->prepare('SELECT ee.*, COALESCE(cd.nombre, \'\') AS descripcion,
             COALESCE(cm.nombre, \'\') AS marca
         FROM empresa_equipos ee
         LEFT JOIN catalogo_descripciones_equipo cd ON cd.id = ee.descripcion_id
         LEFT JOIN catalogo_marcas_equipo cm ON cm.id = ee.marca_id
-        WHERE ee.id = ? AND ee.empresa_id = ? AND ee.direccion_id = ? LIMIT 1');
-    $consulta->bind_param('iii', $equipoId, $empresaId, $direccionId);
-    $consulta->execute();
-    $equipo = $consulta->get_result()->fetch_assoc();
-    $consulta->close();
-    if (!$empresa || !$contacto || !$direccion || !$equipo) {
+        WHERE ee.id = ? AND ee.empresa_id = ? LIMIT 1');
+        $consulta->bind_param('ii', $equipoId, $empresaId);
+        $consulta->execute();
+        $equipo = $consulta->get_result()->fetch_assoc();
+        $consulta->close();
+    }
+    if ((!$permitirParcial && (!$contacto || !$direccion || !$equipo))
+        || ($contactoId && !$contacto) || ($direccionId && !$direccion) || ($equipoId && !$equipo)) {
         throw new InvalidArgumentException('Los datos seleccionados ya no corresponden entre sí. Actualiza el formulario.');
     }
-    $primera = trim(implode(' ', array_filter([$direccion['calle'] ?? '',
-        !empty($direccion['numero_exterior']) ? 'No. ' . $direccion['numero_exterior'] : '',
-        !empty($direccion['numero_interior']) ? 'Int. ' . $direccion['numero_interior'] : ''])));
-    $ubicacion = implode(', ', array_filter([$direccion['colonia'] ?? '', $direccion['localidad'] ?? '',
-        $direccion['municipio'] ?? '', $direccion['ciudad'] ?? '', $direccion['estado'] ?? '',
-        !empty($direccion['codigo_postal']) ? 'C.P. ' . $direccion['codigo_postal'] : '', $direccion['pais'] ?? '']));
-    $_POST['nombre_empresa'] = trim((string) ($empresa['razon_social'] ?: $empresa['empresa']));
-    $_POST['nombre_contacto'] = trim((string) $contacto['nombre']);
-    $_POST['correo_contacto'] = trim((string) ($contacto['correo'] ?? ''));
-    $_POST['dir_empresa'] = implode(', ', array_filter([$primera, $ubicacion,
-        $direccion['entre_calles'] ?? '', $direccion['referencia'] ?? '']));
-    $_POST['desc_inst'] = $equipo['descripcion'];
-    $_POST['marca_inst'] = $equipo['marca'];
-    $_POST['modelo_inst'] = $equipo['modelo'];
-    $_POST['id_inst'] = $equipo['identificacion'];
-    $_POST['serie_inst'] = $equipo['numero_serie'];
-    $_POST['unidad'] = $equipo['unidad'];
-    $_POST['max'] = $equipo['capacidad_maxima'];
-    $_POST['d'] = $equipo['division_real'];
-    $_POST['e'] = $equipo['division_verificacion'];
-    $_POST['clase'] = $equipo['clase_exactitud'];
+    $_POST['nombre_empresa'] = trim(implode(' ', array_filter([
+        $empresa['razon_social'] ?: $empresa['empresa'], $empresa['regimen_capital'],
+    ], static fn($value) => trim((string) $value) !== '')));
+    if ($contacto) {
+        $_POST['nombre_contacto'] = trim((string) $contacto['nombre']);
+        $_POST['correo_contacto'] = trim((string) ($contacto['correo'] ?? ''));
+    }
+    if ($direccion) {
+        $primera = trim(implode(' ', array_filter([$direccion['calle'] ?? '',
+            !empty($direccion['numero_exterior']) ? 'No. ' . $direccion['numero_exterior'] : '',
+            !empty($direccion['numero_interior']) ? 'Int. ' . $direccion['numero_interior'] : ''])));
+        $ubicacion = implode(', ', array_filter([$direccion['colonia'] ?? '', $direccion['localidad'] ?? '',
+            $direccion['municipio'] ?? '', $direccion['ciudad'] ?? '', $direccion['estado'] ?? '',
+            !empty($direccion['codigo_postal']) ? 'C.P. ' . $direccion['codigo_postal'] : '', $direccion['pais'] ?? '']));
+        $_POST['dir_empresa'] = implode(', ', array_filter([$primera, $ubicacion,
+            $direccion['entre_calles'] ?? '', $direccion['referencia'] ?? '']));
+    }
+    if ($equipo) {
+        $decimalesEquipo = max(
+            decimalesSignificativosInforme($equipo['capacidad_maxima'] ?? ''),
+            decimalesSignificativosInforme($equipo['division_real'] ?? ''),
+            decimalesSignificativosInforme($equipo['division_verificacion'] ?? '')
+        );
+        $_POST['desc_inst'] = $equipo['descripcion'];
+        $_POST['marca_inst'] = $equipo['marca'];
+        $_POST['modelo_inst'] = $equipo['modelo'];
+        $_POST['id_inst'] = $equipo['identificacion'];
+        $_POST['serie_inst'] = $equipo['numero_serie'];
+        $_POST['unidad'] = $equipo['unidad'];
+        $_POST['max'] = formatearMagnitudInforme($equipo['capacidad_maxima'], $decimalesEquipo);
+        $_POST['d'] = formatearMagnitudInforme($equipo['division_real'], $decimalesEquipo);
+        $_POST['e'] = formatearMagnitudInforme($equipo['division_verificacion'], $decimalesEquipo);
+        if (datoPost('min') !== '') {
+            $_POST['min'] = formatearMagnitudInforme(datoPost('min'), $decimalesEquipo);
+        }
+        $_POST['clase'] = $equipo['clase_exactitud'];
+    }
 }
 
 // Obtiene un valor escalar del POST sin emitir avisos por claves ausentes.
@@ -80,6 +116,48 @@ function numeroPost(string $clave): ?float
 {
     $valor = str_replace(',', '.', datoPost($clave));
     return is_numeric($valor) ? (float) $valor : null;
+}
+
+// Cuenta únicamente los decimales significativos conservados en el registro maestro.
+function decimalesSignificativosInforme($valor): int
+{
+    $texto = trim(str_replace(',', '.', (string) $valor));
+    if (!preg_match('/^-?\d+(?:\.(\d+))?$/', $texto, $coincidencia) || empty($coincidencia[1])) {
+        return 0;
+    }
+    return strlen(rtrim($coincidencia[1], '0'));
+}
+
+// Presenta una magnitud con la precisión metrológica común del instrumento.
+function formatearMagnitudInforme($valor, int $decimales, bool $conservarSigno = false): string
+{
+    $texto = trim((string) $valor);
+    $numero = str_replace(',', '.', $texto);
+    if ($texto === '' || !is_numeric($numero)) {
+        return $texto;
+    }
+    $formateado = number_format((float) $numero, max(0, min(9, $decimales)), '.', '');
+    return $conservarSigno && str_starts_with($texto, '+') && (float) $numero > 0
+        ? '+' . $formateado
+        : $formateado;
+}
+
+// Obtiene la precisión que gobierna todas las magnitudes impresas del informe.
+function decimalesInstrumentoPost(): int
+{
+    return max(
+        decimalesSignificativosInforme(datoPost('max')),
+        decimalesSignificativosInforme(datoPost('d')),
+        decimalesSignificativosInforme(datoPost('e')),
+        decimalesSignificativosInforme(datoPost('min'))
+    );
+}
+
+// Formatea un campo numérico del formulario sin alterar textos o campos vacíos.
+function magnitudPost(string $clave, string $predeterminado = ''): string
+{
+    $valor = datoPost($clave, $predeterminado);
+    return formatearMagnitudInforme($valor, decimalesInstrumentoPost(), true);
 }
 
 // Obtiene la cantidad de decimales escrita en d para conservarla en todas las indicaciones.
@@ -355,7 +433,7 @@ class InformePDF extends FPDF
         $this->textoCelda(10, $y + 5.5, 196, $altoCaja, $contenido !== '' ? $contenido : 'Sin información registrada.');
     }
 
-    // Reúne el cierre del servicio en una sola tarjeta, sin dispersar la información.
+    // Presenta el cierre completo como un único bloque narrativo para lectura continua.
     public function bloqueCierreServicio(float $y, float $alto): void
     {
         $this->SetFillColor(...self::GRIS_CLARO);
@@ -366,33 +444,19 @@ class InformePDF extends FPDF
         $this->SetXY(22, $y + 5);
         $this->Cell(172, 5, $this->texto('CIERRE DEL SERVICIO'), 0, 0, 'L');
 
-        $bloques = [
-            ['OBSERVACIONES', datoPost('observaciones')],
-            ['TRABAJO REALIZADO', datoPost('trabajo_realizado')],
-            ['RECOMENDACIONES', datoPost('recomendaciones')],
-            ['ATENCIÓN / SERVICIOS URGENTES', datoPost('atencion_urgente')],
-        ];
-        $ancho = 87;
-        $altoBloque = ($alto - 16) / 2;
-        foreach ($bloques as $indice => [$titulo, $contenido]) {
-            $columna = $indice % 2;
-            $fila = intdiv($indice, 2);
-            $x = 22 + $columna * 91;
-            $yy = $y + 13 + $fila * $altoBloque;
-            $this->SetFillColor(...self::ROJO);
-            $this->rectanguloRedondeado($x, $yy + 1, 2.2, 2.2, 1.1, 'F');
-            $this->SetTextColor(...self::AZUL);
-            $this->SetFont('Arial', 'B', 6.8);
-            $this->SetXY($x + 4.5, $yy);
-            $this->Cell($ancho - 4.5, 4, $this->texto($titulo), 0, 0, 'L');
-            $this->SetTextColor(...self::TEXTO);
-            $this->SetFont('Arial', '', 5.7);
-            $this->textoCelda($x + 3.5, $yy + 4.2, $ancho - 3.5, $altoBloque - 4.8, $contenido !== '' ? $contenido : 'Sin información registrada.');
-            if ($columna === 0) {
-                $this->SetDrawColor(...self::GRIS);
-                $this->Line(108, $yy, 108, $yy + $altoBloque - 2);
-            }
+        $contenido = datoPost('cierre_servicio');
+        if ($contenido === '') {
+            $contenido = implode("\n", array_filter([
+                datoPost('observaciones'), datoPost('trabajo_realizado'),
+                datoPost('recomendaciones'), datoPost('atencion_urgente'),
+            ], static fn(string $valor): bool => $valor !== ''));
         }
+        $this->SetDrawColor(...self::GRIS);
+        $this->SetFillColor(255, 255, 255);
+        $this->Rect(22, $y + 13, 172, $alto - 21, 'DF');
+        $this->SetTextColor(...self::TEXTO);
+        $this->SetFont('Arial', '', 6.4);
+        $this->textoCelda(25, $y + 16, 166, $alto - 27, $contenido !== '' ? $contenido : 'Espacio para observaciones, trabajo realizado, recomendaciones y atención urgente.');
     }
 
     // Dibuja una línea discontinua simple sin depender de extensiones de FPDF.
@@ -661,8 +725,8 @@ function dibujarPaginaGeneral(InformePDF $pdf, string $folio): void
         ['Descripción', datoPost('desc_inst'), 'Marca', datoPost('marca_inst')],
         ['Modelo', datoPost('modelo_inst'), 'ID', datoPost('id_inst')],
         ['Serie', datoPost('serie_inst'), 'Unidad', datoPost('unidad')],
-        ['Max', datoPost('max'), 'd', datoPost('d')],
-        ['e', datoPost('e'), 'Min', datoPost('min')],
+        ['Max', magnitudPost('max'), 'd', magnitudPost('d')],
+        ['e', magnitudPost('e'), 'Min', magnitudPost('min')],
         ['Clase', datoPost('clase'), '', ''],
     ];
     foreach ($filasInstrumento as $indice => $fila) {
@@ -695,7 +759,7 @@ function dibujarRepetibilidadFija(InformePDF $pdf, string $fase): void
     $prefijo = $fase . '_repetibilidad';
     $pdf->subtituloFijo(52, 'REPETIBILIDAD');
     $pdf->SetFont('Arial', '', 6.5);
-    $pdf->filaFija(58, ['Carga aplicada', datoPost($prefijo . '_carga'), 'Resultado', datoPost($prefijo . '_resultado', 'PENDIENTE')], [29, 65, 29, 65], 6);
+    $pdf->filaFija(58, ['Carga aplicada', magnitudPost($prefijo . '_carga'), 'Resultado', datoPost($prefijo . '_resultado', 'PENDIENTE')], [29, 65, 29, 65], 6);
     $pdf->SetFillColor(242, 244, 246);
     $pdf->SetFont('Arial', 'B', 6.3);
     $pdf->filaFija(64, ['Prueba', 'Indicación'], [62, 126], 5, ['C', 'C'], true);
@@ -703,7 +767,7 @@ function dibujarRepetibilidadFija(InformePDF $pdf, string $fase): void
     for ($i = 1; $i <= 5; $i++) {
         $pdf->filaFija(69 + ($i - 1) * 4.2, [(string) $i, indicacionPost($prefijo . '_lectura_' . $i)], [62, 126], 4.2, ['C', 'C']);
     }
-    $pdf->filaFija(90, ['Diferencia máxima encontrada', datoPost($prefijo . '_diferencia'), 'EMT aplicable', datoPost($prefijo . '_emt')], [43, 51, 33, 61], 6);
+    $pdf->filaFija(90, ['Diferencia máxima encontrada', magnitudPost($prefijo . '_diferencia'), 'EMT aplicable', magnitudPost($prefijo . '_emt')], [43, 51, 33, 61], 6);
 }
 
 // Dibuja excentricidad en el área fija central de una página de pruebas.
@@ -712,7 +776,7 @@ function dibujarExcentricidadFija(InformePDF $pdf, string $fase): void
     $prefijo = $fase . '_excentricidad';
     $pdf->subtituloFijo(100, 'EXCENTRICIDAD');
     $pdf->SetFont('Arial', '', 6.5);
-    $pdf->filaFija(106, ['Carga aplicada', datoPost($prefijo . '_carga'), 'Resultado', datoPost($prefijo . '_resultado', 'PENDIENTE')], [29, 65, 29, 65], 6);
+    $pdf->filaFija(106, ['Carga aplicada', magnitudPost($prefijo . '_carga'), 'Resultado', datoPost($prefijo . '_resultado', 'PENDIENTE')], [29, 65, 29, 65], 6);
     $pdf->SetFillColor(242, 244, 246);
     $pdf->SetFont('Arial', 'B', 6.3);
     $pdf->filaFija(112, ['Posición', 'Indicación'], [76, 112], 5, ['C', 'C'], true);
@@ -721,7 +785,7 @@ function dibujarExcentricidadFija(InformePDF $pdf, string $fase): void
         $posicion = $i === 1 ? '1 - Centro / referencia' : (string) $i;
         $pdf->filaFija(117 + ($i - 1) * 4.2, [$posicion, indicacionPost($prefijo . '_lectura_' . $i)], [76, 112], 4.2, ['L', 'C']);
     }
-    $pdf->filaFija(138, ['Diferencia máxima encontrada', datoPost($prefijo . '_diferencia_maxima'), 'EMT aplicable', datoPost($prefijo . '_emt')], [43, 51, 33, 61], 6);
+    $pdf->filaFija(138, ['Diferencia máxima encontrada', magnitudPost($prefijo . '_diferencia_maxima'), 'EMT aplicable', magnitudPost($prefijo . '_emt')], [43, 51, 33, 61], 6);
 }
 
 // Dibuja exactitud en un área fija y conserva las seis columnas aprobadas.
@@ -736,7 +800,7 @@ function dibujarExactitudFija(InformePDF $pdf, string $fase): void
     $pdf->filaFija(154, ['Punto', 'Carga', 'Indicación', 'Error', 'EMT', 'Resultado'], $anchos, 5, $alineaciones, true);
     $pdf->SetFont('Arial', '', 6.1);
     for ($i = 0; $i <= 5; $i++) {
-        $pdf->filaFija(159 + $i * 4, [(string) $i, datoPost($prefijo . '_carga_' . $i), indicacionPost($prefijo . '_indicacion_' . $i), datoPost($prefijo . '_error_' . $i), datoPost($prefijo . '_emt_' . $i), datoPost($prefijo . '_resultado_' . $i)], $anchos, 4, $alineaciones);
+        $pdf->filaFija(159 + $i * 4, [(string) $i, magnitudPost($prefijo . '_carga_' . $i), indicacionPost($prefijo . '_indicacion_' . $i), magnitudPost($prefijo . '_error_' . $i), magnitudPost($prefijo . '_emt_' . $i), datoPost($prefijo . '_resultado_' . $i)], $anchos, 4, $alineaciones);
     }
     $pdf->SetFont('Arial', 'B', 6.3);
     $pdf->filaFija(183, ['Resultado general', datoPost($prefijo . '_resultado', 'PENDIENTE')], [43, 145], 6);
@@ -754,7 +818,8 @@ function dibujarPaginaPruebas(InformePDF $pdf, string $fase, string $tituloPagin
 
 try {
     $conexion->set_charset('utf8mb4');
-    cargarDatosMaestrosInforme($conexion);
+    $esFormatoTomaDatos = datoPost('modo_formato') === 'toma_datos';
+    cargarDatosMaestrosInforme($conexion, $esFormatoTomaDatos);
     $conexion->close();
 } catch (InvalidArgumentException $error) {
     if (isset($conexion) && $conexion instanceof mysqli) {
@@ -764,7 +829,7 @@ try {
     exit($error->getMessage());
 }
 
-$erroresDivisionReal = validarIndicacionesPost();
+$erroresDivisionReal = $esFormatoTomaDatos ? [] : validarIndicacionesPost();
 if ($erroresDivisionReal !== []) {
     http_response_code(422);
     exit('División real no válida. Revise las indicaciones de: ' . implode(', ', $erroresDivisionReal) . '. Todas deben ser múltiplos de d=' . datoPost('d') . '.');

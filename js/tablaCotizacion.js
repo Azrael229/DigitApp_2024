@@ -53,3 +53,32 @@ function actualizarResumenCotizaciones() {
 
 cotizacionesTable.on('draw', actualizarResumenCotizaciones);
 actualizarResumenCotizaciones();
+
+// Guarda de inmediato el estatus seleccionado y conserva las reglas comerciales del servidor.
+document.querySelector('#example tbody').addEventListener('change', async function (event) {
+    const select = event.target.closest('.cot-status-select');
+    if (!select) { return; }
+    const previous = select.dataset.previous || select.value;
+    select.disabled = true;
+    try {
+        const response = await fetch('../backend/cotizaciones/update_coti_status.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+            body: new URLSearchParams({
+                id: select.dataset.id,
+                estatus: select.value,
+                csrf: document.querySelector('[data-cot-status-csrf]').dataset.cotStatusCsrf
+            })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || data.error) { throw new Error(data.error || 'No fue posible actualizar el estatus.'); }
+        select.dataset.previous = data.estatus;
+    } catch (error) {
+        select.value = previous;
+        window.alert(error.message);
+    } finally {
+        select.disabled = false;
+    }
+});
+
+document.querySelectorAll('.cot-status-select').forEach(select => { select.dataset.previous = select.value; });

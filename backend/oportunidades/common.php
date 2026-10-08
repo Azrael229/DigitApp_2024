@@ -64,7 +64,9 @@ function op_get(mysqli $db, int $id, bool $lock = false): array {
             throw new OutOfBoundsException('Oportunidad no encontrada.');
         }
     }
-    $rows = op_rows($db, 'SELECT o.*, e.empresa, c.nombre AS contacto,
+    $rows = op_rows($db, 'SELECT o.*,
+        CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa), NULLIF(TRIM(e.regimen_capital), \'\')) AS empresa,
+        c.nombre AS contacto,
         c.celular AS contacto_telefono, c.correo AS contacto_correo,
         d.alias AS direccion_alias, d.tipo_direccion, d.calle, d.numero_exterior, d.numero_interior,
         d.colonia, d.localidad, d.municipio, d.ciudad, d.estado, d.codigo_postal, d.pais,

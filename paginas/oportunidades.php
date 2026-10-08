@@ -16,7 +16,7 @@ require __DIR__ . '/../construct/header.php';
     <p class="contactos-muted">El subtotal incluye todas las páginas que coincidan con los filtros.</p>
     <div class="table-responsive data-table-shell table-wide mt-4">
         <table id="tabla-oportunidades" class="table table-secondary table-striped align-middle mb-0 w-100">
-            <thead><tr><th>Fecha</th><th>Número</th><th>Empresa</th><th>Contacto</th><th>Proyecto</th><th>Importe sin IVA</th><th>Estatus</th><th>Registro</th></tr></thead>
+            <thead><tr><th>Fecha</th><th>Número</th><th>Razón social</th><th>Contacto</th><th>Proyecto</th><th>Importe sin IVA</th><th>Estatus</th><th>Registro</th></tr></thead>
             <tbody></tbody>
         </table>
     </div>
@@ -27,5 +27,5 @@ require __DIR__ . '/../construct/header.php';
 <script src="../js/datatable-filters.js"></script>
 <script src="../js/datatable-config.js"></script>
 <script src="../js/oportunidades-common.js"></script>
-<script src="../js/tablaOportunidades.js"></script>
+<script src="../js/tablaOportunidades.js?v=20261007-1"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

@@ -79,7 +79,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                 <div class="table-responsive empresa-table-wrap">
                     <table class="table table-secondary align-middle empresa-detail-table empresa-address-table mb-0">
                         <caption class="visually-hidden">Direcciones registradas de la empresa</caption>
-                        <thead><tr><th scope="col">Tipo</th><th scope="col">Dirección</th><th scope="col">Editar</th></tr></thead>
+                        <thead><tr><th scope="col">Tipo</th><th scope="col">Alias</th><th scope="col">Dirección</th><th scope="col">Editar</th></tr></thead>
                         <tbody id="tabla_direcciones"></tbody>
                     </table>
                 </div>
@@ -224,6 +224,6 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
-<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261006-1"></script>
+<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261007-1"></script>
 
 <?php require (__DIR__ . "/../construct/footer.html"); ?>

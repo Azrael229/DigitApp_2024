@@ -64,13 +64,16 @@ function os_get(mysqli $db, int $id, bool $lock = false): array
         throw new OutOfBoundsException('Orden de servicio no encontrada.');
     }
     $order = $rows[0];
-    $companies = ov_rows($db, 'SELECT empresa, razon_social, rfc, dir_fiscal,
+    $companies = ov_rows($db, 'SELECT empresa, razon_social, regimen_capital, rfc, dir_fiscal,
             regimen_fiscal_codigo, regimen_fiscal_descripcion
         FROM empresas WHERE id_e = ?', 'i', [(int) $order['empresa_id']]);
     if ($companies) {
         $company = $companies[0];
-        $order['empresa_nombre'] = trim((string) $company['empresa']);
-        $order['fiscal_razon_social'] = trim((string) ($company['razon_social'] ?: $company['empresa']));
+        $legalName = trim(implode(' ', array_filter([
+            $company['razon_social'] ?: $company['empresa'], $company['regimen_capital'],
+        ], static fn($value) => trim((string) $value) !== '')));
+        $order['empresa_nombre'] = $legalName;
+        $order['fiscal_razon_social'] = $legalName;
         $order['fiscal_rfc'] = trim((string) $company['rfc']);
         $order['fiscal_regimen'] = trim(implode(' · ', array_filter([
             $company['regimen_fiscal_codigo'] ?? '', $company['regimen_fiscal_descripcion'] ?? '',
@@ -81,6 +84,9 @@ function os_get(mysqli $db, int $id, bool $lock = false): array
         $order['fiscal_direccion'] = $fiscalAddresses
             ? os_address($fiscalAddresses[0])
             : trim((string) $company['dir_fiscal']);
+        $order['fiscal_direccion_alias'] = $fiscalAddresses
+            ? trim((string) ($fiscalAddresses[0]['alias'] ?? ''))
+            : '';
     }
     $deliveryContactId = (int) ($order['entrega_contacto_id'] ?: $order['contacto_id']);
     if ($deliveryContactId > 0) {
@@ -102,6 +108,7 @@ function os_get(mysqli $db, int $id, bool $lock = false): array
             'ii', [$deliveryAddressId, (int) $order['empresa_id']]);
         if ($addresses) {
             $order['entrega_direccion'] = os_address($addresses[0]);
+            $order['entrega_direccion_alias'] = trim((string) ($addresses[0]['alias'] ?? ''));
         }
     }
     $order['equipos'] = ov_rows($db, 'SELECT * FROM orden_servicio_equipos
@@ -113,7 +120,7 @@ function os_get(mysqli $db, int $id, bool $lock = false): array
 function os_source(mysqli $db, int $saleOrderId): array
 {
     $order = ov_get($db, $saleOrderId);
-    $companies = ov_rows($db, 'SELECT empresa, razon_social, rfc, dir_fiscal,
+    $companies = ov_rows($db, 'SELECT empresa, razon_social, regimen_capital, rfc, dir_fiscal,
             regimen_fiscal_codigo, regimen_fiscal_descripcion
         FROM empresas WHERE id_e = ?', 'i', [$order['empresa_id']]);
     if (!$companies) {
@@ -124,6 +131,7 @@ function os_source(mysqli $db, int $saleOrderId): array
         WHERE empresa_id = ? AND tipo_direccion = \'fiscal\'
         ORDER BY es_principal DESC, id ASC LIMIT 1', 'i', [$order['empresa_id']]);
     $fiscalAddress = $fiscalAddresses ? os_address($fiscalAddresses[0]) : trim((string) $company['dir_fiscal']);
+    $fiscalAddressAlias = $fiscalAddresses ? trim((string) ($fiscalAddresses[0]['alias'] ?? '')) : '';
     $regime = trim(implode(' · ', array_filter([
         $company['regimen_fiscal_codigo'] ?? '', $company['regimen_fiscal_descripcion'] ?? '',
     ], static fn($value) => trim((string) $value) !== '')));
@@ -153,10 +161,13 @@ function os_source(mysqli $db, int $saleOrderId): array
     return [
         'order' => $order,
         'fiscal' => [
-            'razon_social' => trim((string) ($company['razon_social'] ?: $company['empresa'])),
+            'razon_social' => trim(implode(' ', array_filter([
+                $company['razon_social'] ?: $company['empresa'], $company['regimen_capital'],
+            ], static fn($value) => trim((string) $value) !== ''))),
             'rfc' => trim((string) $company['rfc']),
             'regimen' => $regime,
             'direccion' => $fiscalAddress,
+            'direccion_alias' => $fiscalAddressAlias,
         ],
         'delivery' => [
             'direccion_id' => $order['direccion_id'],
@@ -165,6 +176,7 @@ function os_source(mysqli $db, int $saleOrderId): array
             'telefono' => trim((string) $order['contacto_telefono']),
             'correo' => trim((string) $order['contacto_correo']),
             'direccion' => trim((string) $order['direccion_texto']),
+            'direccion_alias' => trim((string) ($order['direccion_alias'] ?? '')),
         ],
         'addresses' => $addresses,
         'contacts' => $contacts,

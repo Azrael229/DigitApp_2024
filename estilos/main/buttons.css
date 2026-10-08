@@ -101,3 +101,125 @@ button,
     color: #ffffff !important;
 }
 /* FIN BLOQUE REVERSIBLE: jerarquia funcional de botones 2026-10-06. */
+
+/* Botones adaptados al tema oscuro sin perder su jerarquia funcional. */
+html[data-theme="dark"] .btn {
+    border-color: rgba(179, 196, 214, 0.3);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.34);
+}
+
+html[data-theme="dark"] .btn-success {
+    border-color: rgba(116, 225, 170, 0.5) !important;
+    background: linear-gradient(135deg, #237f52, #15543a) !important;
+    color: #f3fff8 !important;
+}
+
+html[data-theme="dark"] .btn-success:hover,
+html[data-theme="dark"] .btn-success:focus-visible {
+    background: linear-gradient(135deg, #2c9a64, #1a6847) !important;
+    border-color: rgba(143, 239, 191, 0.72) !important;
+}
+
+html[data-theme="dark"] .btn-secondary {
+    border-color: rgba(111, 190, 235, 0.5) !important;
+    background: linear-gradient(135deg, #286f9d, #194968) !important;
+    color: #f4fbff !important;
+}
+
+html[data-theme="dark"] .btn-secondary:hover,
+html[data-theme="dark"] .btn-secondary:focus-visible {
+    background: linear-gradient(135deg, #3488bc, #205b80) !important;
+    border-color: rgba(134, 213, 255, 0.7) !important;
+}
+
+html[data-theme="dark"] .btn-danger,
+html[data-theme="dark"] .btn-outline-danger {
+    border-color: rgba(239, 144, 132, 0.52) !important;
+    background: linear-gradient(135deg, #8d4038, #5f2a27) !important;
+    color: #fff5f3 !important;
+}
+
+html[data-theme="dark"] .btn-danger:hover,
+html[data-theme="dark"] .btn-danger:focus-visible,
+html[data-theme="dark"] .btn-outline-danger:hover,
+html[data-theme="dark"] .btn-outline-danger:focus-visible {
+    background: linear-gradient(135deg, #aa4f43, #74332d) !important;
+    border-color: rgba(255, 166, 153, 0.72) !important;
+}
+
+html[data-theme="dark"] .btn-warning {
+    border-color: rgba(238, 196, 108, 0.58) !important;
+    background: linear-gradient(135deg, #b57b28, #7d501c) !important;
+    color: #fff7e4 !important;
+}
+
+html[data-theme="dark"] :is(.btn-outline-success, .btn-outline-secondary) {
+    border-color: rgba(121, 202, 229, 0.48) !important;
+    background: rgba(70, 138, 164, 0.14) !important;
+    color: #dff7ff !important;
+}
+
+html[data-theme="dark"] :is(.btn-outline-success, .btn-outline-secondary):hover,
+html[data-theme="dark"] :is(.btn-outline-success, .btn-outline-secondary):focus-visible {
+    background: linear-gradient(135deg, #287b98, #19566d) !important;
+    border-color: rgba(139, 224, 249, 0.72) !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .btn-secondary:has(.bi-pencil),
+html[data-theme="dark"] .btn-secondary:has(.bi-pencil-square) {
+    border-color: rgba(179, 159, 239, 0.52) !important;
+    background: linear-gradient(135deg, #594b91, #3d346a) !important;
+}
+
+html[data-theme="dark"] .btn:has(.bi-arrow-left),
+html[data-theme="dark"] .btn:has(.bi-x-lg) {
+    border-color: rgba(170, 187, 204, 0.38) !important;
+    background: linear-gradient(135deg, #465668, #303d4c) !important;
+}
+
+html[data-theme="dark"] .btn:has(.bi-printer) {
+    border-color: rgba(100, 205, 219, 0.5) !important;
+    background: linear-gradient(135deg, #226f82, #174b59) !important;
+}
+
+html[data-theme="dark"] .btn:disabled,
+html[data-theme="dark"] .btn.disabled {
+    box-shadow: none !important;
+    filter: saturate(0.45);
+    opacity: 0.5;
+}
+
+html[data-theme="dark"] .btn-close {
+    filter: invert(1) grayscale(1) brightness(1.65);
+    opacity: 0.75;
+}
+
+html[data-theme="dark"] .btn:focus-visible {
+    box-shadow: 0 0 0 0.22rem rgba(103, 199, 232, 0.28) !important;
+}
+
+html[data-theme="dark"] :is(.btn-outline-primary, .btn-outline-light) {
+    border-color: rgba(121, 202, 229, 0.5) !important;
+    background: rgba(54, 105, 126, 0.16) !important;
+    color: #e4f8ff !important;
+}
+
+html[data-theme="dark"] :is(.btn-outline-primary, .btn-outline-light):hover,
+html[data-theme="dark"] :is(.btn-outline-primary, .btn-outline-light):focus-visible {
+    border-color: rgba(150, 225, 249, 0.76) !important;
+    background: linear-gradient(135deg, #2a7894, #1b5368) !important;
+    color: #ffffff !important;
+}
+
+html[data-theme="dark"] .btn-outline-warning {
+    border-color: rgba(238, 196, 108, 0.58) !important;
+    background: rgba(181, 123, 40, 0.14) !important;
+    color: #ffe7ad !important;
+}
+
+html[data-theme="dark"] .btn-outline-warning:hover,
+html[data-theme="dark"] .btn-outline-warning:focus-visible {
+    background: linear-gradient(135deg, #a36d23, #704718) !important;
+    color: #fff8e8 !important;
+}

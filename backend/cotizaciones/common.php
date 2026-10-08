@@ -50,6 +50,37 @@ function cotizacionEstatusEtiqueta($valor): string
     return COTIZACION_ESTATUS[cotizacionEstatusClave($valor)];
 }
 
+// Mantiene la oportunidad alineada con la cotización relacionada más avanzada.
+function sincronizarEstatusOportunidadCotizaciones(mysqli $conexion, int $oportunidadId): ?string
+{
+    $consulta = $conexion->prepare('SELECT c.cot_status FROM oportunidad_cotizaciones oc
+        JOIN cotizaciones c ON c.id_coti = oc.cotizacion_id WHERE oc.oportunidad_id = ?');
+    $consulta->bind_param('i', $oportunidadId);
+    $consulta->execute();
+    $filas = $consulta->get_result()->fetch_all(MYSQLI_ASSOC);
+    $consulta->close();
+    $estados = array_map(static fn(array $fila): string => cotizacionEstatusClave($fila['cot_status'] ?? ''), $filas);
+    if ($estados === []) {
+        $estatusOportunidad = 'preparacion';
+    } elseif (in_array('aceptada', $estados, true)) {
+        $estatusOportunidad = 'ganada';
+    } elseif (in_array('enviada', $estados, true)) {
+        $estatusOportunidad = 'negociacion';
+    } elseif (in_array('preparacion', $estados, true)) {
+        $estatusOportunidad = 'cotizada';
+    } elseif (count(array_unique($estados)) === 1 && $estados[0] === 'cancelada') {
+        $estatusOportunidad = 'cancelada';
+    } else {
+        $estatusOportunidad = 'perdida';
+    }
+    $actualizar = $conexion->prepare('UPDATE oportunidades_comerciales
+        SET estatus = ?, updated_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ? AND estatus <> ?');
+    $actualizar->bind_param('sis', $estatusOportunidad, $oportunidadId, $estatusOportunidad);
+    $actualizar->execute();
+    $actualizar->close();
+    return $estatusOportunidad;
+}
+
 // Forma el texto vigente de una dirección maestra de empresa.
 function cotizacionDireccionActual(array $direccion): string
 {
@@ -80,7 +111,7 @@ function cotizacionDetalle(mysqli $conexion, int $id): ?array
                 o.estatus AS oportunidad_estatus,
                 ov.id AS orden_venta_id,
                 ov.numero_venta,
-                e.empresa AS empresa_actual,
+                CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa), NULLIF(TRIM(e.regimen_capital), \'\')) AS empresa_actual,
                 ct.nombre AS contacto_actual,
                 ct.celular AS telefono_actual,
                 ct.correo AS correo_actual,

@@ -51,14 +51,10 @@ try {
     $actualizar->execute();
     $actualizar->close();
 
-    if ($estatus === 'aceptada' && $cotizacion['oportunidad_id'] !== null) {
+    $estatusOportunidad = null;
+    if ($cotizacion['oportunidad_id'] !== null) {
         $oportunidadId = (int) $cotizacion['oportunidad_id'];
-        $actualizar = $conexion->prepare(
-            "UPDATE oportunidades_comerciales SET estatus = 'ganada', updated_at = CURRENT_TIMESTAMP WHERE id = ?"
-        );
-        $actualizar->bind_param('i', $oportunidadId);
-        $actualizar->execute();
-        $actualizar->close();
+        $estatusOportunidad = sincronizarEstatusOportunidadCotizaciones($conexion, $oportunidadId);
     }
 
     $conexion->commit();
@@ -67,7 +63,8 @@ try {
         'oportunidad_id' => $cotizacion['oportunidad_id'] === null ? null : (int) $cotizacion['oportunidad_id'],
         'estatus' => $estatus,
         'etiqueta' => COTIZACION_ESTATUS[$estatus],
-        'oportunidad_ganada' => $estatus === 'aceptada' && $cotizacion['oportunidad_id'] !== null,
+        'oportunidad_estatus' => $estatusOportunidad,
+        'oportunidad_ganada' => $estatusOportunidad === 'ganada',
         'puede_crear_orden' => $estatus === 'aceptada'
             && $cotizacion['oportunidad_id'] !== null
             && $cotizacion['orden_venta_id'] === null,

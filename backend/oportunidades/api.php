@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require __DIR__ . '/common.php';
 require_once __DIR__ . '/../helpers/folio_comercial.php';
+require_once __DIR__ . '/../cotizaciones/common.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -43,7 +44,9 @@ try {
         $result['addresses'] = op_rows($conexion, 'SELECT * FROM empresa_direcciones WHERE empresa_id = ?
             ORDER BY es_principal DESC, tipo_direccion, id', 'i', [$company]);
     } elseif ($action === 'list') {
-        $result['data'] = op_rows($conexion, 'SELECT o.*, e.empresa, c.nombre AS contacto
+        $result['data'] = op_rows($conexion, 'SELECT o.*,
+            CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa), NULLIF(TRIM(e.regimen_capital), \'\')) AS empresa,
+            c.nombre AS contacto
             FROM oportunidades_comerciales o JOIN empresas e ON e.id_e = o.empresa_id
             LEFT JOIN contactos c ON c.id = o.contacto_id ORDER BY o.created_at DESC, o.id DESC');
     } elseif ($action === 'get') {
@@ -110,6 +113,7 @@ try {
                     [$numeroOportunidad, $date, $company, $contact, $address, $short, $long, $amount, $status, $actor, $actor])->close();
                 $id = (int) $conexion->insert_id;
             }
+            sincronizarEstatusOportunidadCotizaciones($conexion, $id);
         } elseif ($action === 'amount') {
             $amount = op_amount($input['importe'] ?? '');
             op_query($conexion, 'UPDATE oportunidades_comerciales SET importe = ?, updated_by = ?,
@@ -134,6 +138,7 @@ try {
             }
             op_query($conexion, 'UPDATE oportunidades_comerciales SET updated_at = CURRENT_TIMESTAMP,
                 updated_by = ?, version = version + 1 WHERE id = ?', 'ii', [$actor, $id])->close();
+            sincronizarEstatusOportunidadCotizaciones($conexion, $id);
         }
         $result['opportunity'] = op_get($conexion, $id);
         $conexion->commit();

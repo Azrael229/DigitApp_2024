@@ -19,5 +19,5 @@ require __DIR__ . '/../construct/header.php';
     </div>
 </div>
 <script src="../js/ordenes-venta-common.js?v=20261004-1"></script>
-<script src="../js/verOrdenVenta.js?v=20261007-1"></script>
+<script src="../js/verOrdenVenta.js?v=20261007-2"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

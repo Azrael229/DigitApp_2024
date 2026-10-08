@@ -117,6 +117,68 @@
 }
 /* FIN BLOQUE REVERSIBLE: lectura holgada de tablas 2026-10-06. */
 
+/* El directorio de empresas conserva columnas legibles y desplaza únicamente la tabla. */
+.empresa-directory-table-wrap .dataTables_scrollBody {
+    overscroll-behavior-x: contain;
+}
+
+.empresa-directory-table-wrap .dataTables_scrollHeadInner,
+.empresa-directory-table-wrap .dataTables_scrollHeadInner table,
+.empresa-directory-table-wrap .dataTables_scrollBody table {
+    min-width: 1560px !important;
+}
+
+.empresa-directory-table :is(.empresa-col-fecha, .empresa-col-rfc) {
+    white-space: nowrap;
+    overflow-wrap: normal;
+}
+
+.empresa-directory-table .empresa-col-fecha {
+    min-width: 128px;
+}
+
+.empresa-directory-table .empresa-col-rfc {
+    min-width: 155px;
+}
+
+.empresa-directory-table :is(.empresa-col-ciudad, .empresa-col-municipio, .empresa-col-estado) {
+    min-width: 165px;
+    white-space: nowrap;
+    overflow-wrap: normal;
+}
+
+.empresa-directory-table :is(.empresa-col-nombre, .empresa-col-razon) {
+    min-width: 220px;
+    max-width: 285px;
+}
+
+.empresa-texto-dos-lineas {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    line-height: 1.45;
+    max-height: 2.9em;
+    overflow-wrap: anywhere;
+}
+
+/* Selectores rápidos con apariencia de etiqueta para roles y estatus. */
+:is(.empresa-role-select, .op-status-select, .cot-status-select, .ov-status-select, .os-status-select) {
+    min-width: 150px;
+    border-radius: 999px;
+    border-color: rgba(71, 169, 124, .65);
+    background-color: rgba(32, 107, 78, .24);
+    color: var(--color-texto-principal, #eef6f3);
+    font-weight: 700;
+    padding-inline: .75rem 2rem;
+}
+
+:is(.empresa-role-select, .op-status-select, .cot-status-select, .ov-status-select, .os-status-select):focus {
+    border-color: #55c995;
+    box-shadow: 0 0 0 .2rem rgba(85, 201, 149, .18);
+}
+
 @media (max-width: 991px) {
     .data-table-shell {
         padding: 1.25rem;

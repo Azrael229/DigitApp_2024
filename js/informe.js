@@ -24,11 +24,13 @@ const resumenEmt = document.getElementById('resumen_emt');
 const cuerpoTablaEmt = document.getElementById('tabla_emt_cuerpo');
 const botonEditarCliente = document.getElementById('btn_editar_cliente_informe');
 const botonEditarEquipo = document.getElementById('btn_editar_equipo_informe');
+const botonRestablecerInforme = document.getElementById('btn_restablecer_informe');
 const botonesGenerarInforme = Array.from(formularioInforme.querySelectorAll('[data-informe-accion]'));
 const claveFlujoInforme = `digitapp:draft:${document.body.dataset.userId || 'usuario'}:informe-flujo`;
 const vigenciaFlujoInforme = 5 * 24 * 60 * 60 * 1000;
 let empresaEnCarga = '';
 let equiposEmpresa = [];
+let decimalesInstrumento = 0;
 
 if (window.jQuery && jQuery.fn.select2) {
     jQuery('#select_empresa')
@@ -168,6 +170,7 @@ function limpiarDatosInstrumento() {
     [inputDescripcion, inputMarca, inputModelo, inputIdentificacion, inputSerie, inputMax, inputD, inputE, inputMin, inputClase]
         .forEach((control) => { control.value = ''; });
     inputUnidad.value = '';
+    decimalesInstrumento = 0;
     document.querySelectorAll('.unidad-instrumento').forEach((control) => { control.checked = false; });
     resumenEmt.textContent = '';
     actualizarTablaEmt('', Number.NaN, Number.NaN, Number.NaN);
@@ -181,11 +184,18 @@ function limpiarEquipos(mensaje = 'Seleccione primero una empresa y una direcci�
     limpiarDatosInstrumento();
 }
 
-// Presenta los decimales almacenados sin ceros sobrantes ni separadores de miles.
-function normalizarDecimalEquipo(valor) {
+// Obtiene los decimales significativos almacenados en una magnitud maestra del equipo.
+function decimalesDatoEquipo(valor) {
+    const texto = String(valor ?? '').trim().replace(',', '.');
+    if (!/^\d+(?:\.\d+)?$/.test(texto) || !texto.includes('.')) return 0;
+    return texto.split('.')[1].replace(/0+$/, '').length;
+}
+
+// Presenta Max, d, e y Min con la precisión metrológica común del equipo.
+function normalizarDecimalEquipo(valor, decimales = decimalesInstrumento) {
     if (valor === null || valor === undefined || String(valor).trim() === '') return '';
     const numero = Number(valor);
-    return Number.isFinite(numero) ? String(numero) : '';
+    return Number.isFinite(numero) ? numero.toFixed(decimales) : '';
 }
 
 // Construye una etiqueta breve que permita identificar el equipo en el selector.
@@ -233,6 +243,11 @@ function cargarEquipoSeleccionado() {
     document.querySelectorAll('.unidad-instrumento').forEach((control) => {
         control.checked = control.value === inputUnidad.value;
     });
+    decimalesInstrumento = Math.max(
+        decimalesDatoEquipo(equipo.capacidad_maxima),
+        decimalesDatoEquipo(equipo.division_real),
+        decimalesDatoEquipo(equipo.division_verificacion)
+    );
     inputMax.value = normalizarDecimalEquipo(equipo.capacidad_maxima);
     inputD.value = normalizarDecimalEquipo(equipo.division_real);
     inputE.value = normalizarDecimalEquipo(equipo.division_verificacion);
@@ -341,7 +356,7 @@ async function seleccionarEmpresa() {
         if (!respuestaEmpresa.ok || !respuestaContactos.ok) throw new Error('No fue posible consultar los datos seleccionados.');
         const empresa = await respuestaEmpresa.json();
         const contactos = await respuestaContactos.json();
-        inputEmpresa.value = empresa.razon_social || empresa.empresa || '';
+        inputEmpresa.value = [empresa.razon_social || empresa.empresa, empresa.regimen_capital].filter(Boolean).join(' ');
         equiposEmpresa = Array.isArray(contactos.equipos) ? contactos.equipos : [];
         cargarContactos(contactos.contactos || []);
         cargarDirecciones(contactos.direcciones || [], empresa.dir_entrega || '');
@@ -583,7 +598,7 @@ function actualizarParametros(forzarSugerencias = false) {
     const configuracion = configuracionClase(clase);
     const minimo = configuracion.factorMin * divisionE;
     inputClase.value = clase;
-    inputMin.value = formatearNumero(minimo);
+    inputMin.value = normalizarDecimalEquipo(minimo);
     resumenEmt.textContent = `Clase ${clase}. EMT en servicio: ±${formatearNumero(divisionE)}, ±${formatearNumero(2 * divisionE)} y ±${formatearNumero(3 * divisionE)}.`;
     actualizarTablaEmt(clase, divisionE, divisionReal, maximo);
     colocarSugerencia(document.getElementById('inicial_repetibilidad_carga'), maximo / 2, forzarSugerencias);
@@ -848,22 +863,48 @@ async function prepararOtroEquipo() {
     selectEquipo.focus();
 }
 
+// Vacía por completo el informe y elimina sus borradores locales para iniciar otro registro.
+async function restablecerInforme() {
+    formularioInforme.reset();
+    empresaEnCarga = '';
+    equiposEmpresa = [];
+    limpiarContactos();
+    limpiarDirecciones();
+    limpiarEquipos();
+    if (window.jQuery && jQuery.fn.select2) jQuery(selectEmpresa).val('').trigger('change.select2');
+    establecerFechaActual();
+    await actualizarFolioPrevisto();
+    actualizarPasoIndicaciones();
+    evaluarInspeccion(false);
+    evaluarTodasLasPruebas(false);
+    mostrarErrores([]);
+    localStorage.removeItem(claveFlujoInforme);
+    formularioInforme.dispatchEvent(new CustomEvent('digitapp:draft-saved', { bubbles: true }));
+    selectEmpresa.focus();
+}
+
 async function generarInforme(evento) {
     evento.preventDefault();
-    if (!validarInforme()) return;
     const accion = evento.submitter?.dataset.informeAccion || 'descargar';
+    const esFormatoTomaDatos = accion === 'formato';
+    if (!esFormatoTomaDatos && !validarInforme()) return;
+    if (esFormatoTomaDatos && selectEquipo.value) actualizarParametros(false);
     botonesGenerarInforme.forEach((boton) => { boton.disabled = true; });
     try {
-        const respuesta = await fetch(formularioInforme.action, { method: 'POST', body: new FormData(formularioInforme) });
+        const datos = new FormData(formularioInforme);
+        if (esFormatoTomaDatos) datos.set('modo_formato', 'toma_datos');
+        const respuesta = await fetch(formularioInforme.action, { method: 'POST', body: datos });
         const tipo = respuesta.headers.get('Content-Type') || '';
         if (!respuesta.ok || !tipo.toLowerCase().includes('application/pdf')) {
             const detalle = (await respuesta.text()).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
             throw new Error(detalle || 'No fue posible generar el PDF del informe.');
         }
         descargarPdf(await respuesta.blob(), nombreArchivoInforme(respuesta));
-        localStorage.removeItem(claveFlujoInforme);
-        formularioInforme.dispatchEvent(new CustomEvent('digitapp:draft-saved', { bubbles: true }));
-        if (accion === 'continuar') await prepararOtroEquipo();
+        if (!esFormatoTomaDatos) {
+            localStorage.removeItem(claveFlujoInforme);
+            formularioInforme.dispatchEvent(new CustomEvent('digitapp:draft-saved', { bubbles: true }));
+            if (accion === 'continuar') await prepararOtroEquipo();
+        }
     } catch (error) {
         mostrarErrores([error.message || 'No fue posible generar el PDF del informe.']);
     } finally {
@@ -922,4 +963,5 @@ document.querySelectorAll('.prueba-card').forEach((tarjeta) => {
 });
 actualizarPasoIndicaciones();
 formularioInforme.addEventListener('submit', generarInforme);
+botonRestablecerInforme.addEventListener('click', restablecerInforme);
 restaurarFlujoInforme();

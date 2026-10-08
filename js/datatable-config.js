@@ -1,5 +1,5 @@
 const defaultDataTableOptions = {
-    pageLength: 20,
+    pageLength: 10,
     lengthMenu: [10, 20, 25, 50, 100],
     responsive: true,
     autoWidth: false,

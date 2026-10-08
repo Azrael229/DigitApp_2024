@@ -30,6 +30,159 @@ body::after {
     z-index: -1;
 }
 
+html[data-theme="dark"] body {
+    background:
+        radial-gradient(circle at 10% 5%, rgba(67, 107, 129, 0.2), transparent 28%),
+        radial-gradient(circle at 88% 18%, rgba(102, 63, 83, 0.14), transparent 22%),
+        linear-gradient(145deg, #07090d 0%, #0d1219 48%, #151c25 100%);
+}
+
+html[data-theme="dark"] body::before {
+    background: rgba(70, 122, 145, 0.42);
+}
+
+html[data-theme="dark"] body::after {
+    background: rgba(113, 69, 91, 0.34);
+}
+
+html[data-theme="dark"] .contain {
+    background: linear-gradient(180deg, rgba(24, 31, 41, 0.97), rgba(13, 18, 25, 0.98));
+    border-color: rgba(159, 177, 198, 0.2);
+}
+
+html[data-theme="dark"] .contain::before {
+    background:
+        radial-gradient(circle at top right, rgba(103, 199, 232, 0.07), transparent 22%),
+        linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.015), transparent);
+}
+
+html[data-theme="dark"] .navbar.bg-dark {
+    background: rgba(8, 11, 16, 0.94) !important;
+    border-bottom-color: rgba(159, 177, 198, 0.18);
+}
+
+html[data-theme="dark"] .dropdown-menu {
+    background: rgba(18, 24, 32, 0.99);
+    border-color: rgba(159, 177, 198, 0.2);
+}
+
+html[data-theme="dark"] :is(input, textarea, select, .form-control, .form-select, .select2-selection) {
+    background: rgba(255, 255, 255, 0.055) !important;
+    border-color: rgba(159, 177, 198, 0.24) !important;
+    color: #edf3f8 !important;
+}
+
+html[data-theme="dark"] :is(.table-responsive, .data-table-shell, .month, #card_subir_archivos, .prueba-card, .informe-emt-referencia, .resultados-calculados) {
+    background-color: rgba(18, 24, 32, 0.9) !important;
+    border-color: rgba(159, 177, 198, 0.18) !important;
+}
+
+html[data-theme="dark"] .table thead th {
+    background: linear-gradient(180deg, #273544, #1b2733);
+    border-bottom-color: rgba(103, 199, 232, 0.52);
+}
+
+html[data-theme="dark"] :is(.informe-titulo-seccion, .prueba-card-header, .informe-tabla thead th) {
+    background: linear-gradient(135deg, #2a3745, #1b2632);
+}
+
+/* Superficies globales del tema oscuro para formularios, tarjetas y modales. */
+html[data-theme="dark"] :is(
+    .card,
+    .empresa-form-card,
+    .contacto-form-card,
+    .cotizacion-form-section,
+    .prueba-card,
+    .modal-content,
+    .accordion-item,
+    fieldset
+) {
+    background: linear-gradient(155deg, rgba(27, 35, 46, 0.98), rgba(15, 21, 29, 0.98)) !important;
+    border-color: rgba(135, 158, 181, 0.28) !important;
+    color: var(--text-main) !important;
+}
+
+html[data-theme="dark"] :is(.card-body, .modal-header, .modal-body, .modal-footer, .accordion-body) {
+    color: var(--text-main);
+}
+
+html[data-theme="dark"] :is(.card-header, .modal-header, .modal-footer, .accordion-header) {
+    border-color: rgba(135, 158, 181, 0.2) !important;
+}
+
+html[data-theme="dark"] form :is(
+    input:not([type="checkbox"]):not([type="radio"]),
+    textarea,
+    select,
+    .form-control,
+    .form-select,
+    .select2-selection,
+    .input-group-text
+) {
+    background-color: #171f29 !important;
+    border-color: rgba(145, 168, 190, 0.3) !important;
+    color: #edf3f8 !important;
+}
+
+html[data-theme="dark"] form :is(input, textarea, .form-control)::placeholder {
+    color: rgba(221, 231, 239, 0.52) !important;
+}
+
+html[data-theme="dark"] form :is(input, textarea, select, .form-control, .form-select):focus {
+    background-color: #1b2530 !important;
+    border-color: rgba(103, 199, 232, 0.72) !important;
+    box-shadow: 0 0 0 0.22rem rgba(103, 199, 232, 0.15) !important;
+}
+
+html[data-theme="dark"] :is(.select2-dropdown, .select2-results, .select2-search__field) {
+    background-color: #171f29 !important;
+    border-color: rgba(145, 168, 190, 0.3) !important;
+    color: #edf3f8 !important;
+}
+
+html[data-theme="dark"] :is(.form-text, .text-muted, .empresa-notes-help, .contactos-muted) {
+    color: rgba(221, 231, 239, 0.66) !important;
+}
+
+/* La fila de filtros conserva contraste sin recuperar el azul del tema original. */
+html[data-theme="dark"] .table thead tr:not(:first-child) th,
+html[data-theme="dark"] .dataTables_scrollHead .table thead tr:not(:first-child) th {
+    background: #141c25 !important;
+    border-bottom-color: rgba(103, 199, 232, 0.36) !important;
+}
+
+html[data-theme="dark"] :is(.table, .dataTable) > :not(caption) > * > * {
+    border-color: rgba(135, 158, 181, 0.14) !important;
+}
+
+html[data-theme="dark"] .table tbody tr:nth-of-type(odd) > * {
+    background-color: rgba(255, 255, 255, 0.018) !important;
+}
+
+html[data-theme="dark"] .table tbody tr:hover > * {
+    background-color: rgba(103, 199, 232, 0.075) !important;
+}
+
+.theme-switch-row {
+    align-items: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    min-width: 245px;
+}
+
+.theme-switch-row .form-check-input {
+    background-color: rgba(159, 177, 198, 0.22) !important;
+    border-color: rgba(159, 177, 198, 0.45) !important;
+    cursor: pointer;
+    margin: 0;
+}
+
+.theme-switch-row .form-check-input:checked {
+    background-color: var(--accent-strong) !important;
+    border-color: var(--accent) !important;
+}
+
 body::before {
     top: 120px;
     left: -80px;
