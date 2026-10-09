@@ -169,6 +169,18 @@
     overflow-wrap: normal;
 }
 
+.table-text-two-lines {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    line-height: 1.45;
+    max-height: 2.9em;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 .empresa-texto-dos-lineas {
     display: -webkit-box;
     overflow: hidden;

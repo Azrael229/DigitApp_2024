@@ -7,3 +7,42 @@
     background-color: rgba(10, 35, 76, 0.7);
     border-radius: 18px;
 }
+
+.cotizaciones-directory-table {
+    min-width: 1460px !important;
+}
+
+.cotizaciones-directory-table .cot-col-number {
+    width: 170px;
+    min-width: 170px;
+    white-space: nowrap;
+    overflow-wrap: normal;
+}
+
+.cotizaciones-directory-table .cot-col-company {
+    width: 260px;
+    min-width: 230px;
+}
+
+.cotizaciones-directory-table .cot-col-contact {
+    width: 220px;
+    min-width: 190px;
+}
+
+.cotizaciones-directory-table .cot-col-email {
+    width: 270px;
+    min-width: 230px;
+}
+
+.cotizaciones-directory-table .cot-col-amount {
+    width: 175px;
+    min-width: 175px;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    text-align: right;
+}
+
+.cotizaciones-directory-table .cot-col-status {
+    width: 180px;
+    min-width: 180px;
+}
