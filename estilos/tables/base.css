@@ -152,6 +152,17 @@
     max-width: 285px;
 }
 
+.empresa-directory-table .admin-delete-column {
+    width: 140px;
+    min-width: 140px;
+    white-space: nowrap;
+    overflow-wrap: normal;
+}
+
+.empresa-directory-table .admin-delete-column .btn {
+    white-space: nowrap;
+}
+
 .empresa-texto-dos-lineas {
     display: -webkit-box;
     overflow: hidden;
