@@ -55,5 +55,5 @@ require __DIR__ . '/../construct/header.php';
         </div>
     </div>
 </div>
-<script src="../js/mi-cuenta.js"></script>
+<script src="../js/mi-cuenta.js?v=20261009-1"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

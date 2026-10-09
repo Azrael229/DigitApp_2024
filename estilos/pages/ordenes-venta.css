@@ -13,7 +13,7 @@
 .os-status { padding: .5rem .65rem; background: rgba(78, 144, 230, .25); color: #d0e5ff; }
 .os-status-programada { background: rgba(89, 182, 255, .22); color: #cbeaff; }
 .os-status-en_ejecucion { background: rgba(255, 184, 84, .22); color: #ffe0a6; }
-.os-status-ejecutada { background: rgba(45, 186, 121, .22); color: #b9f6d6; }
+.os-status-completada { background: rgba(45, 186, 121, .3); color: #d4ffe8; }
 .os-status-cancelada { background: rgba(255, 104, 122, .2); color: #ffd0d6; }
 .os-client-column + .os-client-column { border-left: 1px solid rgba(255, 255, 255, .12); }
 #tabla-ordenes-venta td:nth-child(2), #tabla-ordenes-venta td:nth-child(7), #tabla-ordenes-venta td:nth-child(8) { white-space: nowrap; }

@@ -583,7 +583,7 @@ final class CotizacionPDF extends FPDF
     private function fecha(string $fecha): string
     {
         $objeto = DateTimeImmutable::createFromFormat('!Y-m-d', $fecha);
-        return $objeto === false ? $fecha : $objeto->format('d/m/Y');
+        return $objeto === false ? $fecha : $objeto->format('Y-m-d');
     }
 
     private function textoTiempoEntrega(): string

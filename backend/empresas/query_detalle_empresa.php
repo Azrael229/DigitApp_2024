@@ -65,6 +65,19 @@ $consultaContactos->execute();
 $contactos = $consultaContactos->get_result()->fetch_all(MYSQLI_ASSOC);
 $consultaContactos->close();
 
+$consultaContactosDisponibles = $conexion->prepare(
+    'SELECT c.id, c.nombre, c.fecha_creacion
+     FROM contactos c
+     LEFT JOIN empresa_contactos actual
+       ON actual.id_contacto = c.id AND actual.id_empresa = ? AND actual.activo = 1
+     WHERE c.activo = 1 AND actual.id IS NULL
+     ORDER BY c.fecha_creacion DESC, c.id DESC'
+);
+$consultaContactosDisponibles->bind_param('i', $id);
+$consultaContactosDisponibles->execute();
+$contactosDisponibles = $consultaContactosDisponibles->get_result()->fetch_all(MYSQLI_ASSOC);
+$consultaContactosDisponibles->close();
+
 $consultaEquipos = $conexion->prepare(
     'SELECT ee.id, ee.direccion_id, COALESCE(ee.ubicacion, \'\') AS ubicacion,
             COALESCE(ee.modelo, \'\') AS modelo,
@@ -124,6 +137,7 @@ echo json_encode([
     'empresa' => $empresa,
     'direcciones' => $direcciones,
     'contactos' => $contactos,
+    'contactos_disponibles' => $contactosDisponibles,
     'equipos' => $equipos,
     'oportunidades' => $oportunidades,
     'cotizaciones' => $cotizaciones,

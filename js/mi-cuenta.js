@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title.textContent = `${session.nombre}${Number(session.actual) ? ' · Sesión actual' : ''}`;
             const meta = document.createElement('div');
             meta.className = 'auth-session-meta';
-            meta.textContent = `${session.navegador || ''} · ${session.plataforma || ''} · Última actividad: ${session.ultima_actividad_at}`;
+            meta.textContent = `${session.navegador || ''} · ${session.plataforma || ''} · Última actividad: ${DigitAppDate.dateTime(session.ultima_actividad_at)}`;
             info.append(title, meta);
             item.append(info);
             if (!Number(session.actual)) {
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title.textContent = `${device.nombre}${Number(device.actual) ? ' · Dispositivo actual' : ''}`;
             const meta = document.createElement('div');
             meta.className = 'auth-session-meta';
-            meta.textContent = `${device.navegador || ''} · ${device.plataforma || ''} · Último uso: ${device.ultima_actividad_at}`;
+            meta.textContent = `${device.navegador || ''} · ${device.plataforma || ''} · Último uso: ${DigitAppDate.dateTime(device.ultima_actividad_at)}`;
             info.append(title, meta);
             const button = document.createElement('button');
             button.type = 'button';

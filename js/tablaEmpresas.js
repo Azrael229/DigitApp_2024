@@ -1,7 +1,9 @@
+const empresaDeleteColumn = document.querySelector('#example thead .admin-delete-column');
 let table = new DataTable('#example', getDataTableOptions({
     order: [[0, 'desc']],
     responsive: false,
-    scrollX: true
+    scrollX: true,
+    columnDefs: empresaDeleteColumn ? [{targets: -1, orderable: false, searchable: false}] : []
 }));
 
 applyColumnFilters(table);

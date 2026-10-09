@@ -8,18 +8,14 @@ window.OS = {
         mantenimiento_preventivo: 'Mantenimiento preventivo', ajuste: 'Ajuste',
         inspeccion: 'Inspección', diagnostico: 'Diagnóstico', correctivo: 'Mantenimiento correctivo'
     },
-    statuses: {pendiente: 'Pendiente', programada: 'Programada', en_ejecucion: 'En ejecución', ejecutada: 'Ejecutada', cancelada: 'Cancelada'},
+    statuses: {pendiente: 'Pendiente', programada: 'Programada', en_ejecucion: 'En ejecución', completada: 'Completada', cancelada: 'Cancelada'},
     escape(value) {
         const element = document.createElement('span');
         element.textContent = String(value ?? '');
         return element.innerHTML;
     },
     date(value, includeTime = false) {
-        if (!value) { return '—'; }
-        const normalized = String(value).replace(' ', 'T');
-        const date = new Date(includeTime ? normalized : normalized.slice(0, 10) + 'T12:00:00');
-        if (Number.isNaN(date.getTime())) { return String(value); }
-        return new Intl.DateTimeFormat('es-MX', includeTime ? {dateStyle: 'medium', timeStyle: 'short'} : {dateStyle: 'medium'}).format(date);
+        return includeTime ? DigitAppDate.dateTime(value) : DigitAppDate.date(value);
     },
     badge(value) {
         const key = Object.prototype.hasOwnProperty.call(this.statuses, value) ? value : 'pendiente';
@@ -33,9 +29,9 @@ window.OS = {
         if (!response.ok || data.error) { throw new Error(data.error || 'No fue posible completar la operación.'); }
         return data;
     },
-    message(id, text) {
+    message(id, text, success = false) {
         const box = document.getElementById(id);
         box.textContent = text;
-        box.className = 'alert alert-danger mt-4';
+        box.className = `alert ${success ? 'alert-success' : 'alert-danger'} mt-4`;
     }
 };

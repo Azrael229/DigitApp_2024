@@ -38,5 +38,5 @@ require __DIR__ . '/../construct/header.php';
     <div class="modal-footer"><button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-secondary">Guardar usuario</button></div>
 </form></div></div></div>
 <div class="modal fade" id="sesiones-modal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h2 class="modal-title h5">Sesiones y dispositivos</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><h3 class="h6">Sesiones activas</h3><div id="admin-sesiones"></div><h3 class="h6 mt-4">Dispositivos confiables</h3><div id="admin-dispositivos"></div></div></div></div></div>
-<script src="../js/usuarios.js"></script>
+<script src="../js/usuarios.js?v=20261009-1"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

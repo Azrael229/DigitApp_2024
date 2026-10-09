@@ -1,9 +1,12 @@
 <?php
 require __DIR__ . '/../backend/oportunidades/common.php';
+if (empty($_SESSION['cotizacion_status_csrf'])) {
+    $_SESSION['cotizacion_status_csrf'] = bin2hex(random_bytes(32));
+}
 $prefijoRuta = '../';
 require __DIR__ . '/../construct/header.php';
 ?>
-<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle oportunidades-page detail-page" data-csrf="<?= op_escape($_SESSION['oportunidades_csrf']) ?>">
+<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle oportunidades-page detail-page" data-csrf="<?= op_escape($_SESSION['oportunidades_csrf']) ?>" data-cot-status-csrf="<?= op_escape($_SESSION['cotizacion_status_csrf']) ?>">
     <div class="row align-items-center pt-3 pb-4 mb-4 empresa-detalle-header">
         <div class="col empresa-header-copy">
             <p class="empresa-header-kicker mb-1">Gestión comercial</p>
@@ -84,7 +87,7 @@ require __DIR__ . '/../construct/header.php';
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="../js/datatable-filters.js?v=20261008-2"></script>
 <script src="../js/datatable-config.js"></script>
-<script src="../js/oportunidades-common.js"></script>
+<script src="../js/oportunidades-common.js?v=20261009-1"></script>
 <script src="../js/cotizaciones-status.js?v=20261003-1"></script>
-<script src="../js/ver_oportunidad.js?v=20261004-1"></script>
+<script src="../js/ver_oportunidad.js?v=20261009-1"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

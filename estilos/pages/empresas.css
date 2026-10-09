@@ -219,6 +219,10 @@
     table-layout: fixed;
 }
 
+.empresa-address-table {
+    min-width: 760px;
+}
+
 .empresa-detail-table th,
 .empresa-detail-table td {
     vertical-align: middle;
@@ -232,15 +236,29 @@
     font-size: 0.72rem;
 }
 
+.empresa-address-table th:nth-child(3),
 .empresa-address-table .empresa-address-cell {
-    width: 68%;
+    width: 48%;
     min-width: 0;
     white-space: normal;
 }
 
 .empresa-address-table th:first-child,
 .empresa-address-table td:first-child {
-    width: 14%;
+    width: 12%;
+}
+
+.empresa-address-table th:nth-child(2),
+.empresa-address-table td:nth-child(2) {
+    width: 18%;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+.empresa-address-table th:nth-child(n+4),
+.empresa-address-table td:nth-child(n+4) {
+    width: 11%;
 }
 
 .empresa-address-lines {

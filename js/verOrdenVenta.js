@@ -10,7 +10,7 @@ const ovServiceTypes = {
 };
 const ovServiceStatuses = {
     pendiente: 'Pendiente', programada: 'Programada', en_ejecucion: 'En ejecución',
-    ejecutada: 'Ejecutada', cancelada: 'Cancelada'
+    completada: 'Completada', cancelada: 'Cancelada'
 };
 
 // Crea una celda de tabla sin interpretar el contenido como HTML.

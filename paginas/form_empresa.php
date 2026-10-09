@@ -222,7 +222,7 @@ require(__DIR__ . "/../construct/header.php");
 <script src="../js/datatable-filters.js?v=20261008-2"></script>
 <script src="../js/main.js"></script>
 <script src="<?= $prefijoRuta ?>js/duplicate-warning.js?v=20261006-1"></script>
-<script src="<?= $prefijoRuta ?>js/form_empresa.js"></script>
+<script src="<?= $prefijoRuta ?>js/form_empresa.js?v=20261009-1"></script>
 
 
 <?php require(__DIR__ . "/../construct/footer.html") ?>

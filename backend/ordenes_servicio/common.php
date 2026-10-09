@@ -22,9 +22,27 @@ const OS_ESTATUS = [
     'pendiente' => 'Pendiente',
     'programada' => 'Programada',
     'en_ejecucion' => 'En ejecución',
-    'ejecutada' => 'Ejecutada',
+    'completada' => 'Completada',
     'cancelada' => 'Cancelada',
 ];
+
+// Una orden de servicio completada cierra su orden de venta; ningún otro estatus se propaga.
+function os_complete_sale_order(mysqli $db, int $saleOrderId): void
+{
+    $update = ov_query($db, 'UPDATE ordenes_venta SET estatus = \'completada\',
+        updated_at = CURRENT_TIMESTAMP, version = version + 1
+        WHERE id = ? AND estatus <> \'completada\'', 'i', [$saleOrderId]);
+    $changed = $update->affected_rows > 0;
+    $update->close();
+    if ($changed) {
+        ov_query($db, 'INSERT INTO orden_venta_seguimiento
+            (orden_venta_id, tipo, estatus, nota)
+            VALUES (?, \'estatus\', \'completada\', ?)', 'is', [
+                $saleOrderId,
+                'Orden de venta completada automáticamente al completar una orden de servicio.',
+            ])->close();
+    }
+}
 
 // Convierte una dirección estructurada en una sola línea legible.
 function os_address(array $row): string

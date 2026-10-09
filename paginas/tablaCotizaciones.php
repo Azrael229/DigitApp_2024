@@ -1,8 +1,13 @@
 
-<?php $prefijoRuta = '../'; ?>
+<?php
+$prefijoRuta = '../';
+require_once __DIR__ . '/../backend/auth/bootstrap.php';
+$authUser = auth_require_permission('comercial');
+$esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
+?>
 <?php  require (__DIR__ . "/../construct/header.php")   ?>
 <?php  require (__DIR__ . "/../backend/cotizaciones/query_all_cotizaciones.php")   ?>
-<div class="container mt-5 mb-5 contain shadow-lg oportunidades-page" data-cot-status-csrf="<?= htmlspecialchars($_SESSION['cotizacion_status_csrf'], ENT_QUOTES, 'UTF-8') ?>">
+<div class="container mt-5 mb-5 contain shadow-lg oportunidades-page" data-cot-status-csrf="<?= htmlspecialchars($_SESSION['cotizacion_status_csrf'], ENT_QUOTES, 'UTF-8') ?>"<?= $esAdministrador ? ' data-admin-delete-csrf="' . htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
     <div class="row align-items-center contacto-form-header g-3">
             <div class="col">
                 <p class="contactos-kicker mb-1">Gestión comercial</p>
@@ -36,6 +41,7 @@
                             <th scope="col">CORREO ELECTRÓNICO</th>
                             <th scope="col">IMPORTE</th>
                             <th scope="col">ESTATUS</th>
+                            <?php if ($esAdministrador): ?><th scope="col" class="admin-delete-column">ELIMINAR</th><?php endif; ?>
                         </tr>
                     </thead>
                     <tbody>
@@ -55,6 +61,7 @@
                             <td data-cot-total="<?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" data-order="<?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>">$ <?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ' '), ENT_QUOTES, 'UTF-8') ?></td>
                             <?php $estatusClave = cotizacionEstatusClave($row_coti['cot_status'] ?? ''); ?>
                             <td><select class="form-select form-select-sm cot-status-select" data-id="<?= (int) $row_coti['id_coti'] ?>" aria-label="Estatus de cotización <?= htmlspecialchars((string) ($row_coti['cot_numero'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"><?php foreach (COTIZACION_ESTATUS as $clave => $etiqueta): ?><option value="<?= $clave ?>"<?= $estatusClave === $clave ? ' selected' : '' ?>><?= htmlspecialchars($etiqueta, ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select></td>
+                            <?php if ($esAdministrador): ?><td><button type="button" class="btn btn-outline-danger btn-sm" data-admin-delete data-delete-entity="cotizacion" data-delete-id="<?= (int) $row_coti['id_coti'] ?>" data-delete-label="la cotización <?= htmlspecialchars((string) ($row_coti['cot_numero'] ?? $row_coti['id_coti']), ENT_QUOTES, 'UTF-8') ?>"><i class="bi bi-trash" aria-hidden="true"></i> Eliminar</button></td><?php endif; ?>
                         </tr>
                         <?php endforeach;  ?>
                         
@@ -84,5 +91,6 @@
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js?v=20261008-2"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
-<script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261007-1"></script>
+<?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
+<script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261009-1"></script>
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>

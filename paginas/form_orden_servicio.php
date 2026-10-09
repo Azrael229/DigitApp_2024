@@ -33,6 +33,6 @@ require __DIR__ . '/../construct/header.php';
         <div class="d-flex flex-column flex-sm-row justify-content-sm-end gap-2 pb-4"><a id="os-cancel" href="ordenes_servicio.php" class="btn btn-danger">Cancelar</a><button id="os-save" class="btn btn-success" type="submit">Guardar orden de servicio</button></div>
     </form>
 </div>
-<script src="../js/ordenes-servicio-common.js?v=20261004-1"></script>
+<script src="../js/ordenes-servicio-common.js?v=20261009-1"></script>
 <script src="../js/formOrdenServicio.js?v=20261004-3"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

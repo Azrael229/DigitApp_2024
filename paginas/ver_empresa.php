@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../backend/auth/bootstrap.php';
+$authUser = auth_require_permission('clientes');
+$esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
 $prefijoRuta = '../';
 $returnUrl = (string) ($_GET['return_url'] ?? '');
 if ($returnUrl !== '' && !preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
@@ -11,7 +13,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
 ?>
 <?php require (__DIR__ . "/../construct/header.php"); ?>
 
-<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle detail-page" data-notas-csrf="<?= htmlspecialchars($_SESSION['empresa_notas_csrf'], ENT_QUOTES, 'UTF-8') ?>" data-return-url="<?= htmlspecialchars($returnUrl, ENT_QUOTES, 'UTF-8') ?>">
+<div class="container mt-5 mb-5 contain shadow-lg empresa-detalle detail-page" data-notas-csrf="<?= htmlspecialchars($_SESSION['empresa_notas_csrf'], ENT_QUOTES, 'UTF-8') ?>" data-contactos-csrf="<?= htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') ?>" data-return-url="<?= htmlspecialchars($returnUrl, ENT_QUOTES, 'UTF-8') ?>" data-is-admin="<?= $esAdministrador ? '1' : '0' ?>"<?= $esAdministrador ? ' data-admin-delete-csrf="' . htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
     <div class="row align-items-center pt-3 pb-4 mb-4 empresa-detalle-header">
         <div class="col empresa-header-copy">
             <p class="empresa-header-kicker mb-1">Directorio de empresas</p>
@@ -79,7 +81,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                 <div class="table-responsive empresa-table-wrap">
                     <table class="table table-secondary align-middle empresa-detail-table empresa-address-table mb-0">
                         <caption class="visually-hidden">Direcciones registradas de la empresa</caption>
-                        <thead><tr><th scope="col">Tipo</th><th scope="col">Alias</th><th scope="col">Dirección</th><th scope="col">Editar</th></tr></thead>
+                        <thead><tr><th scope="col">Tipo</th><th scope="col">Alias</th><th scope="col">Dirección</th><th scope="col">Editar</th><?php if ($esAdministrador): ?><th scope="col">Eliminar</th><?php endif; ?></tr></thead>
                         <tbody id="tabla_direcciones"></tbody>
                     </table>
                 </div>
@@ -93,9 +95,19 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                         <p class="empresa-section-kicker mb-1">Personas vinculadas</p>
                         <h2 class="h5 card-title mb-0">Contactos</h2>
                     </div>
-                    <a id="btn_agregar_contacto" href="#" class="btn btn-secondary btn-sm disabled" aria-disabled="true">
-                        <i class="bi bi-plus-lg"></i> Añadir contacto
-                    </a>
+                    <button id="btn_gestionar_contacto" type="button" class="btn btn-secondary btn-sm" disabled>
+                        <i class="bi bi-person-plus" aria-hidden="true"></i> Añadir o vincular contacto
+                    </button>
+                </div>
+                <div id="panel_vincular_contacto" class="row g-3 align-items-end mb-3 d-none">
+                    <div class="col-12 col-lg-7">
+                        <label for="selector_contacto_empresa" class="form-label">Contacto existente</label>
+                        <select id="selector_contacto_empresa" class="form-select" disabled><option value="">Seleccionar contacto</option></select>
+                        <div class="form-text">Los contactos se muestran por nombre, comenzando por los registrados más recientemente.</div>
+                    </div>
+                    <div class="col-12 col-sm-auto"><button id="btn_vincular_contacto" type="button" class="btn btn-success" disabled>Vincular seleccionado</button></div>
+                    <div class="col-12 col-sm-auto"><a id="btn_nuevo_contacto" class="btn btn-outline-secondary" href="#"><i class="bi bi-plus-lg" aria-hidden="true"></i> Registrar nuevo contacto</a></div>
+                    <div id="estado_vincular_contacto" class="col-12 empresa-notes-help" role="status" aria-live="polite"></div>
                 </div>
                 <div class="table-responsive empresa-table-wrap">
                     <table class="table table-secondary align-middle empresa-detail-table empresa-contacts-table mb-0">
@@ -138,17 +150,18 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                         <thead>
                             <tr>
                                 <th scope="col">Descripción de equipo</th>
-                                <th scope="col">Ubicación</th>
                                 <th scope="col">Marca</th>
                                 <th scope="col">Modelo</th>
                                 <th scope="col">Identificación</th>
+                                <th scope="col">Ubicación</th>
                                 <th scope="col">Serie</th>
                                 <th scope="col">Capacidad</th>
-                                <th scope="col">División real</th>
-                                <th scope="col">División de verificación</th>
+                                <th scope="col">d</th>
+                                <th scope="col">e</th>
                                 <th scope="col">Clase de exactitud</th>
                                 <th scope="col">Editar</th>
                                 <th scope="col">Estatus</th>
+                                <?php if ($esAdministrador): ?><th scope="col">Eliminar</th><?php endif; ?>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -224,6 +237,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js?v=20261008-2"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
-<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261007-1"></script>
+<?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
+<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261009-2"></script>
 
 <?php require (__DIR__ . "/../construct/footer.html"); ?>

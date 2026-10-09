@@ -6,6 +6,12 @@
     const quoteSelect = document.getElementById('op-cotizacion');
     const linkButton = document.getElementById('op-vincular-boton');
     const quoteBody = document.getElementById('op-cotizaciones');
+    const createOrder = document.getElementById('op-crear-orden');
+    createOrder.href = 'form_orden_venta.php?oportunidad_id=' + encodeURIComponent(id);
+    const pageRoot = document.querySelector('[data-cot-status-csrf]');
+    const statusOptions = Object.entries(CotStatus.labels).map(([key, label]) =>
+        `<option value="${CotStatus.escape(key)}">${CotStatus.escape(label)}</option>`
+    ).join('');
     const linkedQuotesTable = new DataTable('#op-tabla-cotizaciones', getDataTableOptions({
         data: [],
         order: [[0, 'desc']],
@@ -16,7 +22,12 @@
             {data: 'cot_contacto', defaultContent: '', render: DataTable.render.text()},
             {data: 'cot_total', render: (value, type) => type === 'display' ? Op.money(value) : Number(value || 0)},
             {data: 'id_coti', orderable: false, searchable: false, render: value => `<button type="button" class="btn btn-outline-secondary btn-sm" data-quote="${Number(value)}">Desvincular</button>`},
-            {data: 'cot_status', defaultContent: '', render: (value, type) => type === 'display' ? CotStatus.badge(value) : CotStatus.labels[CotStatus.key(value)]}
+            {data: 'cot_status', defaultContent: '', render: (value, type, row) => {
+                const key = CotStatus.key(value);
+                if (type !== 'display') { return CotStatus.labels[key]; }
+                const options = statusOptions.replace(`value="${key}"`, `value="${key}" selected`);
+                return `<select class="form-select form-select-sm cot-status-select cot-status-${key}" data-id="${Number(row.id_coti)}" data-previous="${CotStatus.escape(key)}" aria-label="Estatus de la cotización ${CotStatus.escape(row.cot_numero || row.id_coti)}">${options}</select>`;
+            }}
         ]
     }));
     applyColumnFilters(linkedQuotesTable);
@@ -49,6 +60,45 @@
     }
     document.getElementById('op-vincular').addEventListener('submit', event => { event.preventDefault(); if (quoteSelect.value) { mutate('link', quoteSelect.value); } });
     quoteBody.addEventListener('click', event => { const button = event.target.closest('button[data-quote]'); if (button) { mutate('unlink', button.dataset.quote); } });
+    // Cambia el estatus desde la tabla y deja que el servidor sincronice la oportunidad.
+    quoteBody.addEventListener('change', async event => {
+        const select = event.target.closest('.cot-status-select');
+        if (!select || busy) { return; }
+        const previous = select.dataset.previous || select.value;
+        select.disabled = true;
+        try {
+            const response = await fetch('../backend/cotizaciones/update_coti_status.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'},
+                body: new URLSearchParams({
+                    id: select.dataset.id,
+                    estatus: select.value,
+                    csrf: pageRoot.dataset.cotStatusCsrf
+                })
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok || result.error) {
+                throw new Error(result.error || 'No fue posible actualizar el estatus.');
+            }
+            select.dataset.previous = result.estatus;
+            select.className = `form-select form-select-sm cot-status-select cot-status-${result.estatus}`;
+            const opportunityStatus = Op.statuses[result.oportunidad_estatus] ? result.oportunidad_estatus : 'preparacion';
+            const badge = document.getElementById('op-estatus');
+            badge.textContent = Op.statuses[opportunityStatus];
+            badge.className = 'badge op-status op-title-status op-status-' + opportunityStatus;
+            const quotes = await loadQuotes();
+            const refreshed = await Op.request('get', {id});
+            document.getElementById('op-auditoria').textContent = Op.audit(refreshed.opportunity);
+            const accepted = quotes.linked.some(quote => CotStatus.key(quote.cot_status) === 'aceptada');
+            createOrder.classList.toggle('d-none', opportunityStatus !== 'ganada' || !accepted);
+            Op.message('mensaje_cotizaciones', 'Estatus de la cotización actualizado.', true);
+        } catch (error) {
+            select.value = previous;
+            Op.message('mensaje_cotizaciones', error.message);
+        } finally {
+            select.disabled = false;
+        }
+    });
     try {
         const {opportunity: op} = await Op.request('get', {id});
         document.getElementById('op-numero').textContent = op.numero_oportunidad || '#' + id;
@@ -83,8 +133,6 @@
             const quotes = await loadQuotes();
             const accepted = quotes.linked.some(quote => CotStatus.key(quote.cot_status) === 'aceptada');
             if (op.estatus === 'ganada' && accepted) {
-                const createOrder = document.getElementById('op-crear-orden');
-                createOrder.href = 'form_orden_venta.php?oportunidad_id=' + encodeURIComponent(id);
                 createOrder.classList.remove('d-none');
             }
         } catch (error) { Op.message('mensaje_cotizaciones', error.message); }

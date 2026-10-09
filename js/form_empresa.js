@@ -33,6 +33,9 @@ function cargarEmpresaParaEditar() {
                 var input = document.getElementById(campo === 'version' ? 'empresa_version' : campo);
                 if (input) {
                     var valor = datos.empresa[campo] || '';
+                    if (campo === 'created_at' || campo === 'updated_at') {
+                        valor = DigitAppDate.dateTime(valor);
+                    }
                     if ('value' in input) {
                         input.value = valor;
                     } else {

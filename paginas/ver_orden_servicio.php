@@ -13,5 +13,5 @@ require __DIR__ . '/../construct/header.php';
         <section class="card mb-4 empresa-form-card empresa-detail-section"><div class="card-body empresa-card-body"><div class="empresa-section-heading mb-3"><p class="empresa-section-kicker mb-1">Equipos</p><h2 class="h5 mb-0">Equipos incluidos en el servicio</h2></div><div class="table-responsive data-table-shell table-wide"><table id="os-detail-equipment" class="table table-striped align-middle mb-0"><thead><tr><th>Descripción de equipo</th><th>Ubicación</th><th>Marca</th><th>Modelo</th><th>Identificación</th><th>Serie</th><th>Capacidad</th><th>División real</th><th>División de verificación</th><th>Clase de exactitud</th></tr></thead><tbody id="os-detail-equipment-body"></tbody></table></div><div id="os-detail-equipment-empty" class="alert alert-info mt-3 mb-0 d-none">Esta orden no tiene equipos registrados.</div></div></section>
     </div>
 </div>
-<script src="../js/ordenes-servicio-common.js?v=20261004-1"></script><script src="../js/verOrdenServicio.js?v=20261004-3"></script>
+<script src="../js/ordenes-servicio-common.js?v=20261009-1"></script><script src="../js/verOrdenServicio.js?v=20261004-3"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

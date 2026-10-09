@@ -66,6 +66,9 @@ try {
         }
         ov_query($conexion, 'UPDATE ordenes_servicio SET estatus = ?, updated_at = CURRENT_TIMESTAMP,
             version = version + 1 WHERE id = ?', 'si', [$status, $id])->close();
+        if ($status === 'completada') {
+            os_complete_sale_order($conexion, (int) $old['orden_venta_id']);
+        }
         $result = ['order' => os_get($conexion, $id)];
         $conexion->commit();
         $transaction = false;
@@ -177,6 +180,9 @@ try {
         }
         ov_query($conexion, 'UPDATE ordenes_venta SET updated_at = CURRENT_TIMESTAMP,
             version = version + 1 WHERE id = ?', 'i', [$saleOrderId])->close();
+        if ($status === 'completada') {
+            os_complete_sale_order($conexion, $saleOrderId);
+        }
         $result = ['order' => os_get($conexion, $id)];
         $conexion->commit();
         $transaction = false;

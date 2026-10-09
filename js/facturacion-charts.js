@@ -409,8 +409,7 @@ function actualizarGraficaVentasMensuales(ventasMensuales) {
 
     const labels = ventasMensuales.map(([mes]) => {
         const [anio, numeroMes] = mes.split('-');
-        const fecha = new Date(anio, numeroMes - 1, 1);
-        return fecha.toLocaleDateString('es-MX', { month: 'short', year: 'numeric' });
+        return `${anio}-${String(numeroMes).padStart(2, '0')}`;
     });
     const data = ventasMensuales.map(([, total]) => total);
 

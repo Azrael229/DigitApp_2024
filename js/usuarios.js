@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const item = document.createElement('div');
             item.className = 'auth-session-item';
             const text = document.createElement('span');
-            text.textContent = `${session.nombre} · ${session.ultima_actividad_at}`;
+            text.textContent = `${session.nombre} · ${DigitAppDate.dateTime(session.ultima_actividad_at)}`;
             item.append(text, actionButton('Cerrar', 'btn-outline-danger', async () => { await adminAction('revoke_session', { sesion_id: session.id }); await openSessions(user); }));
             sessions.append(item);
         });
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const item = document.createElement('div');
             item.className = 'auth-session-item';
             const text = document.createElement('span');
-            text.textContent = `${device.nombre} · ${device.navegador || ''} · ${device.ultima_actividad_at}`;
+            text.textContent = `${device.nombre} · ${device.navegador || ''} · ${DigitAppDate.dateTime(device.ultima_actividad_at)}`;
             item.append(text, actionButton('Revocar', 'btn-outline-danger', async () => { await adminAction('revoke_device', { dispositivo_id: device.id }); await openSessions(user); }));
             devices.append(item);
         });
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body.replaceChildren();
         users.forEach((user) => {
             const row = document.createElement('tr');
-            [user.nombre_completo, user.correo, user.rol.replaceAll('_', ' '), user.estado, user.ultimo_acceso_at || 'Sin acceso'].forEach((value) => {
+            [user.nombre_completo, user.correo, user.rol.replaceAll('_', ' '), user.estado, user.ultimo_acceso_at ? DigitAppDate.dateTime(user.ultimo_acceso_at) : 'Sin acceso'].forEach((value) => {
                 const cell = document.createElement('td');
                 cell.textContent = value;
                 row.append(cell);
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body.replaceChildren();
         data.data.forEach((entry) => {
             const row = document.createElement('tr');
-            [entry.created_at, entry.usuario || 'Sistema', entry.evento, entry.resultado, entry.ip || '', entry.detalle || ''].forEach((value) => {
+            [DigitAppDate.dateTime(entry.created_at), entry.usuario || 'Sistema', entry.evento, entry.resultado, entry.ip || '', entry.detalle || ''].forEach((value) => {
                 const cell = document.createElement('td');
                 cell.textContent = value;
                 row.append(cell);

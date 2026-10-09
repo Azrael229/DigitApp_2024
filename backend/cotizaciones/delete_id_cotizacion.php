@@ -1,57 +1,10 @@
 <?php
+declare(strict_types=1);
+
 require_once __DIR__ . '/../auth/bootstrap.php';
-auth_require_permission('comercial');
-require (__DIR__ . "/../../config/conexion.php");
+auth_require_login();
 
-$id = $_GET['id_coti'] ?? '';
-$pdfPath = '';
-$status = 'ok';
-$redirectUrl = $_SERVER['HTTP_REFERER'] ?? '../../paginas/tablaCotizaciones.php';
-
-if ($id === '') {
-    mysqli_close($conexion);
-    header('Location: ' . $redirectUrl . '?delete_status=missing_id');
-    exit;
-}
-
-$sqlArchivo = "SELECT cot_archivo FROM cotizaciones WHERE id_coti = '$id' LIMIT 1";
-$resultArchivo = mysqli_query($conexion, $sqlArchivo);
-
-if ($resultArchivo && mysqli_num_rows($resultArchivo) > 0) {
-    $rowArchivo = mysqli_fetch_assoc($resultArchivo);
-    $archivoPdf = trim((string) ($rowArchivo['cot_archivo'] ?? ''));
-
-    if ($archivoPdf !== '') {
-        $basePdfDirectory = realpath(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'filesPDF');
-        $candidatePath = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'filesPDF' . DIRECTORY_SEPARATOR . basename($archivoPdf);
-        $resolvedCandidatePath = realpath($candidatePath);
-
-        if (
-            $basePdfDirectory !== false &&
-            $resolvedCandidatePath !== false &&
-            str_starts_with($resolvedCandidatePath, $basePdfDirectory . DIRECTORY_SEPARATOR) &&
-            is_file($resolvedCandidatePath)
-        ) {
-            $pdfPath = $resolvedCandidatePath;
-        }
-    }
-} elseif ($resultArchivo === false) {
-    $status = 'query_error';
-}
-
-if ($status === 'ok' && $pdfPath !== '' && !unlink($pdfPath)) {
-    $status = 'pdf_error';
-}
-
-if ($status === 'ok') {
-    $sqlDelete = "DELETE FROM cotizaciones WHERE id_coti = '$id'";
-
-    if (!mysqli_query($conexion, $sqlDelete)) {
-        $status = 'delete_error';
-    }
-}
-
-mysqli_close($conexion);
-
-header('Location: ' . $redirectUrl . '?delete_status=' . $status);
-exit;
+// Ruta heredada desactivada: la eliminación exige rol administrador, POST, CSRF y confirmación BORRAR.
+http_response_code(410);
+header('Content-Type: text/plain; charset=utf-8');
+echo 'Esta acción fue reemplazada por la eliminación administrativa segura.';

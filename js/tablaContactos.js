@@ -1,5 +1,9 @@
 // Conserva el orden del servidor para mostrar primero el contacto recién agregado.
-var tablaContactos = new DataTable('#example', getDataTableOptions({ order: [] }));
+var tablaContactos = new DataTable('#example', getDataTableOptions({
+    order: [],
+    columnDefs: document.querySelector('#example thead .admin-delete-column')
+        ? [{targets: -1, orderable: false, searchable: false}] : []
+}));
 var filtroEmpresaContactos = document.getElementById('filtro_empresa_contactos');
 
 // Filtra contactos por la existencia de al menos una relación empresarial activa.

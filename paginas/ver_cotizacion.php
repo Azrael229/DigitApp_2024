@@ -26,13 +26,13 @@ function cotEscapar($valor): string
 function cotFecha($fecha): string
 {
     $objeto = DateTimeImmutable::createFromFormat('!Y-m-d', (string) $fecha);
-    return $objeto === false ? (string) $fecha : $objeto->format('d/m/Y');
+    return $objeto === false ? (string) $fecha : $objeto->format('Y-m-d');
 }
 
 function cotFechaHora($fecha): string
 {
     $objeto = DateTimeImmutable::createFromFormat('!Y-m-d H:i:s', (string) $fecha);
-    return $objeto === false ? (string) $fecha : $objeto->format('d/m/Y H:i');
+    return $objeto === false ? (string) $fecha : $objeto->format('Y-m-d H:i');
 }
 
 function cotMoneda($valor): string

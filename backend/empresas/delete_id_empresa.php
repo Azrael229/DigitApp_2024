@@ -1,14 +1,10 @@
 <?php
-    require_once __DIR__ . '/../auth/bootstrap.php';
-    auth_require_permission('clientes');
-    require (__DIR__ . "/../../config/conexion.php");
+declare(strict_types=1);
 
-    $id = $_GET ['id'];
+require_once __DIR__ . '/../auth/bootstrap.php';
+auth_require_login();
 
-    $sql = "DELETE FROM `empresas` WHERE ID = '$id'";
-
-    mysqli_query($conexion, $sql);
-
-    mysqli_close($conexion);
-    
-    header('Location: ' . $_SERVER['HTTP_REFERER']);
+// Ruta heredada desactivada: la eliminación exige rol administrador, POST, CSRF y confirmación BORRAR.
+http_response_code(410);
+header('Content-Type: text/plain; charset=utf-8');
+echo 'Esta acción fue reemplazada por la eliminación administrativa segura.';

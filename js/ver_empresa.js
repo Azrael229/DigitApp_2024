@@ -6,7 +6,12 @@ var tablaDirecciones = document.getElementById('tabla_direcciones');
 var tablaContactos = document.getElementById('tabla_contactos');
 var retornoEmpresa = document.querySelector('.empresa-detalle').dataset.returnUrl || '';
 var botonAgregarDireccion = document.getElementById('btn_agregar_direccion');
-var botonAgregarContacto = document.getElementById('btn_agregar_contacto');
+var botonGestionarContacto = document.getElementById('btn_gestionar_contacto');
+var panelVincularContacto = document.getElementById('panel_vincular_contacto');
+var selectorContactoEmpresa = document.getElementById('selector_contacto_empresa');
+var botonVincularContacto = document.getElementById('btn_vincular_contacto');
+var botonNuevoContacto = document.getElementById('btn_nuevo_contacto');
+var estadoVincularContacto = document.getElementById('estado_vincular_contacto');
 var botonAgregarEquipo = document.getElementById('btn_agregar_equipo');
 var filtroDireccionEquipos = document.getElementById('filtro_direccion_equipos');
 var ayudaEquipos = document.getElementById('ayuda_equipos');
@@ -16,6 +21,8 @@ var notasEmpresa = document.getElementById('empresa_notas');
 var botonGuardarNotas = document.getElementById('btn_guardar_notas');
 var estadoNotasEmpresa = document.getElementById('estado_notas_empresa');
 var tokenNotasEmpresa = contenedorEmpresa.dataset.notasCsrf;
+var tokenContactosEmpresa = contenedorEmpresa.dataset.contactosCsrf;
+var esAdministradorEmpresa = contenedorEmpresa.dataset.isAdmin === '1';
 var notasGuardadas = '';
 var notasConCambios = false;
 var etiquetasEstatusOportunidad = {
@@ -59,66 +66,75 @@ function formatearNumeroEquipoEmpresa(valor) {
     return texto.replace(/0+$/, '').replace(/\.$/, '') || '0';
 }
 
+// Une un valor metrológico con la unidad configurada en el registro maestro.
+function formatearMedidaEquipoEmpresa(valor, unidad) {
+    var numero = formatearNumeroEquipoEmpresa(valor);
+    return numero === '-' ? numero : numero + ' ' + String(unidad || '').toLowerCase();
+}
+
+var columnasEquiposEmpresa = [
+    { data: 'descripcion', defaultContent: '', render: DataTable.render.text() },
+    { data: 'marca', defaultContent: '', render: DataTable.render.text() },
+    { data: 'modelo', defaultContent: '', render: DataTable.render.text() },
+    { data: 'identificacion', defaultContent: '', render: DataTable.render.text() },
+    { data: 'ubicacion', defaultContent: '', render: DataTable.render.text() },
+    { data: 'numero_serie', defaultContent: '', render: DataTable.render.text() },
+    {
+        data: 'capacidad_maxima', defaultContent: '',
+        render: function (valor, tipo, fila) {
+            return tipo === 'display' ? escaparHtmlEmpresa(formatearMedidaEquipoEmpresa(valor, fila.unidad)) : Number(valor);
+        }
+    },
+    {
+        data: 'division_real', defaultContent: '',
+        render: function (valor, tipo, fila) {
+            return tipo === 'display' ? escaparHtmlEmpresa(formatearMedidaEquipoEmpresa(valor, fila.unidad)) : Number(valor);
+        }
+    },
+    {
+        data: 'division_verificacion', defaultContent: '',
+        render: function (valor, tipo, fila) {
+            return tipo === 'display' ? escaparHtmlEmpresa(formatearMedidaEquipoEmpresa(valor, fila.unidad)) : Number(valor);
+        }
+    },
+    { data: 'clase_exactitud', defaultContent: '', render: DataTable.render.text() },
+    {
+        data: 'id', orderable: false, searchable: false,
+        render: function (valor, tipo) {
+            if (tipo !== 'display') { return valor; }
+            return '<a class="btn btn-secondary btn-sm" href="form_equipo_empresa.php?empresa_id='
+                + encodeURIComponent(obtenerEmpresaId()) + '&equipo_id=' + Number(valor)
+                + (retornoEmpresa ? '&return_url=' + encodeURIComponent(retornoEmpresa) : '')
+                + '"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</a>';
+        }
+    },
+    {
+        data: 'estatus', defaultContent: '',
+        render: function (valor, tipo) {
+            var etiqueta = etiquetasEstatusEquipo[valor] || valor || 'Sin estatus';
+            if (tipo !== 'display') { return etiqueta; }
+            return '<span class="badge empresa-equipo-estatus empresa-equipo-' + escaparHtmlEmpresa(valor)
+                + '">' + escaparHtmlEmpresa(etiqueta) + '</span>';
+        }
+    }
+];
+
+if (esAdministradorEmpresa) {
+    columnasEquiposEmpresa.push({
+        data: 'id', orderable: false, searchable: false,
+        render: function (valor, tipo, fila) {
+            if (tipo !== 'display') { return valor; }
+            var etiqueta = [fila.descripcion, fila.identificacion, fila.numero_serie].filter(Boolean).join(' · ') || 'el equipo';
+            return '<button type="button" class="btn btn-outline-danger btn-sm" data-admin-delete data-delete-entity="equipo" data-delete-id="'
+                + Number(valor) + '" data-delete-label="' + escaparHtmlEmpresa(etiqueta) + '"><i class="bi bi-trash" aria-hidden="true"></i> Eliminar</button>';
+        }
+    });
+}
+
 var equiposEmpresa = new DataTable('#tabla_equipos_empresa', getDataTableOptions({
     data: [],
-    order: [[0, 'asc'], [4, 'asc']],
-    columns: [
-        { data: 'descripcion', defaultContent: '', render: DataTable.render.text() },
-        { data: 'ubicacion', defaultContent: '', render: DataTable.render.text() },
-        { data: 'marca', defaultContent: '', render: DataTable.render.text() },
-        { data: 'modelo', defaultContent: '', render: DataTable.render.text() },
-        { data: 'identificacion', defaultContent: '', render: DataTable.render.text() },
-        { data: 'numero_serie', defaultContent: '', render: DataTable.render.text() },
-        {
-            data: 'capacidad_maxima',
-            defaultContent: '',
-            render: function (valor, tipo, fila) {
-                var numero = formatearNumeroEquipoEmpresa(valor);
-                return tipo === 'display' ? escaparHtmlEmpresa(numero + ' ' + (fila.unidad || '')) : Number(valor);
-            }
-        },
-        {
-            data: 'division_real',
-            defaultContent: '',
-            render: function (valor, tipo) {
-                return tipo === 'display' ? escaparHtmlEmpresa(formatearNumeroEquipoEmpresa(valor)) : Number(valor);
-            }
-        },
-        {
-            data: 'division_verificacion',
-            defaultContent: '',
-            render: function (valor, tipo) {
-                return tipo === 'display' ? escaparHtmlEmpresa(formatearNumeroEquipoEmpresa(valor)) : Number(valor);
-            }
-        },
-        { data: 'clase_exactitud', defaultContent: '', render: DataTable.render.text() },
-        {
-            data: 'id',
-            orderable: false,
-            searchable: false,
-            render: function (valor, tipo) {
-                if (tipo !== 'display') {
-                    return valor;
-                }
-                return '<a class="btn btn-secondary btn-sm" href="form_equipo_empresa.php?empresa_id='
-                    + encodeURIComponent(obtenerEmpresaId()) + '&equipo_id=' + Number(valor)
-                    + (retornoEmpresa ? '&return_url=' + encodeURIComponent(retornoEmpresa) : '')
-                    + '"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</a>';
-            }
-        },
-        {
-            data: 'estatus',
-            defaultContent: '',
-            render: function (valor, tipo) {
-                var etiqueta = etiquetasEstatusEquipo[valor] || valor || 'Sin estatus';
-                if (tipo !== 'display') {
-                    return etiqueta;
-                }
-                return '<span class="badge empresa-equipo-estatus empresa-equipo-' + escaparHtmlEmpresa(valor)
-                    + '">' + escaparHtmlEmpresa(etiqueta) + '</span>';
-            }
-        }
-    ]
+    order: [[0, 'asc'], [3, 'asc']],
+    columns: columnasEquiposEmpresa
 }));
 
 // Limita la tabla a la dirección elegida sin mostrarla como una columna repetida.
@@ -315,14 +331,9 @@ function formatearDireccionEmpresa(direccion) {
     return listaDireccion;
 }
 
-// Convierte las fechas de la base de datos a una lectura local uniforme.
+// Convierte fechas de control al formato general AAAA-MM-DD con hora opcional.
 function formatearFechaEmpresa(fecha) {
-    if (!fecha) {
-        return '-';
-    }
-
-    var fechaLocal = new Date(fecha.replace(' ', 'T'));
-    return Number.isNaN(fechaLocal.getTime()) ? fecha : fechaLocal.toLocaleString('es-MX');
+    return fecha ? DigitAppDate.dateTime(fecha) : '-';
 }
 
 // Presenta las notas almacenadas y habilita su edición directa.
@@ -440,6 +451,59 @@ function agregarEdicionDireccion(fila, direccion) {
     fila.appendChild(celdaEditar);
 }
 
+// Agrega la eliminación administrativa al extremo derecho de la fila de dirección.
+function agregarEliminacionDireccion(fila, direccion) {
+    if (!esAdministradorEmpresa) { return; }
+    var celda = document.createElement('td');
+    var boton = document.createElement('button');
+    boton.type = 'button';
+    boton.className = 'btn btn-outline-danger btn-sm';
+    boton.dataset.adminDelete = '';
+    boton.dataset.deleteEntity = 'direccion';
+    boton.dataset.deleteId = direccion.id;
+    boton.dataset.deleteCompanyId = obtenerEmpresaId();
+    boton.dataset.deleteLabel = 'la dirección ' + (direccion.alias || formatearTipoDireccion(direccion.tipo_direccion));
+    boton.innerHTML = '<i class="bi bi-trash" aria-hidden="true"></i> Eliminar';
+    celda.appendChild(boton);
+    fila.appendChild(celda);
+}
+
+// Llena el selector con contactos vigentes, ordenados desde el registro más reciente.
+function mostrarContactosDisponibles(contactos) {
+    selectorContactoEmpresa.replaceChildren(new Option('Seleccionar contacto existente', ''));
+    contactos.forEach(function (contacto) {
+        selectorContactoEmpresa.add(new Option(contacto.nombre || 'Contacto sin nombre', contacto.id));
+    });
+    selectorContactoEmpresa.disabled = contactos.length === 0;
+    botonVincularContacto.disabled = contactos.length === 0;
+    estadoVincularContacto.textContent = contactos.length
+        ? 'Selecciona un contacto existente para evitar registros duplicados.'
+        : 'Todos los contactos vigentes ya están vinculados con esta empresa.';
+}
+
+// Vincula el contacto seleccionado con la empresa y actualiza la ficha completa.
+async function vincularContactoEmpresa() {
+    var contactoId = selectorContactoEmpresa.value;
+    var empresaId = obtenerEmpresaId();
+    if (!contactoId || !empresaId) { return; }
+    botonVincularContacto.disabled = true;
+    estadoVincularContacto.textContent = 'Vinculando contacto...';
+    try {
+        var respuesta = await fetch('../backend/empresas/vincular_contacto_empresa.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest'},
+            body: new URLSearchParams({empresa_id: empresaId, contacto_id: contactoId, csrf: tokenContactosEmpresa})
+        });
+        var datos = await respuesta.json().catch(function () { return {}; });
+        if (!respuesta.ok || datos.error) { throw new Error(datos.error || 'No fue posible vincular el contacto.'); }
+        panelVincularContacto.classList.add('d-none');
+        await cargarDetalleEmpresa();
+    } catch (error) {
+        botonVincularContacto.disabled = false;
+        estadoVincularContacto.textContent = error.message;
+    }
+}
+
 // Muestra los datos generales de la empresa en la tarjeta superior.
 function mostrarDatosGenerales(empresa) {
     var campos = [
@@ -482,7 +546,7 @@ function mostrarDirecciones(direcciones) {
     if (!direcciones.length) {
         var filaVacia = document.createElement('tr');
         agregarCelda(filaVacia, 'Sin direcciones registradas');
-        filaVacia.cells[0].colSpan = 4;
+        filaVacia.cells[0].colSpan = esAdministradorEmpresa ? 5 : 4;
         tablaDirecciones.appendChild(filaVacia);
         return;
     }
@@ -497,6 +561,7 @@ function mostrarDirecciones(direcciones) {
         celdaDireccion.appendChild(formatearDireccionEmpresa(direccion));
         fila.appendChild(celdaDireccion);
         agregarEdicionDireccion(fila, direccion);
+        agregarEliminacionDireccion(fila, direccion);
         tablaDirecciones.appendChild(fila);
     });
 }
@@ -535,7 +600,7 @@ function mostrarContactos(contactos) {
 }
 
 // Consulta y muestra la empresa solicitada junto con sus registros relacionados.
-function cargarDetalleEmpresa() {
+async function cargarDetalleEmpresa() {
     var empresaId = obtenerEmpresaId();
     if (!empresaId) {
         mensajeEmpresa.textContent = 'No se indicó una empresa para consultar.';
@@ -543,12 +608,9 @@ function cargarDetalleEmpresa() {
         return;
     }
 
-    fetch('../backend/empresas/query_detalle_empresa.php', {
-        method: 'POST',
-        body: empresaId
-    })
-        .then(function (respuesta) { return respuesta.json(); })
-        .then(function (datos) {
+    try {
+        var respuesta = await fetch('../backend/empresas/query_detalle_empresa.php', {method: 'POST', body: empresaId});
+        var datos = await respuesta.json();
             if (datos.error) {
                 throw new Error(datos.error);
             }
@@ -556,6 +618,7 @@ function cargarDetalleEmpresa() {
             mostrarNotasEmpresa(datos.empresa);
             mostrarDirecciones(datos.direcciones || []);
             mostrarContactos(datos.contactos || []);
+            mostrarContactosDisponibles(datos.contactos_disponibles || []);
             mostrarFiltroDireccionesEquipo(datos.direcciones || []);
             mostrarEquiposEmpresa(datos.equipos || []);
             mostrarOportunidadesEmpresa(datos.oportunidades || []);
@@ -564,10 +627,9 @@ function cargarDetalleEmpresa() {
                 + (retornoEmpresa ? '&return_url=' + encodeURIComponent(retornoEmpresa) : '');
             botonAgregarDireccion.classList.remove('disabled');
             botonAgregarDireccion.removeAttribute('aria-disabled');
-            botonAgregarContacto.href = 'form_contacto.php?empresa_id=' + encodeURIComponent(datos.empresa.id_e)
+            botonNuevoContacto.href = 'form_contacto.php?empresa_id=' + encodeURIComponent(datos.empresa.id_e)
                 + (retornoEmpresa ? '&return_url=' + encodeURIComponent(retornoEmpresa) : '');
-            botonAgregarContacto.classList.remove('disabled');
-            botonAgregarContacto.removeAttribute('aria-disabled');
+            botonGestionarContacto.disabled = false;
             botonAgregarEquipo.href = 'form_equipo_empresa.php?empresa_id=' + encodeURIComponent(datos.empresa.id_e)
                 + (retornoEmpresa ? '&return_url=' + encodeURIComponent(retornoEmpresa) : '');
             botonAgregarEquipo.classList.remove('disabled');
@@ -583,11 +645,10 @@ function cargarDetalleEmpresa() {
             contenidoEmpresa.classList.remove('d-none');
             oportunidadesEmpresa.columns.adjust();
             equiposEmpresa.columns.adjust();
-        })
-        .catch(function () {
-            mensajeEmpresa.textContent = 'No fue posible cargar la información de la empresa.';
-            mensajeEmpresa.className = 'alert alert-danger';
-        });
+    } catch (error) {
+        mensajeEmpresa.textContent = error.message || 'No fue posible cargar la información de la empresa.';
+        mensajeEmpresa.className = 'alert alert-danger';
+    }
 }
 
 // Marca cambios pendientes y evita guardar cuando el contenido no cambió.
@@ -599,6 +660,16 @@ notasEmpresa.addEventListener('input', function () {
 });
 
 botonGuardarNotas.addEventListener('click', guardarNotasEmpresa);
+
+botonGestionarContacto.addEventListener('click', function () {
+    panelVincularContacto.classList.toggle('d-none');
+});
+
+selectorContactoEmpresa.addEventListener('change', function () {
+    botonVincularContacto.disabled = !selectorContactoEmpresa.value;
+});
+
+botonVincularContacto.addEventListener('click', vincularContactoEmpresa);
 
 filtroDireccionEquipos.addEventListener('change', function () {
     equiposEmpresa.draw();

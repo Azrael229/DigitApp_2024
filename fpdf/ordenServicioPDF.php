@@ -272,7 +272,7 @@ $pdf->Cell(188, 10, $pdf->pdfText($typeLabel), 0, 1, 'C', true);
 $pdf->SetTextColor(24, 50, 75);
 $pdf->SetFont('Arial', '', 8);
 $pdf->SetXY(14, 41);
-$pdf->Cell(188, 5, $pdf->pdfText('Fecha de emisión: ' . date('d/m/Y', strtotime((string) $orden['fecha_generacion']))), 0, 0, 'L');
+$pdf->Cell(188, 5, $pdf->pdfText('Fecha de emisión: ' . date('Y-m-d', strtotime((string) $orden['fecha_generacion']))), 0, 0, 'L');
 
 // Datos fiscales y de entrega se distinguen en columnas independientes.
 $fiscalBody = implode("\n", [
@@ -378,7 +378,7 @@ $pdf->Cell(88, 4, $pdf->pdfText('Nombre y firma'), 0, 0, 'C');
 $pdf->Cell(12, 4, '', 0, 0);
 $pdf->Cell(88, 4, $pdf->pdfText('Nombre y firma'), 0, 0, 'C');
 $pdf->SetXY(14, 202);
-$pdf->Cell(88, 4, $pdf->pdfText('Fecha de ejecución: ____ / ____ / ______'), 0, 0, 'C');
+$pdf->Cell(88, 4, $pdf->pdfText('Fecha de ejecución: ______-__-__'), 0, 0, 'C');
 
 $filename = preg_replace('/[^A-Za-z0-9_-]/', '_', (string) $orden['numero_servicio']) . '.pdf';
 $pdf->Output('I', $filename);

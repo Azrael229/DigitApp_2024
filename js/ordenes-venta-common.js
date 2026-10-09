@@ -20,15 +20,9 @@ window.OV = {
         element.textContent = String(value ?? '');
         return element.innerHTML;
     },
-    // Presenta fechas SQL con el formato regional y conserva los valores inválidos para diagnóstico.
+    // Presenta fechas SQL con el formato general AAAA-MM-DD y hora opcional.
     date(value, includeTime = false) {
-        if (!value) { return '—'; }
-        const normalized = String(value).replace(' ', 'T');
-        const date = new Date(includeTime ? normalized : normalized.slice(0, 10) + 'T12:00:00');
-        if (Number.isNaN(date.getTime())) { return String(value); }
-        return new Intl.DateTimeFormat('es-MX', includeTime
-            ? {dateStyle: 'medium', timeStyle: 'short'}
-            : {dateStyle: 'medium'}).format(date);
+        return includeTime ? DigitAppDate.dateTime(value) : DigitAppDate.date(value);
     },
     // Formatea importes de la orden en pesos mexicanos.
     money(value) {

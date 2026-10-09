@@ -1,5 +1,8 @@
 <?php
 $prefijoRuta = '../';
+require_once __DIR__ . '/../backend/auth/bootstrap.php';
+$authUser = auth_require_permission('clientes');
+$esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
 require __DIR__ . '/../backend/contactos/query_all_contactos.php';
 require_once __DIR__ . '/../backend/helpers/entity_links.php';
 require __DIR__ . '/../construct/header.php';
@@ -10,7 +13,7 @@ function escaparContacto($valor): string
 }
 ?>
 
-<div class="container mt-5 mb-5 contain shadow-lg contactos-directorio">
+<div class="container mt-5 mb-5 contain shadow-lg contactos-directorio"<?= $esAdministrador ? ' data-admin-delete-csrf="' . htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
     <div class="row align-items-center contactos-header">
         <div class="col p-2 text-center text-md-start">
             <p class="contactos-kicker mb-1">Directorio</p>
@@ -47,6 +50,7 @@ function escaparContacto($valor): string
                             <th scope="col">Departamento</th>
                             <th scope="col">Razón social principal / empresas</th>
                             <th scope="col">Estado</th>
+                            <?php if ($esAdministrador): ?><th scope="col" class="admin-delete-column">Eliminar</th><?php endif; ?>
                         </tr>
                     </thead>
                     <tbody>
@@ -80,6 +84,7 @@ function escaparContacto($valor): string
                                         <?= $activo ? 'Activo' : 'Inactivo' ?>
                                     </span>
                                 </td>
+                                <?php if ($esAdministrador): ?><td><button type="button" class="btn btn-outline-danger btn-sm" data-admin-delete data-delete-entity="contacto" data-delete-id="<?= $id ?>" data-delete-label="el contacto <?= escaparContacto($contacto['nombre']) ?>"><i class="bi bi-trash" aria-hidden="true"></i> Eliminar</button></td><?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -94,6 +99,7 @@ function escaparContacto($valor): string
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js?v=20261008-2"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
-<script src="<?= $prefijoRuta ?>js/tablaContactos.js?v=20261006-1"></script>
+<?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
+<script src="<?= $prefijoRuta ?>js/tablaContactos.js?v=20261009-1"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

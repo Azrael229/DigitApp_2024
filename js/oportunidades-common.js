@@ -20,8 +20,8 @@ window.Op = {
     },
     // Indica si una fecha se encuentra dentro del rango inclusivo seleccionado.
     inDateRange(date, from, to) { return (!from || date >= from) && (!to || date <= to); },
-    // Convierte una fecha ISO al formato breve utilizado por las pantallas.
-    date(value) { const parts = String(value || '').slice(0, 10).split('-'); return parts.length === 3 ? parts.reverse().join('/') : '—'; },
+    // Convierte una fecha SQL al formato general AAAA-MM-DD.
+    date(value) { return DigitAppDate.date(value); },
     // Muestra u oculta mensajes de resultado en el contenedor indicado.
     message(id, message, success = false) {
         const element = document.getElementById(id);
@@ -52,7 +52,7 @@ window.Op = {
     },
     // Resume las fechas y usuarios de control de una oportunidad.
     audit(op) {
-        return 'Registro: ' + op.created_at + ' · Última modificación: ' + op.updated_at + ' · Usuario creador: pendiente de asignación · Último editor: pendiente de asignación';
+        return 'Registro: ' + DigitAppDate.dateTime(op.created_at) + ' · Última modificación: ' + DigitAppDate.dateTime(op.updated_at) + ' · Usuario creador: pendiente de asignación · Último editor: pendiente de asignación';
     },
     // Reemplaza las opciones de un selector y conserva una selección válida.
     select(element, options, placeholder, selected = '') {

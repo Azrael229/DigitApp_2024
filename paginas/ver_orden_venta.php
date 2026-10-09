@@ -18,6 +18,6 @@ require __DIR__ . '/../construct/header.php';
         <section class="card mb-4 empresa-form-card empresa-detail-section"><div class="card-body empresa-card-body"><div class="empresa-section-heading mb-3"><p class="empresa-section-kicker mb-1">Seguimiento</p><h2 class="h5 card-title mb-0">Control del registro</h2></div><div id="ov-audit" class="empresa-data-value mb-4"></div><div id="ov-followups" class="ov-followup-list"></div></div></section>
     </div>
 </div>
-<script src="../js/ordenes-venta-common.js?v=20261004-1"></script>
-<script src="../js/verOrdenVenta.js?v=20261007-2"></script>
+<script src="../js/ordenes-venta-common.js?v=20261009-1"></script>
+<script src="../js/verOrdenVenta.js?v=20261009-1"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>
