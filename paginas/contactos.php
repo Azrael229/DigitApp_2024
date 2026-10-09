@@ -39,7 +39,7 @@ function escaparContacto($valor): string
 
     <div class="row">
         <div class="col">
-            <div class="table-responsive data-table-shell contactos-table-wrap">
+            <div class="table-responsive data-table-shell table-wide contactos-table-wrap">
                 <table id="example" class="table table-secondary table-striped align-middle contactos-table mb-0">
                     <caption class="visually-hidden">Directorio de contactos</caption>
                     <thead>
@@ -84,7 +84,7 @@ function escaparContacto($valor): string
                                         <?= $activo ? 'Activo' : 'Inactivo' ?>
                                     </span>
                                 </td>
-                                <?php if ($esAdministrador): ?><td><button type="button" class="btn btn-outline-danger btn-sm" data-admin-delete data-delete-entity="contacto" data-delete-id="<?= $id ?>" data-delete-label="el contacto <?= escaparContacto($contacto['nombre']) ?>"><i class="bi bi-trash" aria-hidden="true"></i> Eliminar</button></td><?php endif; ?>
+                                <?php if ($esAdministrador): ?><td class="admin-delete-column"><button type="button" class="btn btn-outline-danger btn-sm" data-admin-delete data-delete-entity="contacto" data-delete-id="<?= $id ?>" data-delete-label="el contacto <?= escaparContacto($contacto['nombre']) ?>"><i class="bi bi-trash" aria-hidden="true"></i> Eliminar</button></td><?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -100,6 +100,6 @@ function escaparContacto($valor): string
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js?v=20261008-2"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
-<script src="<?= $prefijoRuta ?>js/tablaContactos.js?v=20261009-1"></script>
+<script src="<?= $prefijoRuta ?>js/tablaContactos.js?v=20261009-2"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

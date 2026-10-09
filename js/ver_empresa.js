@@ -121,7 +121,7 @@ var columnasEquiposEmpresa = [
 
 if (esAdministradorEmpresa) {
     columnasEquiposEmpresa.push({
-        data: 'id', orderable: false, searchable: false,
+        data: 'id', orderable: false, searchable: false, className: 'admin-delete-column',
         render: function (valor, tipo, fila) {
             if (tipo !== 'display') { return valor; }
             var etiqueta = [fila.descripcion, fila.identificacion, fila.numero_serie].filter(Boolean).join(' · ') || 'el equipo';
@@ -455,6 +455,7 @@ function agregarEdicionDireccion(fila, direccion) {
 function agregarEliminacionDireccion(fila, direccion) {
     if (!esAdministradorEmpresa) { return; }
     var celda = document.createElement('td');
+    celda.className = 'admin-delete-column';
     var boton = document.createElement('button');
     boton.type = 'button';
     boton.className = 'btn btn-outline-danger btn-sm';

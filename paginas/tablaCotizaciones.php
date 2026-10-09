@@ -34,8 +34,8 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
                 <table id="example" class="table table-secondary table-striped align-middle mb-0 w-100">
                     <thead>
                         <tr>
+                            <th scope="col" class="table-date-column">FECHA</th>
                             <th scope="col">NÚMERO</th>
-                            <th scope="col">FECHA</th>
                             <th scope="col">RAZÓN SOCIAL</th>
                             <th scope="col">CONTACTO</th>
                             <th scope="col">CORREO ELECTRÓNICO</th>
@@ -47,12 +47,12 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
                     <tbody>
                         <?php foreach($result_cotizaciones as $row_coti): ?>
                         <tr>
+                            <td class="table-date-column"><?php echo htmlspecialchars((string) ($row_coti['cot_fecha'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
                             <td>
                                 <a class="entity-link fw-semibold" href="ver_cotizacion.php?id=<?= (int) $row_coti['id_coti'] ?>">
                                     <?= htmlspecialchars((string) (($row_coti['cot_numero'] ?? '') ?: $row_coti['id_coti']), ENT_QUOTES, 'UTF-8') ?>
                                 </a>
                             </td>
-                            <td><?php echo $row_coti['cot_fecha'] ?></td>
                             <td><?= htmlspecialchars((string) ($row_coti['cot_empresa'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars((string) ($row_coti['cot_contacto'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
                             <td>
@@ -61,7 +61,7 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
                             <td data-cot-total="<?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" data-order="<?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>">$ <?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ' '), ENT_QUOTES, 'UTF-8') ?></td>
                             <?php $estatusClave = cotizacionEstatusClave($row_coti['cot_status'] ?? ''); ?>
                             <td><select class="form-select form-select-sm cot-status-select" data-id="<?= (int) $row_coti['id_coti'] ?>" aria-label="Estatus de cotización <?= htmlspecialchars((string) ($row_coti['cot_numero'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"><?php foreach (COTIZACION_ESTATUS as $clave => $etiqueta): ?><option value="<?= $clave ?>"<?= $estatusClave === $clave ? ' selected' : '' ?>><?= htmlspecialchars($etiqueta, ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select></td>
-                            <?php if ($esAdministrador): ?><td><button type="button" class="btn btn-outline-danger btn-sm" data-admin-delete data-delete-entity="cotizacion" data-delete-id="<?= (int) $row_coti['id_coti'] ?>" data-delete-label="la cotización <?= htmlspecialchars((string) ($row_coti['cot_numero'] ?? $row_coti['id_coti']), ENT_QUOTES, 'UTF-8') ?>"><i class="bi bi-trash" aria-hidden="true"></i> Eliminar</button></td><?php endif; ?>
+                            <?php if ($esAdministrador): ?><td class="admin-delete-column"><button type="button" class="btn btn-outline-danger btn-sm" data-admin-delete data-delete-entity="cotizacion" data-delete-id="<?= (int) $row_coti['id_coti'] ?>" data-delete-label="la cotización <?= htmlspecialchars((string) ($row_coti['cot_numero'] ?? $row_coti['id_coti']), ENT_QUOTES, 'UTF-8') ?>"><i class="bi bi-trash" aria-hidden="true"></i> Eliminar</button></td><?php endif; ?>
                         </tr>
                         <?php endforeach;  ?>
                         
@@ -92,5 +92,5 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
-<script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261009-1"></script>
+<script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261009-2"></script>
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>

@@ -1,13 +1,15 @@
 const cotizacionesTable = new DataTable('#example', getDataTableOptions({
-    order: [[1, 'desc']],
+    order: [[0, 'desc']],
     orderCellsTop: true,
+    responsive: false,
+    scrollX: true,
     columnDefs: document.querySelector('#example thead .admin-delete-column')
         ? [{targets: -1, orderable: false, searchable: false}] : [],
 }));
 
 applyColumnFilters(cotizacionesTable);
 
-const cotizacionesFechaCell = document.querySelector('#example .dt-filter-row').children[1];
+const cotizacionesFechaCell = document.querySelector('#example .dt-filter-row').children[0];
 cotizacionesFechaCell.replaceChildren();
 const cotizacionesDesde = document.createElement('input');
 const cotizacionesHasta = document.createElement('input');
@@ -34,7 +36,7 @@ jQuery.fn.dataTable.ext.search.push(function (settings, data) {
     if (settings.nTable.id !== 'example') {
         return true;
     }
-    const fecha = String(data[1] || '').slice(0, 10);
+    const fecha = String(data[0] || '').slice(0, 10);
     return (!cotizacionesDesde.value || fecha >= cotizacionesDesde.value)
         && (!cotizacionesHasta.value || fecha <= cotizacionesHasta.value);
 });

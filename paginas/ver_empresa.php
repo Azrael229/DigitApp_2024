@@ -81,7 +81,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                 <div class="table-responsive empresa-table-wrap">
                     <table class="table table-secondary align-middle empresa-detail-table empresa-address-table mb-0">
                         <caption class="visually-hidden">Direcciones registradas de la empresa</caption>
-                        <thead><tr><th scope="col">Tipo</th><th scope="col">Alias</th><th scope="col">Dirección</th><th scope="col">Editar</th><?php if ($esAdministrador): ?><th scope="col">Eliminar</th><?php endif; ?></tr></thead>
+                        <thead><tr><th scope="col">Tipo</th><th scope="col">Alias</th><th scope="col">Dirección</th><th scope="col">Editar</th><?php if ($esAdministrador): ?><th scope="col" class="admin-delete-column">Eliminar</th><?php endif; ?></tr></thead>
                         <tbody id="tabla_direcciones"></tbody>
                     </table>
                 </div>
@@ -161,7 +161,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                                 <th scope="col">Clase de exactitud</th>
                                 <th scope="col">Editar</th>
                                 <th scope="col">Estatus</th>
-                                <?php if ($esAdministrador): ?><th scope="col">Eliminar</th><?php endif; ?>
+                                <?php if ($esAdministrador): ?><th scope="col" class="admin-delete-column">Eliminar</th><?php endif; ?>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -238,6 +238,6 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
-<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261009-2"></script>
+<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261009-3"></script>
 
 <?php require (__DIR__ . "/../construct/footer.html"); ?>
