@@ -27,7 +27,8 @@
                 if (type !== 'display') { return CotStatus.labels[key]; }
                 const options = statusOptions.replace(`value="${key}"`, `value="${key}" selected`);
                 return `<select class="form-select form-select-sm cot-status-select cot-status-${key}" data-id="${Number(row.id_coti)}" data-previous="${CotStatus.escape(key)}" aria-label="Estatus de la cotización ${CotStatus.escape(row.cot_numero || row.id_coti)}">${options}</select>`;
-            }}
+            }},
+            {data: 'id_coti', orderable: false, searchable: false, render: value => `<a class="btn btn-outline-secondary btn-sm text-nowrap" href="nuevaCotizacion.php?duplicar_id=${Number(value)}&oportunidad_id=${encodeURIComponent(id)}"><i class="bi bi-copy" aria-hidden="true"></i> Duplicar</a>`}
         ]
     }));
     applyColumnFilters(linkedQuotesTable);

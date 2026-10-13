@@ -54,7 +54,11 @@ async function actualizarFolioPrevisto() {
         const respuesta = await fetch(url, { headers: { Accept: 'application/json' } });
         if (!respuesta.ok) throw new Error('No fue posible consultar el folio previsto.');
         const datos = await respuesta.json();
-        if (/^\d{5}$/.test(datos.folio || '')) inputFolio.value = datos.folio;
+        if (/^\d{5}$/.test(datos.folio || '')) {
+            inputFolio.value = datos.folio;
+            const folioEncabezado = document.getElementById('informe-header-folio');
+            if (folioEncabezado) folioEncabezado.textContent = datos.folio;
+        }
     } catch (error) {
         console.warn(error.message);
     }

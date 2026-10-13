@@ -32,7 +32,8 @@ if (empty($cotizacion['empresa_id']) || empty($cotizacion['contacto_id']) || emp
 }
 
 $consulta = $conexion->prepare(
-    'SELECT posicion, cantidad, unidad, descripcion, valor_unitario, importe
+    'SELECT posicion, cantidad, unidad, cantidad_secundaria, unidad_secundaria,
+            descripcion, valor_unitario, importe
      FROM cotizacion_partidas WHERE cotizacion_id = ? ORDER BY posicion'
 );
 $consulta->bind_param('i', $cotizacionId);
@@ -233,7 +234,8 @@ final class CotizacionPDF extends FPDF
         $this->SetFont('Arial', '', 8);
         $descripcion = $this->texto((string) $partida['descripcion']);
         $lineas = $this->lineasTexto(82, $descripcion);
-        $altoCompleto = max(10, count($lineas) * 4 + 3);
+        $altoCantidad = empty($partida['unidad_secundaria']) ? 10 : 13;
+        $altoCompleto = max($altoCantidad, count($lineas) * 4 + 3);
         if ($this->GetY() + $altoCompleto > 240 && $altoCompleto <= 194) {
             $this->tipoPagina = 'partidas';
             $this->AddPage();
@@ -257,9 +259,17 @@ final class CotizacionPDF extends FPDF
             }
             $this->SetTextColor(...self::TEXTO);
             if ($primerFragmento) {
-                $this->SetXY($x, $y + 2.5);
-                $this->Cell(18, 5, $this->formatoCantidad($partida['cantidad']), 0, 0, 'C');
-                $this->Cell(28, 5, $this->texto((string) $partida['unidad']), 0, 0, 'L');
+                $cantidades = $this->cantidadConUnidad($partida['cantidad'], (string) $partida['unidad']);
+                if (!empty($partida['unidad_secundaria'])) {
+                    $cantidades .= "\n" . $this->cantidadConUnidad(
+                        $partida['cantidad_secundaria'],
+                        (string) $partida['unidad_secundaria']
+                    );
+                }
+                $this->SetFont('Arial', 'B', 7.5);
+                $this->SetXY($x, $y + 2.2);
+                $this->MultiCell(46, 4, $this->texto($cantidades), 0, 'C');
+                $this->SetFont('Arial', '', 8);
                 $this->SetXY($x + 128, $y + 2.5);
                 $this->Cell(30, 5, formatoMonedaMXN($partida['valor_unitario']), 0, 0, 'R');
                 $this->SetFont('Arial', 'B', 8);
@@ -268,8 +278,8 @@ final class CotizacionPDF extends FPDF
             } else {
                 $this->SetFont('Arial', 'I', 7.2);
                 $this->SetTextColor(...self::MUTED);
-                $this->SetXY($x + 18, $y + 2.5);
-                $this->Cell(28, 5, $this->texto('Continuación'), 0, 0, 'L');
+                $this->SetXY($x, $y + 2.5);
+                $this->Cell(46, 5, $this->texto('Continuación'), 0, 0, 'C');
                 $this->SetFont('Arial', '', 8);
                 $this->SetTextColor(...self::TEXTO);
             }
@@ -563,11 +573,10 @@ final class CotizacionPDF extends FPDF
         $this->SetTextColor(255, 255, 255);
         $this->SetFont('Arial', 'B', 7.2);
         $this->SetXY(14, $y + 2.5);
-        $this->Cell(18, 5, 'CANT.', 0, 0, 'C');
-        $this->Cell(28, 5, 'UNIDAD', 0, 0, 'L');
+        $this->Cell(46, 5, 'CANTIDAD / UNIDAD', 0, 0, 'C');
         $this->Cell(82, 5, $this->texto('DESCRIPCIÓN'), 0, 0, 'L');
         $this->Cell(30, 5, 'VALOR UNIT.', 0, 0, 'R');
-        $this->Cell(30, 5, 'IMPORTE', 0, 0, 'R');
+        $this->Cell(30, 5, 'SUBTOTAL', 0, 0, 'R');
     }
 
     private function arco(float $x1, float $y1, float $x2, float $y2, float $x3, float $y3): void
@@ -578,6 +587,20 @@ final class CotizacionPDF extends FPDF
     private function formatoCantidad($cantidad): string
     {
         return rtrim(rtrim(number_format((float) $cantidad, 3, '.', ''), '0'), '.');
+    }
+
+    private function cantidadConUnidad($cantidad, string $unidad): string
+    {
+        $cantidadTexto = $this->formatoCantidad($cantidad);
+        $unidadNormalizada = mb_strtolower(trim($unidad), 'UTF-8');
+        $esPlural = abs((float) $cantidad - 1.0) > 0.000001;
+        $unidadTexto = match ($unidadNormalizada) {
+            'servicio', 'servicios' => $esPlural ? 'servicios' : 'servicio',
+            'equipo', 'equipos' => $esPlural ? 'equipos' : 'equipo',
+            'pieza', 'piezas' => $esPlural ? 'piezas' : 'pieza',
+            default => trim($unidad),
+        };
+        return trim($cantidadTexto . ' ' . $unidadTexto);
     }
 
     private function fecha(string $fecha): string

@@ -2,7 +2,9 @@
 $prefijoRuta = '../';
 $oportunidadId = filter_input(INPUT_GET, 'oportunidad_id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 $cotizacionId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+$cotizacionDuplicarId = filter_input(INPUT_GET, 'duplicar_id', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 $editandoCotizacion = $cotizacionId !== false && $cotizacionId !== null;
+$duplicandoCotizacion = !$editandoCotizacion && $cotizacionDuplicarId !== false && $cotizacionDuplicarId !== null;
 $paginaRegreso = $editandoCotizacion
     ? 'ver_cotizacion.php?id=' . (int) $cotizacionId
     : (($oportunidadId !== false && $oportunidadId !== null)
@@ -16,31 +18,39 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
 
 <div class="container mt-5 mb-5 contain shadow-lg cotizacion-form-page">
      <!-- titulo  -->
-     <div class="row align-items-center contacto-form-header g-3 pt-3 mb-4">
-        <div class="col">
+     <div class="row align-items-center contacto-form-header app-page-header g-3 pt-3 mb-4">
+        <div class="col app-page-header-copy">
             <p class="contactos-kicker mb-1">Gestión comercial</p>
-            <h1 class="h2 mb-0"><i class="bi bi-cash-coin" id="ico_coti" aria-hidden="true"></i> <?= $editandoCotizacion ? 'Editar cotización' : 'Nueva cotización' ?></h1>
-        </div>  
+            <h1 class="h2 mb-0"><i class="bi bi-cash-coin" id="ico_coti" aria-hidden="true"></i> <?= $editandoCotizacion ? 'Editar cotización' : ($duplicandoCotizacion ? 'Duplicar cotización' : 'Nueva cotización') ?></h1>
+            <div class="app-page-header-meta"><span class="app-page-header-meta-item">Oportunidad <strong id="cot-header-opportunity">Sin seleccionar</strong></span><?php if ($duplicandoCotizacion): ?><span class="app-page-header-meta-item">Origen <strong id="cot-header-source">Cargando...</strong></span><?php endif; ?></div>
+        </div>
+        <div class="col-12 col-lg-auto app-page-header-actions">
+            <a href="<?= htmlspecialchars($paginaRegreso, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-secondary">Cancelar</a>
+            <button id="btn_guardar" type="submit" form="form_cotizacion" class="btn btn-success"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> <?= $editandoCotizacion ? 'Guardar cambios y ver PDF' : 'Guardar y ver PDF' ?></button>
+        </div>
     </div>
     <!-- titulo  -->
 
-    <form action="<?= $prefijoRuta ?>fpdf/cotizacionPDF.php" method="POST" target="cotizacion_pdf" id="form_cotizacion" class="cotizacion-form" data-local-draft="1" data-oportunidad-id="<?= $oportunidadId ? (int) $oportunidadId : '' ?>" data-cotizacion-id="<?= $editandoCotizacion ? (int) $cotizacionId : '' ?>" data-return-url="<?= htmlspecialchars($paginaRegreso, ENT_QUOTES, 'UTF-8') ?>">
+    <form action="<?= $prefijoRuta ?>fpdf/cotizacionPDF.php" method="POST" target="cotizacion_pdf" id="form_cotizacion" class="cotizacion-form" data-local-draft="1" data-oportunidad-id="<?= $oportunidadId ? (int) $oportunidadId : '' ?>" data-cotizacion-id="<?= $editandoCotizacion ? (int) $cotizacionId : '' ?>" data-duplicate-id="<?= $duplicandoCotizacion ? (int) $cotizacionDuplicarId : '' ?>" data-return-url="<?= htmlspecialchars($paginaRegreso, ENT_QUOTES, 'UTF-8') ?>">
     <input type="hidden" name="oportunidad_id" id="oportunidad_id" value="<?= $oportunidadId ? (int) $oportunidadId : '' ?>">
     <input type="hidden" name="empresa_id" id="cot_empresa_id">
     <input type="hidden" name="contacto_id" id="cot_contacto_id">
     <input type="hidden" name="direccion_id" id="cot_direccion_id">
     <input type="hidden" name="cotizacion_id" id="cotizacion_id" value="<?= $editandoCotizacion ? (int) $cotizacionId : '' ?>">
     <input type="hidden" name="version" id="cotizacion_version" value="">
-    
-    
-    <!-- boton submit del formulario -->
-    <div class="row">
-        <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mb-4">
-            <a href="<?= htmlspecialchars($paginaRegreso, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-secondary">Cancelar</a>
-            <button id="btn_guardar" type="submit" class="btn btn-success"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> <?= $editandoCotizacion ? 'Guardar cambios y ver PDF' : 'Guardar y ver PDF' ?></button>
+    <div class="row cotizacion-form-section">
+        <div class="col-12">
+            <div class="cotizacion-section-heading mb-4">
+                <h2 class="h4 mb-1">Oportunidad comercial</h2>
+                <p class="contactos-muted mb-0">Selecciona la oportunidad que dará origen a esta cotización. Las más recientes aparecen primero.</p>
+            </div>
+            <label class="form-label" for="select_oportunidad_cot">Oportunidad relacionada</label>
+            <select class="form-select" id="select_oportunidad_cot">
+                <option value="">Sin oportunidad comercial</option>
+            </select>
+            <div id="cot-oportunidad-ayuda" class="form-text">Si eliges una oportunidad, la empresa se tomará de esa relación comercial.</div>
         </div>
     </div>
-    <!-- boton submit del formulario -->
 
 
     <!-- Sección Control de Cotizacion -->
@@ -321,12 +331,13 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
                         <th scope="col">Unidad</th>
                         <th scope="col">Descripción</th>
                         <th scope="col">Valor unitario</th>
+                        <th scope="col">Subtotal</th>
                         <th scope="col">Acción</th>
                     </tr>
                 </thead>
                 <tbody id="partidas_cotizacion">
                     <tr id="partidas_vacias">
-                        <td colspan="5" class="text-center contactos-muted py-4">Aún no hay partidas. Utiliza “Agregar partida” para comenzar.</td>
+                        <td colspan="6" class="text-center contactos-muted py-4">Aún no hay partidas. Utiliza “Agregar partida” para comenzar.</td>
                     </tr>
                 </tbody>
             </table>
@@ -386,6 +397,6 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
-<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261006-1"></script>
+<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261012-2"></script>
 
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>

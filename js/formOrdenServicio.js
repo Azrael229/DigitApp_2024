@@ -141,6 +141,8 @@ function osLoadEquipment(available, selected = []) {
 // Llena la información comercial y fiscal que no se edita en esta orden.
 function osFillSource(order, fiscal) {
     document.getElementById('os-sale-number').textContent = order.numero_venta;
+    document.getElementById('os-header-sale').textContent = order.numero_venta || 'Sin seleccionar';
+    document.getElementById('os-header-service').textContent = order.numero_servicio || 'Nueva';
     document.getElementById('os-company').textContent = order.empresa_nombre;
     document.getElementById('os-opportunity').textContent = order.numero_oportunidad;
     document.getElementById('os-quote').textContent = order.cot_numero || '#' + order.cotizacion_id;
@@ -183,6 +185,7 @@ async function osLoadForm() {
     document.getElementById('os-cancel').href = returnUrl;
     document.getElementById('mensaje_form_servicio').classList.add('d-none');
     document.getElementById('form_orden_servicio').classList.remove('d-none');
+    document.getElementById('os-save').disabled = false;
 }
 
 // Añade al servicio el equipo seleccionado en el catálogo de la empresa.

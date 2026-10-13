@@ -3,8 +3,11 @@ const cotizacionesTable = new DataTable('#example', getDataTableOptions({
     orderCellsTop: true,
     responsive: false,
     scrollX: true,
-    columnDefs: document.querySelector('#example thead .admin-delete-column')
-        ? [{targets: -1, orderable: false, searchable: false}] : [],
+    columnDefs: [{
+        targets: document.querySelector('#example thead .admin-delete-column') ? [-2, -1] : [-1],
+        orderable: false,
+        searchable: false
+    }],
 }));
 
 applyColumnFilters(cotizacionesTable);

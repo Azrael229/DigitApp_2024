@@ -142,10 +142,15 @@ try {
     $subtotal = 0.0;
     $cantidades = $_POST['partida_cantidad'] ?? [];
     $unidades = $_POST['partida_unidad'] ?? [];
+    $cantidadesSecundarias = $_POST['partida_cantidad_secundaria'] ?? [];
+    $unidadesSecundarias = $_POST['partida_unidad_secundaria'] ?? [];
     $descripciones = $_POST['partida_descripcion'] ?? [];
     $valores = $_POST['partida_valor_unitario'] ?? [];
-    if (!is_array($cantidades) || !is_array($unidades) || !is_array($descripciones) || !is_array($valores)
+    if (!is_array($cantidades) || !is_array($unidades) || !is_array($cantidadesSecundarias)
+        || !is_array($unidadesSecundarias) || !is_array($descripciones) || !is_array($valores)
         || count($cantidades) === 0 || count($cantidades) !== count($unidades)
+        || count($cantidades) !== count($cantidadesSecundarias)
+        || count($cantidades) !== count($unidadesSecundarias)
         || count($cantidades) !== count($descripciones) || count($cantidades) !== count($valores)
         || count($cantidades) > 65535) {
         throw new InvalidArgumentException('Las partidas enviadas no son válidas.');
@@ -154,6 +159,8 @@ try {
         $posicion = $indice + 1;
         $cantidadEntrada = trim((string) $cantidadValor);
         $unidad = cotizacionTexto($unidades[$indice] ?? '', 30, 'La unidad de la partida ' . $posicion);
+        $cantidadSecundariaEntrada = trim((string) ($cantidadesSecundarias[$indice] ?? ''));
+        $unidadSecundaria = cotizacionTexto($unidadesSecundarias[$indice] ?? '', 30, 'La unidad adicional de la partida ' . $posicion);
         $descripcion = trim((string) ($descripciones[$indice] ?? ''));
         $valorEntrada = trim((string) ($valores[$indice] ?? ''));
         if (!preg_match('/^\d{1,9}(?:\.\d{1,3})?$/D', $cantidadEntrada) || (float) $cantidadEntrada <= 0) {
@@ -162,18 +169,31 @@ try {
         if ($unidad === '' || $descripcion === '') {
             throw new InvalidArgumentException('Completa la unidad y la descripción de la partida ' . $posicion . '.');
         }
+        $usaCantidadSecundaria = $cantidadSecundariaEntrada !== '' || $unidadSecundaria !== '';
+        if ($usaCantidadSecundaria && ($cantidadSecundariaEntrada === '' || $unidadSecundaria === '')) {
+            throw new InvalidArgumentException('Completa la cantidad y la unidad adicional de la partida ' . $posicion . '.');
+        }
+        if ($usaCantidadSecundaria
+            && (!preg_match('/^\d{1,9}(?:\.\d{1,3})?$/D', $cantidadSecundariaEntrada)
+                || (float) $cantidadSecundariaEntrada <= 0)) {
+            throw new InvalidArgumentException('La cantidad adicional de la partida ' . $posicion . ' debe ser mayor que cero y usar hasta tres decimales.');
+        }
         if (!preg_match('/^\d{1,12}(?:\.\d{1,2})?$/D', $valorEntrada)) {
             throw new InvalidArgumentException('El valor unitario de la partida ' . $posicion . ' debe usar hasta dos decimales.');
         }
         $cantidad = number_format((float) $cantidadEntrada, 3, '.', '');
+        $cantidadSecundaria = $usaCantidadSecundaria
+            ? number_format((float) $cantidadSecundariaEntrada, 3, '.', '')
+            : '1.000';
+        $unidadSecundaria = $usaCantidadSecundaria ? $unidadSecundaria : null;
         $valorUnitario = number_format((float) $valorEntrada, 2, '.', '');
-        $importeNumero = round((float) $cantidad * (float) $valorUnitario, 2);
+        $importeNumero = round((float) $cantidad * (float) $cantidadSecundaria * (float) $valorUnitario, 2);
         if ($importeNumero > 999999999999.99) {
             throw new InvalidArgumentException('El importe de la partida ' . $posicion . ' excede el máximo permitido.');
         }
         $importe = number_format($importeNumero, 2, '.', '');
         $subtotal += $importeNumero;
-        $partidas[] = compact('posicion', 'cantidad', 'unidad', 'descripcion', 'valorUnitario', 'importe');
+        $partidas[] = compact('posicion', 'cantidad', 'unidad', 'cantidadSecundaria', 'unidadSecundaria', 'descripcion', 'valorUnitario', 'importe');
     }
     $subtotal = round($subtotal, 2);
     $iva = round($subtotal * 0.16, 2);
@@ -266,9 +286,14 @@ try {
         }
         $estatus = $estatusEntrada;
     }
+    $actual = null;
     if ($cotizacionEditarId !== null) {
         $consultarActual = $conexion->prepare(
-            'SELECT cot_numero, version FROM cotizaciones WHERE id_coti = ? FOR UPDATE'
+            'SELECT c.cot_numero, c.version,
+                    (SELECT oc.oportunidad_id FROM oportunidad_cotizaciones oc
+                     WHERE oc.cotizacion_id = c.id_coti LIMIT 1) AS oportunidad_id,
+                    EXISTS(SELECT 1 FROM ordenes_venta ov WHERE ov.cotizacion_id = c.id_coti) AS tiene_orden
+             FROM cotizaciones c WHERE c.id_coti = ? FOR UPDATE'
         );
         $consultarActual->bind_param('i', $cotizacionEditarId);
         $consultarActual->execute();
@@ -279,6 +304,10 @@ try {
         }
         if ($version === null || (int) $actual['version'] !== $version) {
             throw new RuntimeException('Otra edición modificó esta cotización. Recarga la página antes de guardar.');
+        }
+        $oportunidadAnterior = $actual['oportunidad_id'] === null ? null : (int) $actual['oportunidad_id'];
+        if ((int) $actual['tiene_orden'] === 1 && $oportunidadAnterior !== $oportunidadId) {
+            throw new InvalidArgumentException('La oportunidad no puede cambiarse porque la cotización ya tiene una orden de venta.');
         }
         $numero = (string) $actual['cot_numero'];
         $cotizacionId = $cotizacionEditarId;
@@ -414,16 +443,19 @@ try {
 
     $insertarPartida = $conexion->prepare(
         'INSERT INTO cotizacion_partidas
-            (cotizacion_id, posicion, cantidad, unidad, descripcion, valor_unitario, importe)
-         VALUES (?, ?, ?, ?, ?, ?, ?)'
+            (cotizacion_id, posicion, cantidad, unidad, cantidad_secundaria, unidad_secundaria,
+             descripcion, valor_unitario, importe)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
     foreach ($partidas as $partida) {
         $insertarPartida->bind_param(
-            'iisssss',
+            'iisssssss',
             $cotizacionId,
             $partida['posicion'],
             $partida['cantidad'],
             $partida['unidad'],
+            $partida['cantidadSecundaria'],
+            $partida['unidadSecundaria'],
             $partida['descripcion'],
             $partida['valorUnitario'],
             $partida['importe']
@@ -443,13 +475,29 @@ try {
         $insertarNota->close();
     }
 
-    if ($oportunidadId !== null && $cotizacionEditarId === null) {
+    if ($cotizacionEditarId !== null && (int) ($actual['tiene_orden'] ?? 0) === 0) {
+        $desvincular = $conexion->prepare('DELETE FROM oportunidad_cotizaciones WHERE cotizacion_id = ?');
+        $desvincular->bind_param('i', $cotizacionId);
+        $desvincular->execute();
+        $desvincular->close();
+    }
+    if ($oportunidadId !== null
+        && ($cotizacionEditarId === null || (int) ($actual['tiene_orden'] ?? 0) === 0)) {
         $vincular = $conexion->prepare(
             'INSERT INTO oportunidad_cotizaciones (oportunidad_id, cotizacion_id) VALUES (?, ?)'
         );
         $vincular->bind_param('ii', $oportunidadId, $cotizacionId);
         $vincular->execute();
         $vincular->close();
+    }
+
+    // Recalcula tanto la oportunidad anterior como la vigente cuando cambia la relación comercial.
+    $oportunidadesSincronizar = array_values(array_unique(array_filter([
+        $cotizacionEditarId !== null ? ($oportunidadAnterior ?? null) : null,
+        $oportunidadId,
+    ], static fn($id): bool => $id !== null)));
+    foreach ($oportunidadesSincronizar as $oportunidadSincronizarId) {
+        sincronizarEstatusOportunidadCotizaciones($conexion, (int) $oportunidadSincronizarId);
     }
 
     $conexion->commit();

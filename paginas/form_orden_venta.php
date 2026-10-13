@@ -12,7 +12,7 @@ $quoteId = filter_input(INPUT_GET, 'cotizacion_id', FILTER_VALIDATE_INT);
      data-opportunity-id="<?= ov_escape($opportunityId ?: '') ?>"
      data-quote-id="<?= ov_escape($quoteId ?: '') ?>">
     <div class="row align-items-center pt-3 pb-4 mb-4 empresa-detalle-header">
-        <div class="col"><p class="empresa-header-kicker mb-1">Gestión comercial</p><h1 id="ov-form-title" class="h2 mb-1"><?= $orderId ? 'Editar orden de venta' : 'Nueva orden de venta' ?></h1><p class="empresa-header-subtitle mb-0">Formaliza una cotización aceptada y prepara el alcance para las órdenes operativas.</p></div>
+        <div class="col"><p class="empresa-header-kicker mb-1">Gestión comercial</p><h1 id="ov-form-title" class="h2 mb-1"><?= $orderId ? 'Editar orden de venta' : 'Nueva orden de venta' ?></h1><p class="empresa-header-subtitle mb-0">Formaliza una cotización aceptada y prepara el alcance para las órdenes operativas.</p><div class="app-page-header-meta mt-2"><span class="app-page-header-meta-item">Oportunidad <strong id="ov-header-opportunity">Sin seleccionar</strong></span><span class="app-page-header-meta-item">Cotización <strong id="ov-header-quote">Sin seleccionar</strong></span></div></div>
         <div class="col-12 col-md-auto mt-3 mt-md-0"><a href="ordenes_venta.php" class="btn btn-secondary"><i class="bi bi-arrow-left" aria-hidden="true"></i> Órdenes de venta</a></div>
     </div>
     <div id="mensaje_form_orden" class="alert alert-info" role="status" aria-live="polite">Preparando el formulario...</div>
@@ -58,7 +58,7 @@ $quoteId = filter_input(INPUT_GET, 'cotizacion_id', FILTER_VALIDATE_INT);
                 <div class="col-md-6 empresa-data-field"><div class="empresa-data-label">Actualizaciones</div><div id="ov-tracking-updates" class="empresa-data-value">Sin actualizaciones; se registrará al guardar.</div></div>
             </div>
         </div></section>
-        <div class="d-flex flex-column flex-sm-row justify-content-sm-end gap-2 pb-4"><a href="ordenes_venta.php" class="btn btn-danger">Cancelar</a><button id="ov-save" class="btn btn-success" type="submit">Guardar orden de venta</button></div>
+        <div class="d-flex flex-column flex-sm-row justify-content-sm-end gap-2 pb-4" data-page-header-actions><a href="ordenes_venta.php" class="btn btn-danger">Cancelar</a><button id="ov-save" class="btn btn-success" type="submit" form="form_orden_venta" disabled>Guardar orden de venta</button></div>
     </form>
 </div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>

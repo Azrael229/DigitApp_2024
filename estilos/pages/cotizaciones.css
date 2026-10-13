@@ -149,12 +149,41 @@
     min-width: 21rem;
 }
 
+.cotizacion-form .table td:nth-child(5) {
+    min-width: 9.5rem;
+}
+
 .cotizacion-form .table td:last-child {
     min-width: 7rem;
 }
 
 .cotizacion-form .partida-descripcion {
     min-height: 5.5rem;
+}
+
+.cotizacion-form .cotizacion-partida-factor {
+    min-width: 10rem;
+}
+
+.cotizacion-form .cotizacion-partida-secondary-label {
+    display: block;
+    margin: 0.75rem 0 0.3rem;
+    color: var(--text-soft);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.cotizacion-form .partida-subtotal[readonly] {
+    cursor: default;
+    font-weight: 700;
+}
+
+.cotizacion-partida-secundaria {
+    margin-top: 0.3rem;
+    color: var(--text-soft);
+    font-size: 0.86em;
+    font-weight: 600;
 }
 
 .cotizacion-form .btn-eliminar-partida {

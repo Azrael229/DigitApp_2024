@@ -171,9 +171,9 @@ require __DIR__ . '/../construct/header.php';
             </section>
         </div>
 
-        <div class="d-flex flex-column flex-sm-row justify-content-sm-end gap-2 mt-4 contacto-form-actions">
+        <div class="d-flex flex-column flex-sm-row justify-content-sm-end gap-2 mt-4 contacto-form-actions" data-page-header-actions>
             <a id="btn_cancelar_contacto" href="contactos.php" class="btn btn-danger">Cancelar</a>
-            <button id="btn_guardar_contacto" type="submit" class="btn btn-secondary">Guardar contacto</button>
+            <button id="btn_guardar_contacto" type="submit" form="form_contacto" class="btn btn-secondary">Guardar contacto</button>
         </div>
     </form>
 </div>

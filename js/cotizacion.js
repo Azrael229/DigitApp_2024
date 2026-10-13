@@ -27,6 +27,9 @@ var inputContactoId = document.getElementById('cot_contacto_id');
 var inputDireccionId = document.getElementById('cot_direccion_id');
 var inputCotizacionId = document.getElementById('cotizacion_id');
 var selectCotizacionEstatus = document.getElementById('cot_status');
+var selectOportunidadCotizacion = document.getElementById('select_oportunidad_cot');
+var textoOportunidadEncabezado = document.getElementById('cot-header-opportunity');
+var textoCotizacionOrigen = document.getElementById('cot-header-source');
 var contenedorPartidas = document.getElementById('partidas_cotizacion');
 var btnAgregarPartida = document.getElementById('btn_agregar_partida');
 var selectTiempoEntrega = document.getElementById('tiempo_entrega_tipo');
@@ -57,7 +60,9 @@ var consecutivoPartida = 0;
 var guardando = false;
 var formularioModificado = false;
 var cotizacionEditarId = formulario.dataset.cotizacionId;
+var cotizacionDuplicarId = formulario.dataset.duplicateId;
 var paginaRegreso = formulario.dataset.returnUrl || 'tablaCotizaciones.php';
+var oportunidadesCotizacion = [];
 
 formulario.addEventListener('input', function () {
      formularioModificado = true;
@@ -184,12 +189,37 @@ selectDireccion.addEventListener('change', actualizarDireccionSeleccionada);
 selectNombContacto.addEventListener('change', selectContacto);
 selectEmpresaCotizacion.addEventListener('change', function () { cargarEmpresaCotizacion(); });
 
-// Precarga la empresa, contacto y dirección relacionados con la oportunidad.
-async function precargarOportunidad() {
-     var oportunidadId = formulario.dataset.oportunidadId;
+// Construye la etiqueta legible de una oportunidad dentro del selector principal.
+function etiquetaOportunidadCotizacion(oportunidad) {
+     var estatus = String(oportunidad.estatus || '').replaceAll('_', ' ');
+     return [oportunidad.numero_oportunidad || '#' + oportunidad.id, oportunidad.empresa, estatus]
+          .filter(Boolean).join(' · ');
+}
+
+// Carga todas las oportunidades desde la más reciente y conserva la selección solicitada.
+async function cargarOportunidadesCotizacion(seleccionada) {
+     var response = await fetch('../backend/oportunidades/api.php?action=list');
+     var data = await response.json();
+     if (!response.ok || data.error) {
+          throw new Error(data.error || 'No fue posible cargar las oportunidades comerciales.');
+     }
+     oportunidadesCotizacion = data.data || [];
+     selectOportunidadCotizacion.innerHTML = '<option value="">Sin oportunidad comercial</option>';
+     oportunidadesCotizacion.forEach(function (oportunidad) {
+          selectOportunidadCotizacion.add(new Option(etiquetaOportunidadCotizacion(oportunidad), oportunidad.id));
+     });
+     selectOportunidadCotizacion.value = seleccionada ? String(seleccionada) : '';
+}
+
+// Actualiza la empresa y reinicia contacto y dirección conforme a la oportunidad elegida.
+async function aplicarOportunidadCotizacion(oportunidadId, contactoSeleccionado, direccionSeleccionada) {
      if (!oportunidadId) {
-          cargarSelectorDirecciones();
-          return;
+          document.getElementById('oportunidad_id').value = '';
+          textoOportunidadEncabezado.textContent = 'Sin seleccionar';
+          selectEmpresaCotizacion.disabled = false;
+          selectEmpresaCotizacion.value = '';
+          await cargarEmpresaCotizacion();
+          return null;
      }
      try {
           var oportunidadRespuesta = await fetch('../backend/oportunidades/api.php?action=get&id=' + encodeURIComponent(oportunidadId));
@@ -198,13 +228,25 @@ async function precargarOportunidad() {
                throw new Error(oportunidadData.error || 'No fue posible cargar la oportunidad.');
           }
           var oportunidad = oportunidadData.opportunity;
+          document.getElementById('oportunidad_id').value = oportunidad.id;
+          selectOportunidadCotizacion.value = String(oportunidad.id);
+          textoOportunidadEncabezado.textContent = oportunidad.numero_oportunidad || '#' + oportunidad.id;
           selectEmpresaCotizacion.value = String(oportunidad.empresa_id);
-          await cargarEmpresaCotizacion(oportunidad.contacto_id, oportunidad.direccion_id);
-          formularioModificado = false;
+          selectEmpresaCotizacion.disabled = true;
+          await cargarEmpresaCotizacion(
+               contactoSeleccionado || oportunidad.contacto_id,
+               direccionSeleccionada || oportunidad.direccion_id
+          );
+          return oportunidad;
      } catch (error) {
           alert(error.message);
+          return null;
      }
 }
+
+selectOportunidadCotizacion.addEventListener('change', function () {
+     aplicarOportunidadCotizacion(selectOportunidadCotizacion.value);
+});
 
 // Alterna el campo numérico según el tipo de tiempo de entrega seleccionado.
 function actualizarTiempoEntrega() {
@@ -262,10 +304,29 @@ function actualizarEstadoPartidas() {
      var aviso = document.getElementById('partidas_vacias');
      var hayPartidas = contenedorPartidas.querySelector('.partida-cotizacion') !== null;
      if (!hayPartidas && !aviso) {
-          contenedorPartidas.insertAdjacentHTML('beforeend', '<tr id="partidas_vacias"><td colspan="5" class="text-center contactos-muted py-4">Aún no hay partidas. Utiliza “Agregar partida” para comenzar.</td></tr>');
+          contenedorPartidas.insertAdjacentHTML('beforeend', '<tr id="partidas_vacias"><td colspan="6" class="text-center contactos-muted py-4">Aún no hay partidas. Utiliza “Agregar partida” para comenzar.</td></tr>');
      } else if (hayPartidas && aviso) {
           aviso.remove();
      }
+}
+
+// Mantiene opcional el segundo factor y exige cantidad y unidad cuando se utiliza.
+function actualizarPartidaSecundaria(fila) {
+     var cantidadSecundaria = fila.querySelector('.partida-cantidad-secundaria');
+     var unidadSecundaria = fila.querySelector('.partida-unidad-secundaria');
+     var seUtiliza = cantidadSecundaria.value.trim() !== '' || unidadSecundaria.value !== '';
+     cantidadSecundaria.required = seUtiliza;
+     unidadSecundaria.required = seUtiliza;
+}
+
+// Presenta el subtotal calculado de la partida como moneda mexicana de solo lectura.
+function formatearSubtotalPartida(importe) {
+     return importe.toLocaleString('es-MX', {
+          style: 'currency',
+          currency: 'MXN',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+     });
 }
 
 // Agrega una fila de captura independiente y sin límite de longitud en la descripción.
@@ -276,10 +337,11 @@ function agregarPartida(datos, enfocar) {
      var indice = consecutivoPartida;
      contenedorPartidas.insertAdjacentHTML('beforeend', `
           <tr class="partida-cotizacion" data-partida="${indice}">
-               <td><label class="visually-hidden" for="partida_cantidad_${indice}">Cantidad</label><input class="form-control partida-cantidad" type="number" min="0.001" step="0.001" name="partida_cantidad[]" id="partida_cantidad_${indice}" required></td>
-               <td><label class="visually-hidden" for="partida_unidad_${indice}">Unidad</label><select class="form-select partida-unidad" name="partida_unidad[]" id="partida_unidad_${indice}" required><option value="">Selecciona</option><option value="Servicio">Servicio</option><option value="Pieza">Pieza</option></select></td>
+               <td class="cotizacion-partida-factor"><label class="visually-hidden" for="partida_cantidad_${indice}">Cantidad principal</label><input class="form-control partida-cantidad" type="number" min="0.001" step="0.001" name="partida_cantidad[]" id="partida_cantidad_${indice}" required><label class="form-label cotizacion-partida-secondary-label" for="partida_cantidad_secundaria_${indice}">Cantidad adicional</label><input class="form-control partida-cantidad-secundaria" type="number" min="0.001" step="0.001" name="partida_cantidad_secundaria[]" id="partida_cantidad_secundaria_${indice}" placeholder="Opcional"></td>
+               <td class="cotizacion-partida-factor"><label class="visually-hidden" for="partida_unidad_${indice}">Unidad principal</label><select class="form-select partida-unidad" name="partida_unidad[]" id="partida_unidad_${indice}" required><option value="">Selecciona</option><option value="Servicio">Servicio</option><option value="Equipo">Equipo</option><option value="Pieza">Pieza</option></select><label class="form-label cotizacion-partida-secondary-label" for="partida_unidad_secundaria_${indice}">Unidad adicional</label><select class="form-select partida-unidad-secundaria" name="partida_unidad_secundaria[]" id="partida_unidad_secundaria_${indice}"><option value="">No aplica</option><option value="Servicio">Servicio</option><option value="Equipo">Equipo</option><option value="Pieza">Pieza</option></select></td>
                <td><label class="visually-hidden" for="partida_descripcion_${indice}">Descripción</label><textarea class="form-control partida-descripcion" name="partida_descripcion[]" id="partida_descripcion_${indice}" rows="3" placeholder="Descripción del servicio o equipo" required></textarea></td>
-               <td><label class="visually-hidden" for="partida_valor_${indice}">Valor unitario</label><input class="form-control partida-valor" type="number" min="0" step="0.01" name="partida_valor_unitario[]" id="partida_valor_${indice}" required><input class="partida-total" type="hidden" name="partida_total[]" value="0.00"></td>
+               <td><label class="visually-hidden" for="partida_valor_${indice}">Valor unitario</label><input class="form-control partida-valor" type="number" min="0" step="0.01" name="partida_valor_unitario[]" id="partida_valor_${indice}" required></td>
+               <td><label class="visually-hidden" for="partida_subtotal_${indice}">Subtotal calculado</label><input class="form-control partida-subtotal text-end" type="text" id="partida_subtotal_${indice}" value="$0.00" readonly aria-readonly="true" tabindex="-1"><input class="partida-total" type="hidden" name="partida_total[]" value="0.00"></td>
                <td class="text-center"><button type="button" class="btn btn-outline-danger btn-sm btn-eliminar-partida" aria-label="Eliminar partida ${indice}"><i class="bi bi-trash" aria-hidden="true"></i><span class="d-none d-lg-inline"> Eliminar</span></button></td>
           </tr>`);
      actualizarEstadoPartidas();
@@ -290,8 +352,15 @@ function agregarPartida(datos, enfocar) {
           selectUnidad.add(new Option(datos.unidad, datos.unidad));
      }
      selectUnidad.value = datos.unidad || '';
+     fila.querySelector('.partida-cantidad-secundaria').value = datos.unidad_secundaria ? (datos.cantidad_secundaria || '') : '';
+     var selectUnidadSecundaria = fila.querySelector('.partida-unidad-secundaria');
+     if (datos.unidad_secundaria && !Array.from(selectUnidadSecundaria.options).some(function (opcion) { return opcion.value === datos.unidad_secundaria; })) {
+          selectUnidadSecundaria.add(new Option(datos.unidad_secundaria, datos.unidad_secundaria));
+     }
+     selectUnidadSecundaria.value = datos.unidad_secundaria || '';
      fila.querySelector('.partida-descripcion').value = datos.descripcion || '';
      fila.querySelector('.partida-valor').value = datos.valor_unitario || '';
+     actualizarPartidaSecundaria(fila);
      if (enfocar) {
           document.getElementById('partida_cantidad_' + indice).focus();
      }
@@ -340,60 +409,108 @@ function cargarNotas(notas) {
      actualizarGarantia();
 }
 
-// Recupera la cotización y precarga todos sus datos estructurados para edición.
-async function cargarCotizacionEdicion() {
+// Copia partidas y condiciones comerciales comunes a edición y duplicación.
+function cargarContenidoCotizacion(cotizacion) {
+     contenedorPartidas.innerHTML = '';
+     (cotizacion.partidas || []).forEach(function (partida) {
+          agregarPartida(partida, false);
+     });
+     actualizarEstadoPartidas();
+
+     selectTiempoEntrega.value = cotizacion.cot_tiempo_entrega_tipo || '';
+     actualizarTiempoEntrega();
+     if (cotizacion.cot_tiempo_entrega_tipo !== 'inmediato') {
+          inputTiempoCantidad.value = cotizacion.cot_tiempo_entrega_cantidad || '';
+     }
+     selectCondicionEntrega.value = cotizacion.cot_condicion_entrega || '';
+     selectCondicionPago.value = cotizacion.cot_condicion_pago_tipo || '';
+     inputPagoAnticipo.value = cotizacion.cot_pago_anticipo_porcentaje !== null
+          ? Number(cotizacion.cot_pago_anticipo_porcentaje) : '';
+     inputPagoCreditoDias.value = cotizacion.cot_pago_credito_dias !== null
+          ? cotizacion.cot_pago_credito_dias : '';
+     selectPagoSaldoMomento.value = cotizacion.cot_pago_saldo_momento || 'al_finalizar';
+     selectGarantiaTipo.value = cotizacion.cot_garantia_tipo || '';
+     inputGarantiaVigencia.value = cotizacion.cot_garantia_vigencia !== null
+          ? cotizacion.cot_garantia_vigencia : '';
+     selectGarantiaUnidad.value = cotizacion.cot_garantia_unidad || 'dias';
+     selectCostosEnvio.value = cotizacion.cot_costos_envio || '';
+     actualizarCondicionPago();
+     actualizarGarantia();
+     cargarNotas(cotizacion.notas);
+     totalizar();
+}
+
+// Devuelve la fecha local actual sin conversiones de zona horaria.
+function fechaLocalCotizacion() {
+     var ahora = new Date();
+     var local = new Date(ahora.getTime() - ahora.getTimezoneOffset() * 60000);
+     return local.toISOString().slice(0, 10);
+}
+
+// Conserva el mismo periodo de vigencia al crear una nueva cotización duplicada.
+function fechasCotizacionDuplicada(fechaOriginal, vigenciaOriginal) {
+     var fecha = fechaLocalCotizacion();
+     var inicioOriginal = new Date(fechaOriginal + 'T00:00:00');
+     var finOriginal = new Date(vigenciaOriginal + 'T00:00:00');
+     var dias = Number.isNaN(inicioOriginal.getTime()) || Number.isNaN(finOriginal.getTime())
+          ? 0 : Math.max(0, Math.round((finOriginal - inicioOriginal) / 86400000));
+     var vigencia = new Date(fecha + 'T00:00:00');
+     vigencia.setDate(vigencia.getDate() + dias);
+     var vigenciaLocal = new Date(vigencia.getTime() - vigencia.getTimezoneOffset() * 60000);
+     return {fecha: fecha, vigencia: vigenciaLocal.toISOString().slice(0, 10)};
+}
+
+// Recupera una cotización y la prepara para editarla o generar una copia independiente.
+async function cargarCotizacionBase(id, duplicar) {
      try {
-          var response = await fetch('../backend/cotizaciones/query_cotizacion.php?id=' + encodeURIComponent(cotizacionEditarId));
+          var response = await fetch('../backend/cotizaciones/query_cotizacion.php?id=' + encodeURIComponent(id));
           var resultado = await response.json();
           if (!response.ok || resultado.error) {
                throw new Error(resultado.error || 'No fue posible cargar la cotización.');
           }
           var cotizacion = resultado.cotizacion;
-          inputCotizacionId.value = cotizacion.id_coti;
-          document.getElementById('cotizacion_version').value = cotizacion.version || '';
-          document.getElementById('oportunidad_id').value = cotizacion.oportunidad_id || '';
-          inputNumCotizacion.value = cotizacion.cot_numero || '';
-          document.getElementById('coti_fecha').value = cotizacion.cot_fecha || '';
-          document.getElementById('coti_vigencia').value = cotizacion.cot_vigencia || '';
-          if (selectCotizacionEstatus) {
+          await cargarOportunidadesCotizacion(cotizacion.oportunidad_id);
+          if (duplicar) {
+               var fechas = fechasCotizacionDuplicada(cotizacion.cot_fecha || '', cotizacion.cot_vigencia || '');
+               inputCotizacionId.value = '';
+               document.getElementById('cotizacion_version').value = '';
+               inputNumCotizacion.value = '';
+               document.getElementById('coti_fecha').value = fechas.fecha;
+               document.getElementById('coti_vigencia').value = fechas.vigencia;
+               if (textoCotizacionOrigen) {
+                    textoCotizacionOrigen.textContent = cotizacion.cot_numero || '#' + cotizacion.id_coti;
+               }
+          } else {
+               inputCotizacionId.value = cotizacion.id_coti;
+               document.getElementById('cotizacion_version').value = cotizacion.version || '';
+               inputNumCotizacion.value = cotizacion.cot_numero || '';
+               document.getElementById('coti_fecha').value = cotizacion.cot_fecha || '';
+               document.getElementById('coti_vigencia').value = cotizacion.cot_vigencia || '';
+          }
+          if (!duplicar && selectCotizacionEstatus) {
                selectCotizacionEstatus.value = window.CotStatus
                     ? window.CotStatus.key(cotizacion.cot_status)
                     : (cotizacion.cot_status || 'preparacion');
           }
 
-          selectEmpresaCotizacion.value = String(cotizacion.empresa_id || '');
-          await cargarEmpresaCotizacion(cotizacion.contacto_id, cotizacion.direccion_id);
-
-          contenedorPartidas.innerHTML = '';
-          (cotizacion.partidas || []).forEach(function (partida) {
-               agregarPartida(partida, false);
-          });
-          actualizarEstadoPartidas();
-
-          selectTiempoEntrega.value = cotizacion.cot_tiempo_entrega_tipo || '';
-          actualizarTiempoEntrega();
-          if (cotizacion.cot_tiempo_entrega_tipo !== 'inmediato') {
-               inputTiempoCantidad.value = cotizacion.cot_tiempo_entrega_cantidad || '';
+          if (cotizacion.oportunidad_id) {
+               await aplicarOportunidadCotizacion(
+                    cotizacion.oportunidad_id,
+                    cotizacion.contacto_id,
+                    cotizacion.direccion_id
+               );
+          } else {
+               document.getElementById('oportunidad_id').value = '';
+               textoOportunidadEncabezado.textContent = 'Sin seleccionar';
+               selectEmpresaCotizacion.disabled = false;
+               selectEmpresaCotizacion.value = String(cotizacion.empresa_id || '');
+               await cargarEmpresaCotizacion(cotizacion.contacto_id, cotizacion.direccion_id);
           }
-          selectCondicionEntrega.value = cotizacion.cot_condicion_entrega || '';
-          selectCondicionPago.value = cotizacion.cot_condicion_pago_tipo || '';
-          if (cotizacion.cot_pago_anticipo_porcentaje !== null) {
-               inputPagoAnticipo.value = Number(cotizacion.cot_pago_anticipo_porcentaje);
+          if (!duplicar && cotizacion.orden_venta_id) {
+               selectOportunidadCotizacion.disabled = true;
+               document.getElementById('cot-oportunidad-ayuda').textContent = 'La oportunidad no puede cambiarse porque la cotización ya tiene una orden de venta.';
           }
-          if (cotizacion.cot_pago_credito_dias !== null) {
-               inputPagoCreditoDias.value = cotizacion.cot_pago_credito_dias;
-          }
-          selectPagoSaldoMomento.value = cotizacion.cot_pago_saldo_momento || 'al_finalizar';
-          selectGarantiaTipo.value = cotizacion.cot_garantia_tipo || '';
-          if (cotizacion.cot_garantia_vigencia !== null) {
-               inputGarantiaVigencia.value = cotizacion.cot_garantia_vigencia;
-          }
-          selectGarantiaUnidad.value = cotizacion.cot_garantia_unidad || 'dias';
-          selectCostosEnvio.value = cotizacion.cot_costos_envio || '';
-          actualizarCondicionPago();
-          actualizarGarantia();
-          cargarNotas(cotizacion.notas);
-          totalizar();
+          cargarContenidoCotizacion(cotizacion);
           formularioModificado = false;
      } catch (error) {
           alert(error.message);
@@ -408,10 +525,25 @@ async function inicializarFormulario() {
      actualizarCondicionPago();
      actualizarGarantia();
      if (cotizacionEditarId) {
-          await cargarCotizacionEdicion();
+          await cargarCotizacionBase(cotizacionEditarId, false);
           return;
      }
-     await precargarOportunidad();
+     if (cotizacionDuplicarId) {
+          await cargarCotizacionBase(cotizacionDuplicarId, true);
+          return;
+     }
+     try {
+          await cargarOportunidadesCotizacion(formulario.dataset.oportunidadId);
+          if (formulario.dataset.oportunidadId) {
+               await aplicarOportunidadCotizacion(formulario.dataset.oportunidadId);
+          } else {
+               selectEmpresaCotizacion.disabled = false;
+               cargarSelectorDirecciones();
+          }
+          formularioModificado = false;
+     } catch (error) {
+          alert(error.message);
+     }
 }
 
 // Recalcula cada importe y el resumen visual; el servidor confirma los montos al guardar.
@@ -419,9 +551,12 @@ function totalizar() {
      var subtotal = 0;
      contenedorPartidas.querySelectorAll('.partida-cotizacion').forEach(function (fila) {
           var cantidad = Number(fila.querySelector('.partida-cantidad').value || 0);
+          var cantidadSecundariaEntrada = fila.querySelector('.partida-cantidad-secundaria').value;
+          var cantidadSecundaria = cantidadSecundariaEntrada === '' ? 1 : Number(cantidadSecundariaEntrada);
           var valor = Number(fila.querySelector('.partida-valor').value || 0);
-          var importe = cantidad * valor;
+          var importe = cantidad * cantidadSecundaria * valor;
           fila.querySelector('.partida-total').value = importe.toFixed(2);
+          fila.querySelector('.partida-subtotal').value = formatearSubtotalPartida(importe);
           subtotal += importe;
      });
      var iva = subtotal * 0.16;
@@ -437,7 +572,14 @@ inputPagoAnticipo.addEventListener('input', actualizarCondicionPago);
 selectPagoSaldoMomento.addEventListener('change', actualizarCondicionPago);
 selectGarantiaTipo.addEventListener('change', actualizarGarantia);
 contenedorPartidas.addEventListener('input', function (event) {
-     if (event.target.matches('.partida-cantidad, .partida-valor')) {
+     if (event.target.matches('.partida-cantidad, .partida-cantidad-secundaria, .partida-valor')) {
+          actualizarPartidaSecundaria(event.target.closest('.partida-cotizacion'));
+          totalizar();
+     }
+});
+contenedorPartidas.addEventListener('change', function (event) {
+     if (event.target.matches('.partida-unidad-secundaria')) {
+          actualizarPartidaSecundaria(event.target.closest('.partida-cotizacion'));
           totalizar();
      }
 });
@@ -456,6 +598,7 @@ formulario.addEventListener('submit', async function (event) {
      if (btnGuardar.disabled) {
           return;
      }
+     contenedorPartidas.querySelectorAll('.partida-cotizacion').forEach(actualizarPartidaSecundaria);
      if (!formulario.reportValidity()) {
           return;
      }

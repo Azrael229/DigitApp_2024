@@ -152,9 +152,9 @@ if (empty($_SESSION['empresa_equipos_csrf'])) {
                 </div>
             </div>
 
-            <div class="d-flex flex-column flex-sm-row justify-content-sm-end gap-2 pb-4">
+            <div class="d-flex flex-column flex-sm-row justify-content-sm-end gap-2 pb-4" data-page-header-actions>
                 <a href="<?= htmlspecialchars($returnUrl !== '' ? $returnUrl : 'ver_empresa.php?id=' . (string) $empresaId . '#equipos', ENT_QUOTES, 'UTF-8') ?>" class="btn btn-danger">Cancelar</a>
-                <button id="btn_guardar_equipo" class="btn btn-secondary" type="submit">Guardar equipo</button>
+                <button id="btn_guardar_equipo" class="btn btn-secondary" type="submit" form="form_equipo_empresa" disabled>Guardar equipo</button>
             </div>
         </form>
     <?php endif; ?>

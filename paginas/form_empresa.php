@@ -52,8 +52,8 @@ require(__DIR__ . "/../construct/header.php");
         <div class="row">
             <div class="col mt-4 mb-4">
                 <!-- crear aqui los botones-->
-                <div class="d-flex flex-column flex-md-row justify-content-md-end gap-2">
-                    <button id="btn_guardar_empresa" type="submit" class="btn btn-outline-success btn-empresa-guardar px-4">
+                <div class="d-flex flex-column flex-md-row justify-content-md-end gap-2" data-page-header-actions>
+                    <button id="btn_guardar_empresa" type="submit" form="formEmpresa" class="btn btn-outline-success btn-empresa-guardar px-4">
                         Guardar
                     </button>
                     <a id="btn_cancelar_empresa" href="<?= htmlspecialchars($returnUrl !== '' ? $returnUrl : ($contactoRetornoId ? 'ver_contacto.php?id=' . (int) $contactoRetornoId : 'empresas.php'), ENT_QUOTES, 'UTF-8') ?>" class="btn btn-danger px-4">

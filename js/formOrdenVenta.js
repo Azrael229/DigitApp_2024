@@ -99,6 +99,8 @@ function ovShowSource(source) {
         'ov-amount': source ? OV.money(source.importe_sin_iva) : '—'
     };
     Object.entries(values).forEach(([id, value]) => { document.getElementById(id).textContent = value; });
+    document.getElementById('ov-header-opportunity').textContent = source?.numero_oportunidad || 'Sin seleccionar';
+    document.getElementById('ov-header-quote').textContent = source?.cot_numero || 'Sin seleccionar';
 }
 
 // Refleja correo y teléfono del contacto vigente seleccionado.

@@ -26,7 +26,7 @@ require __DIR__ . '/../construct/header.php';
                 </div>
             </div></section>
             <section class="card border-0 shadow-sm contacto-form-card mt-4"><div class="card-body p-4 contacto-form-card-body"><h2 class="h4">Control del registro</h2><div id="op-auditoria" class="contactos-muted">Las fechas de registro se asignarán al guardar.</div></div></section>
-            <div class="d-flex justify-content-end gap-2 mt-4 contacto-form-actions"><a href="<?= $id ? 'ver_oportunidad.php?id=' . (int) $id : 'oportunidades.php' ?>" class="btn btn-danger">Cancelar</a><button id="op-guardar" type="submit" class="btn btn-secondary">Guardar oportunidad</button></div>
+            <div class="d-flex justify-content-end gap-2 mt-4 contacto-form-actions" data-page-header-actions><a href="<?= $id ? 'ver_oportunidad.php?id=' . (int) $id : 'oportunidades.php' ?>" class="btn btn-danger">Cancelar</a><button id="op-guardar" type="submit" form="form-oportunidad" class="btn btn-secondary" disabled>Guardar oportunidad</button></div>
         </fieldset>
     </form>
 </div>

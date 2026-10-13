@@ -47,6 +47,7 @@
             await loadOptions(op.contacto_id, op.direccion_id);
         }
         fields.disabled = false;
+        save.disabled = false;
         contact.disabled = !company.value; address.disabled = !company.value;
         if (jQuery.fn.select2) {
             jQuery(company).select2({width: '100%'}).on('change', () => { dirty = initialized; loadOptions(); });

@@ -40,6 +40,7 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
                 <h3><i class="bi bi-patch-check" id="ico_informe"></i></h3>
                 <h1>Informe de Pruebas Metrológicas</h1>
                 <p class="text-muted mb-0">Informe técnico de servicio - V1</p>
+                <div class="app-page-header-meta justify-content-center mt-2"><span class="app-page-header-meta-item">Informe <strong id="informe-header-folio"><?= htmlspecialchars($folioSugerido, ENT_QUOTES, 'UTF-8') ?></strong></span></div>
             </div>
         </div>
 
@@ -244,15 +245,15 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
         </section>
 
         <div id="errores_informe" class="alert alert-danger d-none" role="alert" tabindex="-1"></div>
-        <div class="d-grid gap-2 col-lg-7 mx-auto py-4">
-            <button type="button" class="btn btn-outline-danger btn-lg" id="btn_restablecer_informe">
+        <div class="d-grid gap-2 col-lg-7 mx-auto py-4" data-page-header-actions>
+            <button type="button" form="form_informe" class="btn btn-outline-danger btn-lg" id="btn_restablecer_informe">
                 <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> RESTABLECER INFORME
             </button>
-            <button type="submit" class="btn btn-outline-secondary btn-lg" data-informe-accion="formato" formnovalidate>
+            <button type="submit" form="form_informe" class="btn btn-outline-secondary btn-lg" data-informe-accion="formato" formnovalidate>
                 GENERAR FORMATO DE TOMA DE DATOS
             </button>
-            <button type="submit" class="btn btn-success btn-lg" data-informe-accion="descargar">GENERAR Y DESCARGAR PDF</button>
-            <button type="submit" class="btn btn-secondary btn-lg" data-informe-accion="continuar">GENERAR PDF Y CONTINUAR CON OTRO EQUIPO</button>
+            <button type="submit" form="form_informe" class="btn btn-success btn-lg" data-informe-accion="descargar">GENERAR Y DESCARGAR PDF</button>
+            <button type="submit" form="form_informe" class="btn btn-secondary btn-lg" data-informe-accion="continuar">GENERAR PDF Y CONTINUAR CON OTRO EQUIPO</button>
         </div>
     </form>
 </div>

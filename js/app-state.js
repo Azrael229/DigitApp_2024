@@ -8,6 +8,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeKey = 'digitapp:theme';
     const themeSwitch = document.getElementById('digitapp-theme-switch');
 
+    // Sincroniza la posición del encabezado contextual con la altura real del menú responsive.
+    function updateHeaderOffset() {
+        const navbar = document.querySelector('.navbar.fixed-top');
+        const height = navbar ? Math.ceil(navbar.getBoundingClientRect().height) : 68;
+        document.documentElement.style.setProperty('--app-navbar-offset', `${height + 10}px`);
+    }
+
+    // Unifica el primer encabezado de cada pantalla y acerca sus acciones y resúmenes relevantes.
+    function initializePageHeader() {
+        const container = document.querySelector('.contain');
+        if (!container) return;
+
+        let header = container.querySelector(':scope > .app-page-header');
+        if (!header) {
+            const title = container.querySelector('h1, #titulo_direccion, .dashboard-hero h2')
+                || container.querySelector('h2, h3');
+            header = title?.closest('.contacto-form-header, .contactos-header, .empresa-detalle-header, .contacto-detail-header, .dashboard-hero, .row');
+        }
+        if (!header) return;
+
+        header.classList.add('app-page-header');
+        const titleColumn = header.querySelector(':scope > .col, :scope > [class*="col-"]');
+        titleColumn?.classList.add('app-page-header-copy');
+
+        header.querySelectorAll('.btn').forEach((button) => {
+            const group = button.closest('.d-flex, [class*="col-"]');
+            if (group && group !== titleColumn) group.classList.add('app-page-header-actions');
+        });
+
+        container.querySelectorAll('[data-page-header-actions]').forEach((actions) => {
+            actions.classList.add('app-page-header-actions');
+            header.appendChild(actions);
+        });
+
+        const summary = container.querySelector('.factura-resumen');
+        if (summary && !header.contains(summary)) {
+            summary.classList.add('app-page-header-summary');
+            header.appendChild(summary);
+        }
+    }
+
     // Aplica y conserva la preferencia visual en este navegador y dispositivo.
     function applyTheme(theme) {
         const nextTheme = theme === 'dark' ? 'dark' : 'original';
@@ -102,6 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
         form.addEventListener('submit', () => localStorage.removeItem(key));
         form.addEventListener('digitapp:draft-saved', () => localStorage.removeItem(key));
     }
+
+    updateHeaderOffset();
+    initializePageHeader();
+    window.addEventListener('resize', updateHeaderOffset, { passive: true });
+    document.getElementById('navbarDigitApp')?.addEventListener('shown.bs.collapse', updateHeaderOffset);
+    document.getElementById('navbarDigitApp')?.addEventListener('hidden.bs.collapse', updateHeaderOffset);
 
     if (!version || !userId || !applyVersion(version)) return;
     document.querySelectorAll('form[data-local-draft="1"]').forEach(enableDraft);

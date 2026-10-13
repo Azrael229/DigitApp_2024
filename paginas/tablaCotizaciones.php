@@ -41,6 +41,7 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
                             <th scope="col" class="cot-col-email">CORREO ELECTRÓNICO</th>
                             <th scope="col" class="cot-col-amount">IMPORTE</th>
                             <th scope="col" class="cot-col-status">ESTATUS</th>
+                            <th scope="col" class="table-action-column">DUPLICAR</th>
                             <?php if ($esAdministrador): ?><th scope="col" class="admin-delete-column">ELIMINAR</th><?php endif; ?>
                         </tr>
                     </thead>
@@ -61,6 +62,7 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
                             <td class="cot-col-amount" data-cot-total="<?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" data-order="<?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>">$ <?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ' '), ENT_QUOTES, 'UTF-8') ?></td>
                             <?php $estatusClave = cotizacionEstatusClave($row_coti['cot_status'] ?? ''); ?>
                             <td class="cot-col-status"><select class="form-select form-select-sm cot-status-select" data-id="<?= (int) $row_coti['id_coti'] ?>" aria-label="Estatus de cotización <?= htmlspecialchars((string) ($row_coti['cot_numero'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"><?php foreach (COTIZACION_ESTATUS as $clave => $etiqueta): ?><option value="<?= $clave ?>"<?= $estatusClave === $clave ? ' selected' : '' ?>><?= htmlspecialchars($etiqueta, ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select></td>
+                            <td class="table-action-column"><a class="btn btn-outline-secondary btn-sm text-nowrap" href="nuevaCotizacion.php?duplicar_id=<?= (int) $row_coti['id_coti'] ?>"><i class="bi bi-copy" aria-hidden="true"></i> Duplicar</a></td>
                             <?php if ($esAdministrador): ?><td class="admin-delete-column"><button type="button" class="btn btn-outline-danger btn-sm" data-admin-delete data-delete-entity="cotizacion" data-delete-id="<?= (int) $row_coti['id_coti'] ?>" data-delete-label="la cotización <?= htmlspecialchars((string) ($row_coti['cot_numero'] ?? $row_coti['id_coti']), ENT_QUOTES, 'UTF-8') ?>"><i class="bi bi-trash" aria-hidden="true"></i> Eliminar</button></td><?php endif; ?>
                         </tr>
                         <?php endforeach;  ?>
@@ -92,5 +94,5 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
-<script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261009-2"></script>
+<script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261012-1"></script>
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>
