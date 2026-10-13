@@ -16,7 +16,7 @@ function cargarDatosMaestrosInforme(mysqli $conexion, bool $permitirParcial = fa
         throw new InvalidArgumentException('Selecciona empresa, contacto, dirección y equipo registrados.');
     }
     foreach (['nombre_empresa', 'nombre_contacto', 'correo_contacto', 'dir_empresa', 'desc_inst',
-        'marca_inst', 'modelo_inst', 'id_inst', 'serie_inst', 'unidad', 'max', 'd', 'e', 'clase'] as $campo) {
+        'marca_inst', 'modelo_inst', 'id_inst', 'serie_inst', 'ubicacion_inst', 'unidad', 'max', 'd', 'e', 'clase'] as $campo) {
         $_POST[$campo] = datoPost($campo);
     }
     if (!$empresaId) {
@@ -93,6 +93,7 @@ function cargarDatosMaestrosInforme(mysqli $conexion, bool $permitirParcial = fa
         $_POST['modelo_inst'] = $equipo['modelo'];
         $_POST['id_inst'] = $equipo['identificacion'];
         $_POST['serie_inst'] = $equipo['numero_serie'];
+        $_POST['ubicacion_inst'] = $equipo['ubicacion'];
         $_POST['unidad'] = $equipo['unidad'];
         $_POST['max'] = formatearMagnitudInforme($equipo['capacidad_maxima'], $decimalesEquipo);
         $_POST['d'] = formatearMagnitudInforme($equipo['division_real'], $decimalesEquipo);
@@ -727,7 +728,7 @@ function dibujarPaginaGeneral(InformePDF $pdf, string $folio): void
         ['Serie', datoPost('serie_inst'), 'Unidad', datoPost('unidad')],
         ['Max', magnitudPost('max'), 'd', magnitudPost('d')],
         ['e', magnitudPost('e'), 'Min', magnitudPost('min')],
-        ['Clase', datoPost('clase'), '', ''],
+        ['Clase', datoPost('clase'), 'Ubicación', datoPost('ubicacion_inst')],
     ];
     foreach ($filasInstrumento as $indice => $fila) {
         $pdf->filaFija(83 + $indice * 5.5, $fila, [26, 68, 26, 68], 5.5);

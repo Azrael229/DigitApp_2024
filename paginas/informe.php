@@ -132,6 +132,7 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
                         <input type="hidden" name="unidad" id="unidad_inst">
                     </div>
                 </div>
+                <div class="col-12"><label class="form-label" for="ubicacion_inst">Ubicación</label><input class="form-control" type="text" name="ubicacion_inst" id="ubicacion_inst" readonly aria-readonly="true"></div>
                 <div class="col-md-2"><label class="form-label" for="max">Max</label><input class="form-control parametro-instrumento" type="number" id="max" name="max" step="any" min="0" readonly aria-readonly="true" required></div>
                 <div class="col-md-2"><label class="form-label" for="d">División real (d)</label><input class="form-control parametro-instrumento" type="number" name="d" id="d" step="any" min="0" readonly aria-readonly="true" required></div>
                 <div class="col-md-2"><label class="form-label" for="e">División verificación (e)</label><input class="form-control parametro-instrumento" type="number" name="e" id="e" step="any" min="0" readonly aria-readonly="true" required></div>
@@ -260,6 +261,6 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="<?= $prefijoRuta ?>js/informe.js?v=20261008-1"></script>
+<script src="<?= $prefijoRuta ?>js/informe.js?v=20261013-1"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

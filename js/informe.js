@@ -14,6 +14,7 @@ const inputMarca = document.getElementById('marca_inst');
 const inputModelo = document.getElementById('modelo_inst');
 const inputIdentificacion = document.getElementById('id_inst');
 const inputSerie = document.getElementById('serie_inst');
+const inputUbicacion = document.getElementById('ubicacion_inst');
 const inputUnidad = document.getElementById('unidad_inst');
 const inputMax = document.getElementById('max');
 const inputD = document.getElementById('d');
@@ -171,7 +172,7 @@ function limpiarDirecciones(mensaje = 'Seleccione primero una empresa') {
 
 // Borra la ficha del instrumento para impedir que queden datos de otro equipo.
 function limpiarDatosInstrumento() {
-    [inputDescripcion, inputMarca, inputModelo, inputIdentificacion, inputSerie, inputMax, inputD, inputE, inputMin, inputClase]
+    [inputDescripcion, inputMarca, inputModelo, inputIdentificacion, inputSerie, inputUbicacion, inputMax, inputD, inputE, inputMin, inputClase]
         .forEach((control) => { control.value = ''; });
     inputUnidad.value = '';
     decimalesInstrumento = 0;
@@ -243,6 +244,7 @@ function cargarEquipoSeleccionado() {
     inputModelo.value = equipo.modelo || '';
     inputIdentificacion.value = equipo.identificacion || '';
     inputSerie.value = equipo.numero_serie || '';
+    inputUbicacion.value = equipo.ubicacion || '';
     inputUnidad.value = equipo.unidad || '';
     document.querySelectorAll('.unidad-instrumento').forEach((control) => {
         control.checked = control.value === inputUnidad.value;
@@ -423,7 +425,7 @@ async function restaurarFlujoInforme() {
     const flujo = leerFlujoInforme();
     if (!flujo) return;
 
-    restaurarControlesInforme(flujo, ['select_empresa', 'select_contacto', 'dir_empresa', 'direccion_id', 'equipo_id']);
+    restaurarControlesInforme(flujo, ['select_empresa', 'select_contacto', 'dir_empresa', 'direccion_id', 'equipo_id', 'ubicacion_inst']);
     const empresaId = valorGuardado(flujo, 'select_empresa');
     if (!empresaId || !selectEmpresa.querySelector(`option[value="${empresaId}"]`)) return;
     selectEmpresa.value = empresaId;
@@ -442,7 +444,7 @@ async function restaurarFlujoInforme() {
     const equipoId = valorGuardado(flujo, 'equipo_id');
     if (equipoId && selectEquipo.querySelector(`option[value="${equipoId}"]`)) selectEquipo.value = equipoId;
     cargarEquipoSeleccionado();
-    restaurarControlesInforme(flujo, ['select_empresa', 'select_contacto', 'dir_empresa', 'direccion_id', 'equipo_id']);
+    restaurarControlesInforme(flujo, ['select_empresa', 'select_contacto', 'dir_empresa', 'direccion_id', 'equipo_id', 'ubicacion_inst']);
     actualizarPasoIndicaciones();
     evaluarInspeccion(false);
     evaluarTodasLasPruebas(false);
