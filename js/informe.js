@@ -723,6 +723,12 @@ function evaluarExcentricidad(tarjeta, validar = false, errores = []) {
     return true;
 }
 
+// Compara magnitudes con una tolerancia mínima para neutralizar residuos de coma flotante.
+function cumpleErrorMaximoTolerado(error, emt) {
+    const toleranciaNumerica = Math.max(1e-9, Math.abs(emt) * 1e-10);
+    return Math.abs(error) <= emt + toleranciaNumerica;
+}
+
 // Evalúa error con signo, EMT y resultado de los seis puntos de exactitud.
 function evaluarExactitud(tarjeta, validar = false, errores = []) {
     const prefijo = tarjeta.dataset.prueba;
@@ -757,7 +763,7 @@ function evaluarExactitud(tarjeta, validar = false, errores = []) {
         }
         const error = indicacion - carga;
         const emt = obtenerEMT(carga, inputClase.value, Number(inputE.value));
-        const resultadoPunto = Math.abs(error) <= emt.valor ? 'CUMPLE' : 'NO CUMPLE';
+        const resultadoPunto = cumpleErrorMaximoTolerado(error, emt.valor) ? 'CUMPLE' : 'NO CUMPLE';
         if (resultadoPunto === 'NO CUMPLE') resultadoGeneral = 'NO CUMPLE';
         document.getElementById(`${prefijo}_error_${i}`).value = formatearNumero(error, 0, true);
         document.getElementById(`${prefijo}_intervalo_${i}`).value = String(emt.intervalo);
@@ -888,7 +894,8 @@ async function restablecerInforme() {
 
 async function generarInforme(evento) {
     evento.preventDefault();
-    const accion = evento.submitter?.dataset.informeAccion || 'descargar';
+    const accion = evento.submitter?.dataset.informeAccion || '';
+    if (!['formato', 'descargar', 'continuar'].includes(accion)) return;
     const esFormatoTomaDatos = accion === 'formato';
     if (!esFormatoTomaDatos && !validarInforme()) return;
     if (esFormatoTomaDatos && selectEquipo.value) actualizarParametros(false);
@@ -966,5 +973,11 @@ document.querySelectorAll('.prueba-card').forEach((tarjeta) => {
 });
 actualizarPasoIndicaciones();
 formularioInforme.addEventListener('submit', generarInforme);
+// Enter en un campo nunca sustituye a los botones explícitos de generación de PDF.
+formularioInforme.addEventListener('keydown', (evento) => {
+    if (evento.key !== 'Enter' || evento.target instanceof HTMLTextAreaElement
+        || evento.target instanceof HTMLButtonElement) return;
+    evento.preventDefault();
+});
 botonRestablecerInforme.addEventListener('click', restablecerInforme);
 restaurarFlujoInforme();

@@ -44,6 +44,25 @@ function cotizacionFecha($valor, string $etiqueta): string
     return $fecha;
 }
 
+// Conserva una fecha pendiente como NULL y valida las fechas que sí fueron capturadas.
+function cotizacionFechaOpcional($valor, string $etiqueta): ?string
+{
+    return trim((string) $valor) === '' ? null : cotizacionFecha($valor, $etiqueta);
+}
+
+// Valida enteros positivos opcionales usados por las condiciones comerciales.
+function cotizacionEnteroOpcional($valor, string $etiqueta, int $maximo): ?int
+{
+    if (trim((string) $valor) === '') {
+        return null;
+    }
+    $numero = filter_var($valor, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+    if ($numero === false || (int) $numero > $maximo) {
+        throw new InvalidArgumentException($etiqueta . ' no es válido.');
+    }
+    return (int) $numero;
+}
+
 // Limita los textos antes de conservar la fotografía histórica de la cotización.
 function cotizacionTexto($valor, int $maximo, string $etiqueta, bool $obligatorio = false): string
 {
@@ -57,86 +76,84 @@ function cotizacionTexto($valor, int $maximo, string $etiqueta, bool $obligatori
 try {
     $cotizacionEditarId = cotizacionId($_POST['cotizacion_id'] ?? '', true);
     $version = cotizacionId($_POST['version'] ?? '', true);
-    $fecha = cotizacionFecha($_POST['coti_fecha'] ?? '', 'La fecha de emisión');
-    $vigencia = cotizacionFecha($_POST['coti_vigencia'] ?? '', 'La fecha de vigencia');
-    if ($vigencia < $fecha) {
+    $fecha = cotizacionFechaOpcional($_POST['coti_fecha'] ?? '', 'La fecha de emisión');
+    $vigencia = cotizacionFechaOpcional($_POST['coti_vigencia'] ?? '', 'La fecha de vigencia');
+    if ($fecha !== null && $vigencia !== null && $vigencia < $fecha) {
         throw new InvalidArgumentException('La vigencia no puede ser anterior a la fecha de emisión.');
     }
 
     $oportunidadId = cotizacionId($_POST['oportunidad_id'] ?? '', true);
-    $empresaId = cotizacionId($_POST['empresa_id'] ?? '');
+    $empresaId = cotizacionId($_POST['empresa_id'] ?? '', true);
     $contactoEntrada = trim((string) ($_POST['contacto_id'] ?? ''));
     if ($contactoEntrada === '') {
         $contactoEntrada = trim((string) ($_POST['select_contacto'] ?? ''));
     }
-    $contactoId = cotizacionId($contactoEntrada);
-    $direccionId = cotizacionId($_POST['direccion_id'] ?? '');
+    $contactoId = cotizacionId($contactoEntrada, true);
+    $direccionId = cotizacionId($_POST['direccion_id'] ?? '', true);
 
-    $empresaNombre = '';
-    $contactoNombre = '';
-    $telefono = '';
-    $correo = '';
-    $departamento = '';
-    $direccionTexto = '';
+    $empresaNombre = cotizacionTexto($_POST['nombre_empresa'] ?? '', 50, 'El nombre de la empresa');
+    $contactoNombre = cotizacionTexto($_POST['nombre_contacto'] ?? '', 50, 'El nombre del contacto');
+    $telefono = cotizacionTexto($_POST['cel_contacto'] ?? '', 30, 'El teléfono');
+    $correo = cotizacionTexto($_POST['correo_contacto'] ?? '', 150, 'El correo');
+    $departamento = cotizacionTexto($_POST['depto_contacto'] ?? '', 100, 'El departamento');
+    $direccionTexto = cotizacionTexto($_POST['dir_empresa'] ?? '', 65535, 'La dirección');
     $tiempoEntregaTipo = trim((string) ($_POST['tiempo_entrega_tipo'] ?? ''));
-    if (!in_array($tiempoEntregaTipo, ['inmediato', 'dias_habiles', 'semanas'], true)) {
+    if ($tiempoEntregaTipo !== '' && !in_array($tiempoEntregaTipo, ['inmediato', 'dias_habiles', 'semanas'], true)) {
         throw new InvalidArgumentException('Selecciona un tiempo de entrega válido.');
     }
-    $tiempoEntregaCantidad = $tiempoEntregaTipo === 'inmediato'
+    $tiempoEntregaTipo = $tiempoEntregaTipo === '' ? null : $tiempoEntregaTipo;
+    $tiempoEntregaCantidad = $tiempoEntregaTipo === 'inmediato' || $tiempoEntregaTipo === null
         ? null
-        : cotizacionId($_POST['tiempo_entrega_cantidad'] ?? '');
-    if ($tiempoEntregaCantidad !== null && $tiempoEntregaCantidad > 65535) {
-        throw new InvalidArgumentException('El tiempo de entrega es demasiado grande.');
-    }
+        : cotizacionEnteroOpcional($_POST['tiempo_entrega_cantidad'] ?? '', 'El tiempo de entrega', 65535);
     $condicionEntrega = trim((string) ($_POST['condicion_entrega'] ?? ''));
-    if (!in_array($condicionEntrega, ['instalaciones_cliente', 'paqueteria', 'instalaciones_servicom'], true)) {
+    if ($condicionEntrega !== '' && !in_array($condicionEntrega, ['instalaciones_cliente', 'paqueteria', 'instalaciones_servicom'], true)) {
         throw new InvalidArgumentException('Selecciona una condición de entrega válida.');
     }
+    $condicionEntrega = $condicionEntrega === '' ? null : $condicionEntrega;
     $condicionPagoTipo = trim((string) ($_POST['condicion_pago_tipo'] ?? ''));
-    if (!in_array($condicionPagoTipo, ['anticipado', 'anticipado_total', 'anticipo_saldo', 'credito'], true)) {
+    if ($condicionPagoTipo !== '' && !in_array($condicionPagoTipo, ['anticipado', 'anticipado_total', 'anticipo_saldo', 'credito'], true)) {
         throw new InvalidArgumentException('Selecciona una condición de pago válida.');
     }
+    $condicionPagoTipo = $condicionPagoTipo === '' ? null : $condicionPagoTipo;
     $pagoAnticipoPorcentaje = null;
     $pagoCreditoDias = null;
     $pagoSaldoMomento = null;
     if ($condicionPagoTipo === 'anticipo_saldo') {
         $porcentajeEntrada = trim((string) ($_POST['pago_anticipo_porcentaje'] ?? ''));
-        if (!preg_match('/^\d{1,2}(?:\.\d{1,2})?$/D', $porcentajeEntrada)
-            || (float) $porcentajeEntrada <= 0 || (float) $porcentajeEntrada >= 100) {
+        if ($porcentajeEntrada !== '' && (!preg_match('/^\d{1,2}(?:\.\d{1,2})?$/D', $porcentajeEntrada)
+            || (float) $porcentajeEntrada <= 0 || (float) $porcentajeEntrada >= 100)) {
             throw new InvalidArgumentException('El porcentaje de anticipo debe ser mayor que 0 y menor que 100.');
         }
-        $pagoAnticipoPorcentaje = number_format((float) $porcentajeEntrada, 2, '.', '');
+        $pagoAnticipoPorcentaje = $porcentajeEntrada === '' ? null : number_format((float) $porcentajeEntrada, 2, '.', '');
         $pagoSaldoMomento = trim((string) ($_POST['pago_saldo_momento'] ?? ''));
-        if (!in_array($pagoSaldoMomento, ['al_finalizar', 'contra_aviso_entrega'], true)) {
+        if ($pagoSaldoMomento !== '' && !in_array($pagoSaldoMomento, ['al_finalizar', 'contra_aviso_entrega'], true)) {
             throw new InvalidArgumentException('Selecciona cuándo se pagará el saldo restante.');
         }
+        $pagoSaldoMomento = $pagoSaldoMomento === '' ? null : $pagoSaldoMomento;
     } elseif ($condicionPagoTipo === 'credito') {
-        $pagoCreditoDias = cotizacionId($_POST['pago_credito_dias'] ?? '');
-        if ($pagoCreditoDias > 365) {
-            throw new InvalidArgumentException('Los días de crédito no pueden exceder 365.');
-        }
+        $pagoCreditoDias = cotizacionEnteroOpcional($_POST['pago_credito_dias'] ?? '', 'Los días de crédito', 365);
     }
 
     $garantiaTipo = trim((string) ($_POST['garantia_tipo'] ?? ''));
-    if (!in_array($garantiaTipo, ['sin_garantia', 'producto', 'mano_obra'], true)) {
+    if ($garantiaTipo !== '' && !in_array($garantiaTipo, ['sin_garantia', 'producto', 'mano_obra'], true)) {
         throw new InvalidArgumentException('Selecciona una condición de garantía válida.');
     }
+    $garantiaTipo = $garantiaTipo === '' ? null : $garantiaTipo;
     $garantiaVigencia = null;
     $garantiaUnidad = null;
-    if ($garantiaTipo !== 'sin_garantia') {
-        $garantiaVigencia = cotizacionId($_POST['garantia_vigencia'] ?? '');
-        if ($garantiaVigencia > 65535) {
-            throw new InvalidArgumentException('La vigencia de la garantía es demasiado grande.');
-        }
+    if (in_array($garantiaTipo, ['producto', 'mano_obra'], true)) {
+        $garantiaVigencia = cotizacionEnteroOpcional($_POST['garantia_vigencia'] ?? '', 'La vigencia de la garantía', 65535);
         $garantiaUnidad = trim((string) ($_POST['garantia_unidad'] ?? ''));
-        if (!in_array($garantiaUnidad, ['dias', 'meses'], true)) {
+        if ($garantiaUnidad !== '' && !in_array($garantiaUnidad, ['dias', 'meses'], true)) {
             throw new InvalidArgumentException('Selecciona días o meses para la garantía.');
         }
+        $garantiaUnidad = $garantiaUnidad === '' ? null : $garantiaUnidad;
     }
     $costosEnvio = trim((string) ($_POST['costos_envio'] ?? ''));
-    if (!in_array($costosEnvio, ['incluye', 'no_incluye'], true)) {
+    if ($costosEnvio !== '' && !in_array($costosEnvio, ['incluye', 'no_incluye'], true)) {
         throw new InvalidArgumentException('Selecciona si la cotización incluye costos de envío.');
     }
+    $costosEnvio = $costosEnvio === '' ? null : $costosEnvio;
 
     $partidas = [];
     $subtotal = 0.0;
@@ -148,7 +165,7 @@ try {
     $valores = $_POST['partida_valor_unitario'] ?? [];
     if (!is_array($cantidades) || !is_array($unidades) || !is_array($cantidadesSecundarias)
         || !is_array($unidadesSecundarias) || !is_array($descripciones) || !is_array($valores)
-        || count($cantidades) === 0 || count($cantidades) !== count($unidades)
+        || count($cantidades) !== count($unidades)
         || count($cantidades) !== count($cantidadesSecundarias)
         || count($cantidades) !== count($unidadesSecundarias)
         || count($cantidades) !== count($descripciones) || count($cantidades) !== count($valores)
@@ -163,36 +180,40 @@ try {
         $unidadSecundaria = cotizacionTexto($unidadesSecundarias[$indice] ?? '', 30, 'La unidad adicional de la partida ' . $posicion);
         $descripcion = trim((string) ($descripciones[$indice] ?? ''));
         $valorEntrada = trim((string) ($valores[$indice] ?? ''));
-        if (!preg_match('/^\d{1,9}(?:\.\d{1,3})?$/D', $cantidadEntrada) || (float) $cantidadEntrada <= 0) {
+        if ($cantidadEntrada === '' && $unidad === '' && $cantidadSecundariaEntrada === ''
+            && $unidadSecundaria === '' && $descripcion === '' && $valorEntrada === '') {
+            continue;
+        }
+        if ($cantidadEntrada !== '' && (!preg_match('/^\d{1,9}(?:\.\d{1,3})?$/D', $cantidadEntrada)
+            || (float) $cantidadEntrada <= 0)) {
             throw new InvalidArgumentException('La cantidad de la partida ' . $posicion . ' debe ser mayor que cero y usar hasta tres decimales.');
         }
-        if ($unidad === '' || $descripcion === '') {
-            throw new InvalidArgumentException('Completa la unidad y la descripción de la partida ' . $posicion . '.');
-        }
         $usaCantidadSecundaria = $cantidadSecundariaEntrada !== '' || $unidadSecundaria !== '';
-        if ($usaCantidadSecundaria && ($cantidadSecundariaEntrada === '' || $unidadSecundaria === '')) {
-            throw new InvalidArgumentException('Completa la cantidad y la unidad adicional de la partida ' . $posicion . '.');
-        }
-        if ($usaCantidadSecundaria
+        if ($cantidadSecundariaEntrada !== ''
             && (!preg_match('/^\d{1,9}(?:\.\d{1,3})?$/D', $cantidadSecundariaEntrada)
                 || (float) $cantidadSecundariaEntrada <= 0)) {
             throw new InvalidArgumentException('La cantidad adicional de la partida ' . $posicion . ' debe ser mayor que cero y usar hasta tres decimales.');
         }
-        if (!preg_match('/^\d{1,12}(?:\.\d{1,2})?$/D', $valorEntrada)) {
+        if ($valorEntrada !== '' && !preg_match('/^\d{1,12}(?:\.\d{1,2})?$/D', $valorEntrada)) {
             throw new InvalidArgumentException('El valor unitario de la partida ' . $posicion . ' debe usar hasta dos decimales.');
         }
-        $cantidad = number_format((float) $cantidadEntrada, 3, '.', '');
+        $cantidad = $cantidadEntrada === '' ? null : number_format((float) $cantidadEntrada, 3, '.', '');
         $cantidadSecundaria = $usaCantidadSecundaria
-            ? number_format((float) $cantidadSecundariaEntrada, 3, '.', '')
+            ? ($cantidadSecundariaEntrada === '' ? null : number_format((float) $cantidadSecundariaEntrada, 3, '.', ''))
             : '1.000';
+        $unidad = $unidad === '' ? null : $unidad;
+        // La cadena vacía distingue una segunda cantidad aún sin unidad de un factor no utilizado (NULL).
         $unidadSecundaria = $usaCantidadSecundaria ? $unidadSecundaria : null;
-        $valorUnitario = number_format((float) $valorEntrada, 2, '.', '');
-        $importeNumero = round((float) $cantidad * (float) $cantidadSecundaria * (float) $valorUnitario, 2);
-        if ($importeNumero > 999999999999.99) {
+        $descripcion = $descripcion === '' ? null : $descripcion;
+        $valorUnitario = $valorEntrada === '' ? null : number_format((float) $valorEntrada, 2, '.', '');
+        $importeNumero = $cantidad !== null && $cantidadSecundaria !== null && $valorUnitario !== null
+            ? round((float) $cantidad * (float) $cantidadSecundaria * (float) $valorUnitario, 2)
+            : null;
+        if ($importeNumero !== null && $importeNumero > 999999999999.99) {
             throw new InvalidArgumentException('El importe de la partida ' . $posicion . ' excede el máximo permitido.');
         }
-        $importe = number_format($importeNumero, 2, '.', '');
-        $subtotal += $importeNumero;
+        $importe = $importeNumero === null ? null : number_format($importeNumero, 2, '.', '');
+        $subtotal += $importeNumero ?? 0.0;
         $partidas[] = compact('posicion', 'cantidad', 'unidad', 'cantidadSecundaria', 'unidadSecundaria', 'descripcion', 'valorUnitario', 'importe');
     }
     $subtotal = round($subtotal, 2);
@@ -216,29 +237,38 @@ try {
     $conexion->begin_transaction();
     $transaccion = true;
 
-    $validarEmpresa = $conexion->prepare('SELECT id_e, empresa FROM empresas WHERE id_e = ?');
-    $validarEmpresa->bind_param('i', $empresaId);
-    $validarEmpresa->execute();
-    $empresaExiste = $validarEmpresa->get_result()->fetch_assoc();
-    $validarEmpresa->close();
-    if ($empresaExiste === null) {
-        throw new InvalidArgumentException('La empresa seleccionada ya no existe.');
+    if ($empresaId !== null) {
+        $validarEmpresa = $conexion->prepare('SELECT id_e, empresa FROM empresas WHERE id_e = ?');
+        $validarEmpresa->bind_param('i', $empresaId);
+        $validarEmpresa->execute();
+        $empresaExiste = $validarEmpresa->get_result()->fetch_assoc();
+        $validarEmpresa->close();
+        if ($empresaExiste === null) {
+            throw new InvalidArgumentException('La empresa seleccionada ya no existe.');
+        }
+        $empresaNombre = trim((string) $empresaExiste['empresa']);
     }
-    $empresaNombre = trim((string) $empresaExiste['empresa']);
 
     if ($contactoId !== null) {
-        $validarContacto = $conexion->prepare(
-            'SELECT c.id, c.nombre, c.celular, c.correo, COALESCE(cd.nombre, c.depto) AS departamento FROM contactos c
-             JOIN empresa_contactos ec ON ec.id_contacto = c.id
-             LEFT JOIN catalogo_departamentos cd ON cd.id = c.id_departamento
-             WHERE c.id = ? AND ec.id_empresa = ? AND c.activo = 1 AND ec.activo = 1 LIMIT 1'
-        );
-        $validarContacto->bind_param('ii', $contactoId, $empresaId);
+        $sqlContacto = 'SELECT c.id, c.nombre, c.celular, c.correo, COALESCE(cd.nombre, c.depto) AS departamento
+            FROM contactos c LEFT JOIN catalogo_departamentos cd ON cd.id = c.id_departamento';
+        if ($empresaId !== null) {
+            $sqlContacto .= ' JOIN empresa_contactos ec ON ec.id_contacto = c.id
+                WHERE c.id = ? AND ec.id_empresa = ? AND c.activo = 1 AND ec.activo = 1 LIMIT 1';
+            $validarContacto = $conexion->prepare($sqlContacto);
+            $validarContacto->bind_param('ii', $contactoId, $empresaId);
+        } else {
+            $sqlContacto .= ' WHERE c.id = ? AND c.activo = 1 LIMIT 1';
+            $validarContacto = $conexion->prepare($sqlContacto);
+            $validarContacto->bind_param('i', $contactoId);
+        }
         $validarContacto->execute();
         $contactoExiste = $validarContacto->get_result()->fetch_assoc();
         $validarContacto->close();
         if ($contactoExiste === null) {
-            throw new InvalidArgumentException('El contacto no pertenece a la empresa seleccionada.');
+            throw new InvalidArgumentException($empresaId !== null
+                ? 'El contacto no pertenece a la empresa seleccionada.'
+                : 'El contacto seleccionado ya no existe.');
         }
         $contactoNombre = trim((string) $contactoExiste['nombre']);
         $telefono = trim((string) ($contactoExiste['celular'] ?? ''));
@@ -247,6 +277,9 @@ try {
     }
 
     if ($direccionId !== null) {
+        if ($empresaId === null) {
+            throw new InvalidArgumentException('Selecciona una empresa antes de indicar la dirección.');
+        }
         $validarDireccion = $conexion->prepare(
             'SELECT * FROM empresa_direcciones WHERE id = ? AND empresa_id = ? LIMIT 1'
         );
@@ -261,6 +294,9 @@ try {
     }
 
     if ($oportunidadId !== null) {
+        if ($empresaId === null) {
+            throw new InvalidArgumentException('La oportunidad debe corresponder a una empresa seleccionada.');
+        }
         $validarOportunidad = $conexion->prepare(
             'SELECT empresa_id, contacto_id, direccion_id
              FROM oportunidades_comerciales WHERE id = ? FOR UPDATE'
@@ -272,6 +308,9 @@ try {
         if ($oportunidad === null || (int) $oportunidad['empresa_id'] !== $empresaId) {
             throw new InvalidArgumentException('La oportunidad no corresponde a la empresa seleccionada.');
         }
+    }
+    if ($empresaNombre === '' && $contactoNombre === '') {
+        throw new InvalidArgumentException('Para guardar el borrador indica al menos una empresa o un contacto.');
     }
 
     $moneda = 'MXN';
@@ -379,7 +418,8 @@ try {
         $eliminarNotas->execute();
         $eliminarNotas->close();
     } else {
-        $numero = reservarFolioComercial($conexion, 'Q', $fecha);
+        $fechaFolio = $fecha ?? (new DateTimeImmutable('now', new DateTimeZone('America/Mexico_City')))->format('Y-m-d');
+        $numero = reservarFolioComercial($conexion, 'Q', $fechaFolio);
         $archivo = 'COT SERVICOM ' . $numero . '.pdf';
         $utilidad = cotizacionTexto($_POST['total_utilidad'] ?? '', 50, 'La utilidad');
         $costos = cotizacionTexto($_POST['costos'] ?? '', 50, 'Los costos');
@@ -509,9 +549,10 @@ try {
         'subtotal' => $subtotalTexto,
         'iva' => $ivaTexto,
         'total' => $totalTexto,
+        'version' => $cotizacionEditarId !== null ? (int) $actual['version'] + 1 : 1,
         'message' => $cotizacionEditarId !== null
-            ? 'La cotización se actualizó correctamente.'
-            : 'La cotización se registró correctamente.',
+            ? 'El borrador de la cotización se actualizó correctamente.'
+            : 'El borrador de la cotización se guardó correctamente.',
     ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 } catch (Throwable $error) {
     if ($transaccion) {

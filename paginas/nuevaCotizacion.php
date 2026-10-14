@@ -26,12 +26,13 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
         </div>
         <div class="col-12 col-lg-auto app-page-header-actions">
             <a href="<?= htmlspecialchars($paginaRegreso, ENT_QUOTES, 'UTF-8') ?>" class="btn btn-secondary">Cancelar</a>
-            <button id="btn_guardar" type="submit" form="form_cotizacion" class="btn btn-success"><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> <?= $editandoCotizacion ? 'Guardar cambios y ver PDF' : 'Guardar y ver PDF' ?></button>
+            <button id="btn_guardar" type="submit" form="form_cotizacion" formnovalidate class="btn btn-success"><i class="bi bi-save" aria-hidden="true"></i> <?= $editandoCotizacion ? 'Guardar cambios' : 'Guardar borrador' ?></button>
+            <button id="btn_imprimir" type="button" form="form_cotizacion" class="btn btn-primary"<?= $editandoCotizacion ? '' : ' disabled' ?>><i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> Imprimir PDF</button>
         </div>
     </div>
     <!-- titulo  -->
 
-    <form action="<?= $prefijoRuta ?>fpdf/cotizacionPDF.php" method="POST" target="cotizacion_pdf" id="form_cotizacion" class="cotizacion-form" data-local-draft="1" data-oportunidad-id="<?= $oportunidadId ? (int) $oportunidadId : '' ?>" data-cotizacion-id="<?= $editandoCotizacion ? (int) $cotizacionId : '' ?>" data-duplicate-id="<?= $duplicandoCotizacion ? (int) $cotizacionDuplicarId : '' ?>" data-return-url="<?= htmlspecialchars($paginaRegreso, ENT_QUOTES, 'UTF-8') ?>">
+    <form action="<?= $prefijoRuta ?>fpdf/cotizacionPDF.php" method="POST" target="cotizacion_pdf" id="form_cotizacion" class="cotizacion-form" novalidate data-local-draft="1" data-oportunidad-id="<?= $oportunidadId ? (int) $oportunidadId : '' ?>" data-cotizacion-id="<?= $editandoCotizacion ? (int) $cotizacionId : '' ?>" data-duplicate-id="<?= $duplicandoCotizacion ? (int) $cotizacionDuplicarId : '' ?>" data-return-url="<?= htmlspecialchars($paginaRegreso, ENT_QUOTES, 'UTF-8') ?>">
     <input type="hidden" name="oportunidad_id" id="oportunidad_id" value="<?= $oportunidadId ? (int) $oportunidadId : '' ?>">
     <input type="hidden" name="empresa_id" id="cot_empresa_id">
     <input type="hidden" name="contacto_id" id="cot_contacto_id">
@@ -397,6 +398,6 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
-<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261012-2"></script>
+<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261014-1"></script>
 
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>

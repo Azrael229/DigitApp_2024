@@ -52,6 +52,11 @@ if (!$partidas) {
     http_response_code(422);
     exit('La cotización no tiene partidas registradas.');
 }
+$pendientesPdf = cotizacionPendientesParaPdf($cotizacion, $partidas);
+if ($pendientesPdf !== []) {
+    http_response_code(422);
+    exit('Completa la cotización antes de imprimir: ' . implode(', ', $pendientesPdf) . '.');
+}
 
 $terminos = cotizacionTerminosDesdeSnapshot($cotizacion['cot_terminos_snapshot'] ?? null);
 

@@ -259,20 +259,20 @@ require __DIR__ . '/../construct/header.php';
                         <tr>
                             <td><?= (int) $partida['posicion'] ?></td>
                             <td>
-                                <span><?= cotEscapar(rtrim(rtrim(number_format((float) $partida['cantidad'], 3, '.', ''), '0'), '.')) ?></span>
-                                <?php if (!empty($partida['unidad_secundaria'])): ?>
-                                    <span class="d-block cotizacion-partida-secundaria"><?= cotEscapar(rtrim(rtrim(number_format((float) $partida['cantidad_secundaria'], 3, '.', ''), '0'), '.')) ?></span>
+                                <span><?= $partida['cantidad'] === null ? '—' : cotEscapar(rtrim(rtrim(number_format((float) $partida['cantidad'], 3, '.', ''), '0'), '.')) ?></span>
+                                <?php if ($partida['unidad_secundaria'] !== null): ?>
+                                    <span class="d-block cotizacion-partida-secundaria"><?= $partida['cantidad_secundaria'] === null ? '—' : cotEscapar(rtrim(rtrim(number_format((float) $partida['cantidad_secundaria'], 3, '.', ''), '0'), '.')) ?></span>
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <span><?= cotEscapar($partida['unidad']) ?></span>
-                                <?php if (!empty($partida['unidad_secundaria'])): ?>
-                                    <span class="d-block cotizacion-partida-secundaria"><?= cotEscapar($partida['unidad_secundaria']) ?></span>
+                                <span><?= cotEscapar($partida['unidad'] ?: '—') ?></span>
+                                <?php if ($partida['unidad_secundaria'] !== null): ?>
+                                    <span class="d-block cotizacion-partida-secundaria"><?= cotEscapar($partida['unidad_secundaria'] ?: '—') ?></span>
                                 <?php endif; ?>
                             </td>
-                            <td class="cotizacion-detail-description"><?= nl2br(cotEscapar($partida['descripcion'])) ?></td>
-                            <td class="text-end text-nowrap"><?= cotEscapar(cotMoneda($partida['valor_unitario'])) ?></td>
-                            <td class="text-end text-nowrap fw-semibold"><?= cotEscapar(cotMoneda($partida['importe'])) ?></td>
+                            <td class="cotizacion-detail-description"><?= nl2br(cotEscapar($partida['descripcion'] ?: '—')) ?></td>
+                            <td class="text-end text-nowrap"><?= $partida['valor_unitario'] === null ? '—' : cotEscapar(cotMoneda($partida['valor_unitario'])) ?></td>
+                            <td class="text-end text-nowrap fw-semibold"><?= $partida['importe'] === null ? '—' : cotEscapar(cotMoneda($partida['importe'])) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

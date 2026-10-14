@@ -12,6 +12,7 @@ function actualizarSelectContactoVisual() {
 
 var formulario = document.getElementById('form_cotizacion');
 var btnGuardar = document.getElementById('btn_guardar');
+var btnImprimir = document.getElementById('btn_imprimir');
 var inputNumCotizacion = document.getElementById('numero_coti');
 var inputNombreEmpresa = document.getElementById('nombre_empresa');
 var selectEmpresaCotizacion = document.getElementById('select_empresa_cot');
@@ -352,7 +353,10 @@ function agregarPartida(datos, enfocar) {
           selectUnidad.add(new Option(datos.unidad, datos.unidad));
      }
      selectUnidad.value = datos.unidad || '';
-     fila.querySelector('.partida-cantidad-secundaria').value = datos.unidad_secundaria ? (datos.cantidad_secundaria || '') : '';
+     var usaCantidadSecundaria = datos.unidad_secundaria !== null
+          && datos.unidad_secundaria !== undefined;
+     fila.querySelector('.partida-cantidad-secundaria').value = usaCantidadSecundaria
+          ? (datos.cantidad_secundaria || '') : '';
      var selectUnidadSecundaria = fila.querySelector('.partida-unidad-secundaria');
      if (datos.unidad_secundaria && !Array.from(selectUnidadSecundaria.options).some(function (opcion) { return opcion.value === datos.unidad_secundaria; })) {
           selectUnidadSecundaria.add(new Option(datos.unidad_secundaria, datos.unidad_secundaria));
@@ -599,28 +603,21 @@ formulario.addEventListener('submit', async function (event) {
           return;
      }
      contenedorPartidas.querySelectorAll('.partida-cotizacion').forEach(actualizarPartidaSecundaria);
-     if (!formulario.reportValidity()) {
+     if (!inputNombreEmpresa.value.trim() && !inputNombreContacto.value.trim()) {
+          alert('Para guardar el borrador indica al menos una empresa o un contacto.');
+          selectEmpresaCotizacion.focus();
           return;
      }
-     if (!contenedorPartidas.querySelector('.partida-cotizacion')) {
-          alert('Agrega al menos una partida a la cotización.');
-          btnAgregarPartida.focus();
-          return;
-     }
-     var mensajeConfirmacion = cotizacionEditarId
-          ? 'Se guardarán los cambios y se abrirá el archivo PDF actualizado. ¿Deseas continuar?'
-          : 'Se guardará la cotización y se abrirá su archivo PDF. ¿Deseas continuar?';
-     if (!confirm(mensajeConfirmacion)) {
-          return;
-     }
-
-     var ventanaPdf = window.open('', 'cotizacion_pdf');
      btnGuardar.disabled = true;
+     btnImprimir.disabled = true;
+     guardando = true;
      totalizar();
      try {
+          var datos = new FormData(formulario);
+          datos.set('modo_guardado', 'borrador');
           var response = await fetch('../backend/cotizaciones/add_cotizacion.php', {
                method: 'POST',
-               body: new FormData(formulario)
+               body: datos
           });
           var resultado = await response.json();
           if (!response.ok || resultado.error) {
@@ -631,24 +628,46 @@ formulario.addEventListener('submit', async function (event) {
           inputSubtotal.value = resultado.subtotal;
           inputIva.value = resultado.iva;
           inputTotal.value = resultado.total;
-          guardando = true;
+          document.getElementById('cotizacion_version').value = resultado.version;
+          cotizacionEditarId = String(resultado.id);
+          cotizacionDuplicarId = '';
+          formulario.dataset.cotizacionId = cotizacionEditarId;
           formularioModificado = false;
-          HTMLFormElement.prototype.submit.call(formulario);
-          if (ventanaPdf) {
-               ventanaPdf.blur();
-          }
-          window.focus();
-          window.setTimeout(function () {
-               window.focus();
-               window.location.assign(paginaRegreso);
-          }, 150);
+          formulario.dispatchEvent(new CustomEvent('digitapp:draft-saved', {bubbles: true}));
+          btnGuardar.innerHTML = '<i class="bi bi-save" aria-hidden="true"></i> Guardar cambios';
+          window.history.replaceState(null, '', 'nuevaCotizacion.php?id=' + encodeURIComponent(resultado.id));
+          alert(resultado.message || 'El borrador se guardó correctamente.');
      } catch (error) {
-          if (ventanaPdf) {
-               ventanaPdf.close();
-          }
           alert(error.message);
+     } finally {
+          guardando = false;
           btnGuardar.disabled = false;
+          btnImprimir.disabled = !cotizacionEditarId;
      }
+});
+
+// El PDF se genera únicamente desde este botón y solo con una cotización guardada y completa.
+btnImprimir.addEventListener('click', function () {
+     contenedorPartidas.querySelectorAll('.partida-cotizacion').forEach(actualizarPartidaSecundaria);
+     if (!cotizacionEditarId) {
+          alert('Guarda primero el borrador de la cotización.');
+          return;
+     }
+     if (formularioModificado) {
+          alert('Guarda los cambios pendientes antes de imprimir el PDF.');
+          btnGuardar.focus();
+          return;
+     }
+     if (!formulario.reportValidity()) {
+          return;
+     }
+     if (!contenedorPartidas.querySelector('.partida-cotizacion')) {
+          alert('Agrega al menos una partida completa antes de imprimir.');
+          btnAgregarPartida.focus();
+          return;
+     }
+     window.open('', 'cotizacion_pdf');
+     HTMLFormElement.prototype.submit.call(formulario);
 });
 
 inicializarFormulario();

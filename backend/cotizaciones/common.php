@@ -101,6 +101,79 @@ function cotizacionDireccionActual(array $direccion): string
     return $texto !== '' ? $texto : trim((string) ($direccion['direccion_original'] ?? ''));
 }
 
+// Enumera los datos que todavía impiden generar el PDF de una cotización en preparación.
+function cotizacionPendientesParaPdf(array $cotizacion, array $partidas): array
+{
+    $pendientes = [];
+    $fechaValida = static function ($valor): bool {
+        $texto = trim((string) $valor);
+        $fecha = DateTimeImmutable::createFromFormat('!Y-m-d', $texto);
+        $errores = DateTimeImmutable::getLastErrors();
+        return $fecha !== false && ($errores === false
+            || ($errores['warning_count'] === 0 && $errores['error_count'] === 0));
+    };
+    if (!$fechaValida($cotizacion['cot_fecha'] ?? null)
+        || !$fechaValida($cotizacion['cot_vigencia'] ?? null)
+        || (string) $cotizacion['cot_vigencia'] < (string) $cotizacion['cot_fecha']) {
+        $pendientes[] = 'fecha y vigencia válidas';
+    }
+    $entrega = (string) ($cotizacion['cot_tiempo_entrega_tipo'] ?? '');
+    if (!in_array($entrega, ['inmediato', 'dias_habiles', 'semanas'], true)
+        || ($entrega !== 'inmediato' && (int) ($cotizacion['cot_tiempo_entrega_cantidad'] ?? 0) < 1)) {
+        $pendientes[] = 'tiempo de entrega';
+    }
+    if (!in_array((string) ($cotizacion['cot_condicion_entrega'] ?? ''),
+        ['instalaciones_cliente', 'paqueteria', 'instalaciones_servicom'], true)) {
+        $pendientes[] = 'condición de entrega';
+    }
+    $pago = (string) ($cotizacion['cot_condicion_pago_tipo'] ?? '');
+    $pagoCompleto = in_array($pago, ['anticipado', 'anticipado_total'], true)
+        || ($pago === 'anticipo_saldo'
+            && (float) ($cotizacion['cot_pago_anticipo_porcentaje'] ?? 0) > 0
+            && (float) ($cotizacion['cot_pago_anticipo_porcentaje'] ?? 0) < 100
+            && in_array((string) ($cotizacion['cot_pago_saldo_momento'] ?? ''),
+                ['al_finalizar', 'contra_aviso_entrega'], true))
+        || ($pago === 'credito' && (int) ($cotizacion['cot_pago_credito_dias'] ?? 0) > 0);
+    if (!$pagoCompleto) {
+        $pendientes[] = 'condición de pago';
+    }
+    $garantia = (string) ($cotizacion['cot_garantia_tipo'] ?? '');
+    $garantiaCompleta = $garantia === 'sin_garantia'
+        || (in_array($garantia, ['producto', 'mano_obra'], true)
+            && (int) ($cotizacion['cot_garantia_vigencia'] ?? 0) > 0
+            && in_array((string) ($cotizacion['cot_garantia_unidad'] ?? ''), ['dias', 'meses'], true));
+    if (!$garantiaCompleta) {
+        $pendientes[] = 'garantía';
+    }
+    if (!in_array((string) ($cotizacion['cot_costos_envio'] ?? ''), ['incluye', 'no_incluye'], true)) {
+        $pendientes[] = 'costos de envío';
+    }
+    if ($partidas === []) {
+        $pendientes[] = 'al menos una partida';
+    } else {
+        foreach ($partidas as $partida) {
+            if ((float) ($partida['cantidad'] ?? 0) <= 0
+                || trim((string) ($partida['unidad'] ?? '')) === ''
+                || trim((string) ($partida['descripcion'] ?? '')) === ''
+                || $partida['valor_unitario'] === null
+                || (float) $partida['valor_unitario'] < 0
+                || $partida['importe'] === null) {
+                $pendientes[] = 'partidas completas';
+                break;
+            }
+            $cantidadSecundaria = $partida['cantidad_secundaria'] ?? null;
+            $usaSegundoFactor = array_key_exists('unidad_secundaria', $partida)
+                && $partida['unidad_secundaria'] !== null;
+            if ($usaSegundoFactor && ((float) ($partida['cantidad_secundaria'] ?? 0) <= 0
+                || trim((string) ($partida['unidad_secundaria'] ?? '')) === '')) {
+                $pendientes[] = 'partidas completas';
+                break;
+            }
+        }
+    }
+    return array_values(array_unique($pendientes));
+}
+
 // Recupera una cotización con sus partidas, notas y oportunidad vinculada.
 function cotizacionDetalle(mysqli $conexion, int $id): ?array
 {
