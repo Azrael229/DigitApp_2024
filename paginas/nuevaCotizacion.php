@@ -21,7 +21,7 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
      <div class="row align-items-center contacto-form-header app-page-header g-3 pt-3 mb-4">
         <div class="col app-page-header-copy">
             <p class="contactos-kicker mb-1">Gestión comercial</p>
-            <h1 class="h2 mb-0"><i class="bi bi-cash-coin" id="ico_coti" aria-hidden="true"></i> <?= $editandoCotizacion ? 'Editar cotización' : ($duplicandoCotizacion ? 'Duplicar cotización' : 'Nueva cotización') ?></h1>
+            <h1 class="h2 mb-0"><?= $editandoCotizacion ? 'Editar cotización' : ($duplicandoCotizacion ? 'Duplicar cotización' : 'Nueva cotización') ?></h1>
             <div class="app-page-header-meta"><span class="app-page-header-meta-item">Oportunidad <strong id="cot-header-opportunity">Sin seleccionar</strong></span><?php if ($duplicandoCotizacion): ?><span class="app-page-header-meta-item">Origen <strong id="cot-header-source">Cargando...</strong></span><?php endif; ?></div>
         </div>
         <div class="col-12 col-lg-auto app-page-header-actions">

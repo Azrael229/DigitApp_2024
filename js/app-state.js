@@ -8,14 +8,108 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeKey = 'digitapp:theme';
     const themeSwitch = document.getElementById('digitapp-theme-switch');
 
-    // Sincroniza la posición del encabezado contextual con la altura real del menú responsive.
+    // Sincroniza la barra contextual con la altura real del menú responsive.
     function updateHeaderOffset() {
         const navbar = document.querySelector('.navbar.fixed-top');
         const height = navbar ? Math.ceil(navbar.getBoundingClientRect().height) : 68;
-        document.documentElement.style.setProperty('--app-navbar-offset', `${height + 10}px`);
+        document.documentElement.style.setProperty('--app-navbar-offset', `${height + 4}px`);
     }
 
-    // Unifica el primer encabezado de cada pantalla y acerca sus acciones y resúmenes relevantes.
+    // Asigna prioridad visual a las acciones principales de la barra contextual.
+    function pageHeaderActionPriority(action) {
+        if (action.classList.contains('btn-success')) return 100;
+        if (action.classList.contains('btn-primary')) return 90;
+        if (action.classList.contains('btn-warning')) return 80;
+        if (action.classList.contains('btn-secondary')) return 70;
+        if (action.classList.contains('btn-info')) return 60;
+        if (action.classList.contains('btn-danger')) return 50;
+        return 40;
+    }
+
+    // Distribuye las acciones: dos accesos directos en escritorio y un menú compacto en móvil.
+    function initializePageHeaderActions(header, actionGroups) {
+        const actions = Array.from(new Set(actionGroups.flatMap((group) => Array.from(group.querySelectorAll('a.btn, button.btn, input.btn')))));
+        if (!actions.length) return;
+
+        const primaryActions = new Set(actions
+            .map((action, index) => ({ action, index, priority: pageHeaderActionPriority(action) }))
+            .sort((left, right) => right.priority - left.priority || left.index - right.index)
+            .slice(0, 2)
+            .map(({ action }) => action));
+
+        const actionBar = actionGroups[0];
+        actionBar.classList.add('app-page-header-actions');
+        if (!header.contains(actionBar)) header.appendChild(actionBar);
+
+        actionGroups.slice(1).forEach((group) => {
+            if (group !== actionBar) group.remove();
+        });
+
+        const more = document.createElement('div');
+        more.className = 'dropdown app-page-header-more';
+        more.innerHTML = '<button class="btn btn-secondary app-page-header-more-toggle" type="button" aria-expanded="false">Acciones</button><ul class="dropdown-menu dropdown-menu-end"></ul>';
+        const toggle = more.querySelector('.app-page-header-more-toggle');
+        const menu = more.querySelector('.dropdown-menu');
+        const menuItems = new Map(actions.map((action) => {
+            const item = document.createElement('li');
+            return [action, item];
+        }));
+        actionBar.appendChild(more);
+
+        // Cierra el menú compartido y sincroniza su estado accesible.
+        const closeMenu = () => {
+            menu.classList.remove('show');
+            toggle.setAttribute('aria-expanded', 'false');
+        };
+        toggle.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const open = !menu.classList.contains('show');
+            closeMenu();
+            if (open) {
+                menu.classList.add('show');
+                toggle.setAttribute('aria-expanded', 'true');
+            }
+        });
+        menu.addEventListener('click', (event) => {
+            if (event.target.closest('a, button, input')) closeMenu();
+        });
+        document.addEventListener('click', (event) => {
+            if (!more.contains(event.target)) closeMenu();
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && menu.classList.contains('show')) {
+                closeMenu();
+                toggle.focus();
+            }
+        });
+
+        const renderActions = () => {
+            const compact = window.matchMedia('(max-width: 1199.98px)').matches;
+            actions.forEach((action) => {
+                const useMenu = compact || !primaryActions.has(action);
+                action.classList.toggle('dropdown-item', useMenu);
+                action.classList.toggle('app-page-header-menu-action', useMenu);
+                if (useMenu) {
+                    const item = menuItems.get(action);
+                    item.appendChild(action);
+                    menu.appendChild(item);
+                } else {
+                    actionBar.insertBefore(action, more);
+                }
+            });
+            more.classList.toggle('d-none', !menu.children.length);
+        };
+
+        renderActions();
+        window.addEventListener('resize', renderActions, { passive: true });
+    }
+
+    // Retira imágenes e iconos para que la barra contextual conserve su altura compacta.
+    function removePageHeaderVisuals(header) {
+        header.querySelectorAll('img, picture, svg, i, .bi, [class^="bi-"], [class*=" bi-"]').forEach((visual) => visual.remove());
+    }
+
+    // Convierte el primer encabezado de la pantalla en una barra contextual compacta.
     function initializePageHeader() {
         const container = document.querySelector('.contain');
         if (!container) return;
@@ -31,22 +125,28 @@ document.addEventListener('DOMContentLoaded', () => {
         header.classList.add('app-page-header');
         const titleColumn = header.querySelector(':scope > .col, :scope > [class*="col-"]');
         titleColumn?.classList.add('app-page-header-copy');
+        const title = header.querySelector('h1') || header.querySelector('h2') || header.querySelector('h3');
+        title?.classList.add('app-page-header-title');
+        header.querySelector('.contactos-kicker, .empresa-header-kicker, .dashboard-kicker')?.classList.add('app-page-header-kicker');
 
+        const actionGroups = [];
+        let directActionGroup = null;
         header.querySelectorAll('.btn').forEach((button) => {
-            const group = button.closest('.d-flex, [class*="col-"]');
-            if (group && group !== titleColumn) group.classList.add('app-page-header-actions');
+            let group = button.closest('.d-flex, [class*="col-"]');
+            if (group === header) {
+                directActionGroup ||= document.createElement('div');
+                directActionGroup.className = 'app-page-header-actions';
+                directActionGroup.appendChild(button);
+                group = directActionGroup;
+            }
+            if (group && group !== titleColumn && !actionGroups.includes(group)) actionGroups.push(group);
         });
 
         container.querySelectorAll('[data-page-header-actions]').forEach((actions) => {
-            actions.classList.add('app-page-header-actions');
-            header.appendChild(actions);
+            if (!actionGroups.includes(actions)) actionGroups.push(actions);
         });
-
-        const summary = container.querySelector('.factura-resumen');
-        if (summary && !header.contains(summary)) {
-            summary.classList.add('app-page-header-summary');
-            header.appendChild(summary);
-        }
+        initializePageHeaderActions(header, actionGroups);
+        removePageHeaderVisuals(header);
     }
 
     // Aplica y conserva la preferencia visual en este navegador y dispositivo.
