@@ -682,7 +682,7 @@ function evaluarRepetibilidad(tarjeta, validar = false, errores = []) {
     document.getElementById(`${prefijo}_diferencia`).value = formatearNumero(diferencia);
     document.getElementById(`${prefijo}_intervalo`).value = String(emt.intervalo);
     document.getElementById(`${prefijo}_emt`).value = formatearNumero(emt.valor);
-    guardarResultadoPrueba(tarjeta, diferencia <= emt.valor ? 'CUMPLE' : 'NO CUMPLE');
+    guardarResultadoPrueba(tarjeta, cumpleErrorMaximoTolerado(diferencia, emt.valor) ? 'CUMPLE' : 'NO CUMPLE');
     return true;
 }
 
@@ -719,7 +719,7 @@ function evaluarExcentricidad(tarjeta, validar = false, errores = []) {
     document.getElementById(`${prefijo}_diferencia_maxima`).value = formatearNumero(diferenciaMaxima);
     document.getElementById(`${prefijo}_intervalo`).value = String(emt.intervalo);
     document.getElementById(`${prefijo}_emt`).value = formatearNumero(emt.valor);
-    guardarResultadoPrueba(tarjeta, diferenciaMaxima <= emt.valor ? 'CUMPLE' : 'NO CUMPLE');
+    guardarResultadoPrueba(tarjeta, cumpleErrorMaximoTolerado(diferenciaMaxima, emt.valor) ? 'CUMPLE' : 'NO CUMPLE');
     return true;
 }
 
