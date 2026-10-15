@@ -45,6 +45,7 @@ function seleccionarNuevoElementoCatalogo(selector, elemento) {
     }
     opcion.textContent = elemento.nombre;
     selector.value = String(elemento.id);
+    marcarFormularioEquipoModificado();
 }
 
 // Guarda una descripción o marca desde el formulario sin interrumpir la captura del equipo.
@@ -89,6 +90,19 @@ function normalizarDecimalEquipo(valor) {
         return texto;
     }
     return texto.replace(/0+$/, '').replace(/\.$/, '');
+}
+
+// Habilita el guardado cuando cambia un dato persistente del equipo.
+function marcarFormularioEquipoModificado() {
+    botonGuardarEquipo.disabled = false;
+}
+
+// Detecta cambios escritos o seleccionados en los controles que se envían al servidor.
+function detectarCambioEquipo(evento) {
+    var control = evento.target;
+    if (control.matches('[name]:not([type="hidden"])')) {
+        marcarFormularioEquipoModificado();
+    }
 }
 
 // Calcula la clase usando la misma relación Max/e del módulo de informes.
@@ -190,6 +204,9 @@ function validarNumerosEquipo(evento) {
 [campoCapacidadEquipo, campoDivisionVerificacionEquipo].forEach(function (campo) {
     campo.addEventListener('input', actualizarClaseEquipo);
 });
+formularioEquipo.addEventListener('input', detectarCambioEquipo);
+formularioEquipo.addEventListener('change', detectarCambioEquipo);
+formularioEquipo.addEventListener('digitapp:draft-restored', marcarFormularioEquipoModificado);
 formularioEquipo.addEventListener('submit', validarNumerosEquipo);
 DigitAppDuplicateWarning.protegerFormulario({
     formulario: formularioEquipo,

@@ -10,6 +10,7 @@ if ($returnUrl !== '' && !preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
 if (empty($_SESSION['empresa_equipos_csrf'])) {
     $_SESSION['empresa_equipos_csrf'] = bin2hex(random_bytes(32));
 }
+$versionFormEquipoJs = (string) filemtime(__DIR__ . '/../js/form_equipo_empresa.js');
 ?>
 <?php require __DIR__ . '/../construct/header.php'; ?>
 
@@ -162,7 +163,7 @@ if (empty($_SESSION['empresa_equipos_csrf'])) {
 
 <?php if ($empresaId !== false && $empresaId !== null): ?>
 <script src="<?= $prefijoRuta ?>js/duplicate-warning.js?v=20261006-1"></script>
-<script src="<?= $prefijoRuta ?>js/form_equipo_empresa.js?v=20261006-1"></script>
+<script src="<?= $prefijoRuta ?>js/form_equipo_empresa.js?v=<?= $versionFormEquipoJs ?>"></script>
 <?php endif; ?>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>
