@@ -31,6 +31,7 @@ $reactivosInspeccion = [
     6 => 'Limpieza y funcionamiento general.',
 ];
 $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales'];
+$versionInformeJs = (string) filemtime(__DIR__ . '/../js/informe.js');
 ?>
 
 <div class="container my-5 contain shadow-lg informe-contenedor">
@@ -261,6 +262,6 @@ $bloquesPruebas = ['inicial' => 'Pruebas iniciales', 'final' => 'Pruebas finales
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script src="<?= $prefijoRuta ?>js/informe.js?v=20261014-1"></script>
+<script src="<?= $prefijoRuta ?>js/informe.js?v=<?= $versionInformeJs ?>"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>
