@@ -98,13 +98,18 @@ function osShowDeliveryAddress() {
     document.getElementById('os-delivery-address-detail').textContent = address?.direccion_texto || '';
 }
 
+// Devuelve los contactos del cliente para SERVICOM o los vinculados a su dirección.
+function osDeliveryContacts(addressId) {
+    return addressId === osServicomAddress.id
+        ? osCompanyContacts
+        : osContacts.filter(item => String(item.direccion_id) === addressId);
+}
+
 // Filtra el selector de contactos de acuerdo con la dirección elegida.
 function osRenderDeliveryContacts(selectedContact = '') {
     const addressId = document.getElementById('os-delivery-address-select').value;
     const select = document.getElementById('os-delivery-contact-select');
-    const related = addressId === osServicomAddress.id
-        ? osCompanyContacts
-        : osContacts.filter(item => String(item.direccion_id) === addressId);
+    const related = osDeliveryContacts(addressId);
     select.replaceChildren(new Option(addressId ? 'Selecciona un contacto' : 'Selecciona primero una dirección', ''));
     related.forEach(contact => select.add(new Option([contact.nombre, contact.puesto, contact.departamento].filter(Boolean).join(' · '), contact.id)));
     select.disabled = addressId === '';
@@ -113,11 +118,11 @@ function osRenderDeliveryContacts(selectedContact = '') {
     osShowDeliveryContact();
 }
 
-// Muestra teléfono, correo y función del contacto seleccionado.
+// Muestra los datos maestros del contacto usando el mismo filtro que el selector.
 function osShowDeliveryContact() {
     const id = document.getElementById('os-delivery-contact-select').value;
     const addressId = document.getElementById('os-delivery-address-select').value;
-    const contact = osContacts.find(item => String(item.id) === id && String(item.direccion_id) === addressId);
+    const contact = osDeliveryContacts(addressId).find(item => String(item.id) === id);
     document.getElementById('os-delivery-phone').textContent = contact?.celular || '—';
     document.getElementById('os-delivery-email').textContent = contact?.correo || '—';
     document.getElementById('os-delivery-role').textContent = [contact?.puesto, contact?.departamento].filter(Boolean).join(' · ') || '—';
