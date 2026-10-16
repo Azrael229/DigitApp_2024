@@ -328,21 +328,24 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
             <table class="table table-secondary align-middle" id="tabla_partidas_cotizacion">
                 <thead class="text-center">
                     <tr>
+                        <th scope="col">Código</th>
                         <th scope="col">Cantidad</th>
                         <th scope="col">Unidad</th>
                         <th scope="col">Descripción</th>
                         <th scope="col">Valor unitario</th>
+                        <th scope="col">Descuento</th>
                         <th scope="col">Subtotal</th>
                         <th scope="col">Acción</th>
                     </tr>
                 </thead>
                 <tbody id="partidas_cotizacion">
                     <tr id="partidas_vacias">
-                        <td colspan="6" class="text-center contactos-muted py-4">Aún no hay partidas. Utiliza “Agregar partida” para comenzar.</td>
+                        <td colspan="8" class="text-center contactos-muted py-4">Aún no hay partidas. Utiliza “Agregar partida” para comenzar.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
+        <datalist id="catalogo_comercial_codigos"></datalist>
 
         <!-- Totales -->
         <div class="row justify-content-end mt-4">
@@ -398,6 +401,6 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
-<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261014-1"></script>
+<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261015-1"></script>
 
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>

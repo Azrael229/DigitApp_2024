@@ -7,6 +7,13 @@ const osEquipment = new Map();
 const osSelectedEquipment = new Set();
 let osAddresses = [];
 let osContacts = [];
+let osCompanyContacts = [];
+const osServicomAddress = {
+    id: 'servicom',
+    alias: 'Instalaciones de SERVICOM Básculas Digitales',
+    tipo_direccion: 'Ejecución en SERVICOM',
+    direccion_texto: 'Calzada de Guadalupe 65, Villas de Guadalupe, C.P. 76116 Santiago de Querétaro, Querétaro.'
+};
 
 // Muestra mensajes accesibles dentro del formulario de orden de servicio.
 function osMessage(text, success = false) {
@@ -95,7 +102,9 @@ function osShowDeliveryAddress() {
 function osRenderDeliveryContacts(selectedContact = '') {
     const addressId = document.getElementById('os-delivery-address-select').value;
     const select = document.getElementById('os-delivery-contact-select');
-    const related = osContacts.filter(item => String(item.direccion_id) === addressId);
+    const related = addressId === osServicomAddress.id
+        ? osCompanyContacts
+        : osContacts.filter(item => String(item.direccion_id) === addressId);
     select.replaceChildren(new Option(addressId ? 'Selecciona un contacto' : 'Selecciona primero una dirección', ''));
     related.forEach(contact => select.add(new Option([contact.nombre, contact.puesto, contact.departamento].filter(Boolean).join(' · '), contact.id)));
     select.disabled = addressId === '';
@@ -115,13 +124,14 @@ function osShowDeliveryContact() {
 }
 
 // Carga las direcciones de la empresa y selecciona la relación de entrega inicial.
-function osLoadDelivery(addresses, contacts, selectedAddress = '', selectedContact = '') {
-    osAddresses = addresses;
+function osLoadDelivery(addresses, contacts, companyContacts, selectedAddress = '', selectedContact = '') {
+    osAddresses = [...addresses, osServicomAddress];
     osContacts = contacts;
+    osCompanyContacts = companyContacts;
     const select = document.getElementById('os-delivery-address-select');
     select.replaceChildren(new Option('Selecciona una dirección', ''));
-    addresses.forEach(address => select.add(new Option([address.alias, address.tipo_direccion, address.direccion_texto].filter(Boolean).join(' · '), address.id)));
-    select.value = addresses.some(address => String(address.id) === String(selectedAddress)) ? String(selectedAddress) : '';
+    osAddresses.forEach(address => select.add(new Option([address.alias, address.tipo_direccion, address.direccion_texto].filter(Boolean).join(' · '), address.id)));
+    select.value = osAddresses.some(address => String(address.id) === String(selectedAddress)) ? String(selectedAddress) : '';
     osRenderDeliveryContacts(selectedContact);
 }
 
@@ -165,8 +175,8 @@ async function osLoadForm() {
         document.getElementById('os-date').value = order.fecha_generacion;
         document.getElementById('os-type').value = order.tipo;
         document.getElementById('os-status').value = order.estatus;
-        osLoadDelivery(result.addresses || [], result.contacts || [],
-            order.entrega_direccion_id || order.direccion_id,
+        osLoadDelivery(result.addresses || [], result.contacts || [], result.company_contacts || [],
+            order.entrega_direccion_opcion || order.entrega_direccion_id || order.direccion_id,
             order.entrega_contacto_id || order.contacto_id);
         document.getElementById('os-instructions').value = order.instrucciones || '';
         document.getElementById('os-notes').value = order.notas || '';
@@ -177,7 +187,7 @@ async function osLoadForm() {
         const result = await osRequest('source', {orden_venta_id: osSaleOrderId});
         osFillSource(result.order, result.fiscal);
         document.getElementById('os-date').value = osToday();
-        osLoadDelivery(result.addresses || [], result.contacts || [], result.delivery.direccion_id, result.delivery.contacto_id);
+        osLoadDelivery(result.addresses || [], result.contacts || [], result.company_contacts || [], result.delivery.direccion_id, result.delivery.contacto_id);
         osLoadEquipment(result.equipment || []);
         returnUrl = 'ver_orden_venta.php?id=' + Number(result.order.id);
     }

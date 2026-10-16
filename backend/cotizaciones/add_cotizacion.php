@@ -163,12 +163,22 @@ try {
     $unidadesSecundarias = $_POST['partida_unidad_secundaria'] ?? [];
     $descripciones = $_POST['partida_descripcion'] ?? [];
     $valores = $_POST['partida_valor_unitario'] ?? [];
+    $catalogoIds = $_POST['partida_catalogo_item_id'] ?? [];
+    $catalogoCodigos = $_POST['partida_codigo_catalogo'] ?? [];
+    $catalogoTipos = $_POST['partida_tipo_catalogo'] ?? [];
+    $descuentoTipos = $_POST['partida_descuento_tipo'] ?? [];
+    $descuentoValores = $_POST['partida_descuento_valor'] ?? [];
     if (!is_array($cantidades) || !is_array($unidades) || !is_array($cantidadesSecundarias)
         || !is_array($unidadesSecundarias) || !is_array($descripciones) || !is_array($valores)
+        || !is_array($catalogoIds) || !is_array($catalogoCodigos) || !is_array($catalogoTipos)
+        || !is_array($descuentoTipos) || !is_array($descuentoValores)
         || count($cantidades) !== count($unidades)
         || count($cantidades) !== count($cantidadesSecundarias)
         || count($cantidades) !== count($unidadesSecundarias)
         || count($cantidades) !== count($descripciones) || count($cantidades) !== count($valores)
+        || count($cantidades) !== count($catalogoIds) || count($cantidades) !== count($catalogoCodigos)
+        || count($cantidades) !== count($catalogoTipos) || count($cantidades) !== count($descuentoTipos)
+        || count($cantidades) !== count($descuentoValores)
         || count($cantidades) > 65535) {
         throw new InvalidArgumentException('Las partidas enviadas no son válidas.');
     }
@@ -180,9 +190,42 @@ try {
         $unidadSecundaria = cotizacionTexto($unidadesSecundarias[$indice] ?? '', 30, 'La unidad adicional de la partida ' . $posicion);
         $descripcion = trim((string) ($descripciones[$indice] ?? ''));
         $valorEntrada = trim((string) ($valores[$indice] ?? ''));
+        $catalogoItemId = cotizacionId($catalogoIds[$indice] ?? '', true);
+        $codigoCatalogo = strtoupper(cotizacionTexto($catalogoCodigos[$indice] ?? '', 32, 'El código de catálogo de la partida ' . $posicion));
+        $tipoCatalogo = trim((string) ($catalogoTipos[$indice] ?? ''));
+        $descuentoTipo = trim((string) ($descuentoTipos[$indice] ?? 'ninguno'));
+        $descuentoEntrada = trim((string) ($descuentoValores[$indice] ?? '0'));
         if ($cantidadEntrada === '' && $unidad === '' && $cantidadSecundariaEntrada === ''
-            && $unidadSecundaria === '' && $descripcion === '' && $valorEntrada === '') {
+            && $unidadSecundaria === '' && $descripcion === '' && $valorEntrada === '' && $codigoCatalogo === '') {
             continue;
+        }
+        if (!in_array($descuentoTipo, ['ninguno', 'porcentaje', 'monto'], true)) {
+            throw new InvalidArgumentException('El tipo de descuento de la partida ' . $posicion . ' no es válido.');
+        }
+        if ($descuentoEntrada === '') {
+            $descuentoEntrada = '0';
+        }
+        if (!preg_match('/^\d{1,12}(?:\.\d{1,2})?$/D', $descuentoEntrada)) {
+            throw new InvalidArgumentException('El descuento de la partida ' . $posicion . ' debe usar hasta dos decimales.');
+        }
+        if ($descuentoTipo === 'porcentaje' && (float) $descuentoEntrada > 100) {
+            throw new InvalidArgumentException('El descuento porcentual de la partida ' . $posicion . ' no puede exceder 100%.');
+        }
+        if ($tipoCatalogo !== '' && !in_array($tipoCatalogo, ['producto', 'servicio'], true)) {
+            throw new InvalidArgumentException('El tipo de catálogo de la partida ' . $posicion . ' no es válido.');
+        }
+        if ($catalogoItemId !== null) {
+            $validarItem = $conexion->prepare('SELECT codigo, tipo FROM catalogo_items_comerciales WHERE id = ?');
+            $validarItem->bind_param('i', $catalogoItemId);
+            $validarItem->execute();
+            $itemCatalogo = $validarItem->get_result()->fetch_assoc();
+            $validarItem->close();
+            if (!$itemCatalogo || strtoupper((string) $itemCatalogo['codigo']) !== $codigoCatalogo
+                || (string) $itemCatalogo['tipo'] !== $tipoCatalogo) {
+                throw new InvalidArgumentException('El código de catálogo de la partida ' . $posicion . ' cambió. Selecciónalo nuevamente.');
+            }
+        } else {
+            $tipoCatalogo = $tipoCatalogo === '' ? null : $tipoCatalogo;
         }
         if ($cantidadEntrada !== '' && (!preg_match('/^\d{1,9}(?:\.\d{1,3})?$/D', $cantidadEntrada)
             || (float) $cantidadEntrada <= 0)) {
@@ -206,15 +249,30 @@ try {
         $unidadSecundaria = $usaCantidadSecundaria ? $unidadSecundaria : null;
         $descripcion = $descripcion === '' ? null : $descripcion;
         $valorUnitario = $valorEntrada === '' ? null : number_format((float) $valorEntrada, 2, '.', '');
-        $importeNumero = $cantidad !== null && $cantidadSecundaria !== null && $valorUnitario !== null
+        $importeBrutoNumero = $cantidad !== null && $cantidadSecundaria !== null && $valorUnitario !== null
             ? round((float) $cantidad * (float) $cantidadSecundaria * (float) $valorUnitario, 2)
             : null;
-        if ($importeNumero !== null && $importeNumero > 999999999999.99) {
+        if ($importeBrutoNumero !== null && $importeBrutoNumero > 999999999999.99) {
             throw new InvalidArgumentException('El importe de la partida ' . $posicion . ' excede el máximo permitido.');
         }
+        $descuentoValor = number_format($descuentoTipo === 'ninguno' ? 0 : (float) $descuentoEntrada, 2, '.', '');
+        $descuentoImporteNumero = 0.0;
+        if ($importeBrutoNumero !== null) {
+            $descuentoImporteNumero = $descuentoTipo === 'porcentaje'
+                ? round($importeBrutoNumero * (float) $descuentoValor / 100, 2)
+                : ($descuentoTipo === 'monto' ? (float) $descuentoValor : 0.0);
+            if ($descuentoImporteNumero > $importeBrutoNumero) {
+                throw new InvalidArgumentException('El descuento de la partida ' . $posicion . ' no puede exceder su importe.');
+            }
+        }
+        $importeNumero = $importeBrutoNumero === null ? null : round($importeBrutoNumero - $descuentoImporteNumero, 2);
+        $importeBruto = $importeBrutoNumero === null ? null : number_format($importeBrutoNumero, 2, '.', '');
+        $descuentoImporte = number_format($descuentoImporteNumero, 2, '.', '');
         $importe = $importeNumero === null ? null : number_format($importeNumero, 2, '.', '');
         $subtotal += $importeNumero ?? 0.0;
-        $partidas[] = compact('posicion', 'cantidad', 'unidad', 'cantidadSecundaria', 'unidadSecundaria', 'descripcion', 'valorUnitario', 'importe');
+        $partidas[] = compact('posicion', 'catalogoItemId', 'codigoCatalogo', 'tipoCatalogo', 'cantidad', 'unidad',
+            'cantidadSecundaria', 'unidadSecundaria', 'descripcion', 'valorUnitario', 'importeBruto',
+            'descuentoTipo', 'descuentoValor', 'descuentoImporte', 'importe');
     }
     $subtotal = round($subtotal, 2);
     $iva = round($subtotal * 0.16, 2);
@@ -483,21 +541,29 @@ try {
 
     $insertarPartida = $conexion->prepare(
         'INSERT INTO cotizacion_partidas
-            (cotizacion_id, posicion, cantidad, unidad, cantidad_secundaria, unidad_secundaria,
-             descripcion, valor_unitario, importe)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+            (cotizacion_id, posicion, catalogo_item_id, codigo_catalogo, tipo_catalogo,
+             cantidad, unidad, cantidad_secundaria, unidad_secundaria, descripcion,
+             valor_unitario, importe_bruto, descuento_tipo, descuento_valor, descuento_importe, importe)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
     foreach ($partidas as $partida) {
         $insertarPartida->bind_param(
-            'iisssssss',
+            'iiisssssssssssss',
             $cotizacionId,
             $partida['posicion'],
+            $partida['catalogoItemId'],
+            $partida['codigoCatalogo'],
+            $partida['tipoCatalogo'],
             $partida['cantidad'],
             $partida['unidad'],
             $partida['cantidadSecundaria'],
             $partida['unidadSecundaria'],
             $partida['descripcion'],
             $partida['valorUnitario'],
+            $partida['importeBruto'],
+            $partida['descuentoTipo'],
+            $partida['descuentoValor'],
+            $partida['descuentoImporte'],
             $partida['importe']
         );
         $insertarPartida->execute();

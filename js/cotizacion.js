@@ -64,6 +64,7 @@ var cotizacionEditarId = formulario.dataset.cotizacionId;
 var cotizacionDuplicarId = formulario.dataset.duplicateId;
 var paginaRegreso = formulario.dataset.returnUrl || 'tablaCotizaciones.php';
 var oportunidadesCotizacion = [];
+var catalogoComercial = new Map();
 
 formulario.addEventListener('input', function () {
      formularioModificado = true;
@@ -305,10 +306,49 @@ function actualizarEstadoPartidas() {
      var aviso = document.getElementById('partidas_vacias');
      var hayPartidas = contenedorPartidas.querySelector('.partida-cotizacion') !== null;
      if (!hayPartidas && !aviso) {
-          contenedorPartidas.insertAdjacentHTML('beforeend', '<tr id="partidas_vacias"><td colspan="6" class="text-center contactos-muted py-4">Aún no hay partidas. Utiliza “Agregar partida” para comenzar.</td></tr>');
+          contenedorPartidas.insertAdjacentHTML('beforeend', '<tr id="partidas_vacias"><td colspan="8" class="text-center contactos-muted py-4">Aún no hay partidas. Utiliza “Agregar partida” para comenzar.</td></tr>');
      } else if (hayPartidas && aviso) {
           aviso.remove();
      }
+}
+
+// Carga los productos y servicios activos disponibles para seleccionar por código.
+async function cargarCatalogoComercial() {
+     var response = await fetch('../backend/catalogo/api.php?action=quote_items');
+     var result = await response.json().catch(function () { return {}; });
+     if (!response.ok || result.error) {
+          throw new Error(result.error || 'No fue posible cargar el catálogo comercial.');
+     }
+     var datalist = document.getElementById('catalogo_comercial_codigos');
+     datalist.replaceChildren();
+     catalogoComercial.clear();
+     (result.items || []).forEach(function (item) {
+          catalogoComercial.set(String(item.codigo).toUpperCase(), item);
+          var option = document.createElement('option');
+          option.value = item.codigo;
+          option.label = item.descripcion;
+          datalist.appendChild(option);
+     });
+}
+
+// Precarga la fotografía comercial del código elegido sin bloquear la edición manual de la partida.
+function aplicarCatalogoPartida(fila) {
+     var input = fila.querySelector('.partida-codigo');
+     var code = input.value.trim().toUpperCase();
+     input.value = code;
+     var item = catalogoComercial.get(code);
+     fila.querySelector('.partida-catalogo-id').value = item ? item.id : '';
+     fila.querySelector('.partida-catalogo-tipo').value = item ? item.tipo : '';
+     if (!item) { return; }
+     fila.querySelector('.partida-descripcion').value = item.descripcion || '';
+     var unit = fila.querySelector('.partida-unidad');
+     if (item.unidad && !Array.from(unit.options).some(function (option) { return option.value === item.unidad; })) {
+          unit.add(new Option(item.unidad, item.unidad));
+     }
+     unit.value = item.unidad || '';
+     fila.querySelector('.partida-valor').value = item.precio_publico || '';
+     if (!fila.querySelector('.partida-cantidad').value) { fila.querySelector('.partida-cantidad').value = '1'; }
+     totalizar();
 }
 
 // Mantiene opcional el segundo factor y exige cantidad y unidad cuando se utiliza.
@@ -338,15 +378,20 @@ function agregarPartida(datos, enfocar) {
      var indice = consecutivoPartida;
      contenedorPartidas.insertAdjacentHTML('beforeend', `
           <tr class="partida-cotizacion" data-partida="${indice}">
+               <td><label class="visually-hidden" for="partida_codigo_${indice}">Código de catálogo</label><input class="form-control partida-codigo" type="text" name="partida_codigo_catalogo[]" id="partida_codigo_${indice}" list="catalogo_comercial_codigos" maxlength="32" placeholder="PRD- / SRV-"><input class="partida-catalogo-id" type="hidden" name="partida_catalogo_item_id[]"><input class="partida-catalogo-tipo" type="hidden" name="partida_tipo_catalogo[]"></td>
                <td class="cotizacion-partida-factor"><label class="visually-hidden" for="partida_cantidad_${indice}">Cantidad principal</label><input class="form-control partida-cantidad" type="number" min="0.001" step="0.001" name="partida_cantidad[]" id="partida_cantidad_${indice}" required><label class="form-label cotizacion-partida-secondary-label" for="partida_cantidad_secundaria_${indice}">Cantidad adicional</label><input class="form-control partida-cantidad-secundaria" type="number" min="0.001" step="0.001" name="partida_cantidad_secundaria[]" id="partida_cantidad_secundaria_${indice}" placeholder="Opcional"></td>
-               <td class="cotizacion-partida-factor"><label class="visually-hidden" for="partida_unidad_${indice}">Unidad principal</label><select class="form-select partida-unidad" name="partida_unidad[]" id="partida_unidad_${indice}" required><option value="">Selecciona</option><option value="Servicio">Servicio</option><option value="Equipo">Equipo</option><option value="Pieza">Pieza</option></select><label class="form-label cotizacion-partida-secondary-label" for="partida_unidad_secundaria_${indice}">Unidad adicional</label><select class="form-select partida-unidad-secundaria" name="partida_unidad_secundaria[]" id="partida_unidad_secundaria_${indice}"><option value="">No aplica</option><option value="Servicio">Servicio</option><option value="Equipo">Equipo</option><option value="Pieza">Pieza</option></select></td>
+               <td class="cotizacion-partida-factor"><label class="visually-hidden" for="partida_unidad_${indice}">Unidad principal</label><select class="form-select partida-unidad" name="partida_unidad[]" id="partida_unidad_${indice}" required><option value="">Selecciona</option><option value="Servicio">Servicio</option><option value="Equipo">Equipo</option><option value="Pieza">Pieza</option><option value="Hora">Hora</option><option value="Día">Día</option><option value="Viaje">Viaje</option><option value="Kit">Kit</option><option value="Renta">Renta</option></select><label class="form-label cotizacion-partida-secondary-label" for="partida_unidad_secundaria_${indice}">Unidad adicional</label><select class="form-select partida-unidad-secundaria" name="partida_unidad_secundaria[]" id="partida_unidad_secundaria_${indice}"><option value="">No aplica</option><option value="Servicio">Servicio</option><option value="Equipo">Equipo</option><option value="Pieza">Pieza</option><option value="Hora">Hora</option><option value="Día">Día</option><option value="Viaje">Viaje</option><option value="Kit">Kit</option><option value="Renta">Renta</option></select></td>
                <td><label class="visually-hidden" for="partida_descripcion_${indice}">Descripción</label><textarea class="form-control partida-descripcion" name="partida_descripcion[]" id="partida_descripcion_${indice}" rows="3" placeholder="Descripción del servicio o equipo" required></textarea></td>
                <td><label class="visually-hidden" for="partida_valor_${indice}">Valor unitario</label><input class="form-control partida-valor" type="number" min="0" step="0.01" name="partida_valor_unitario[]" id="partida_valor_${indice}" required></td>
+               <td><label class="visually-hidden" for="partida_descuento_tipo_${indice}">Tipo de descuento</label><select class="form-select partida-descuento-tipo mb-2" name="partida_descuento_tipo[]" id="partida_descuento_tipo_${indice}"><option value="ninguno">Sin descuento</option><option value="porcentaje">Porcentaje</option><option value="monto">Cantidad monetaria</option></select><label class="visually-hidden" for="partida_descuento_${indice}">Valor del descuento</label><input class="form-control partida-descuento" type="number" min="0" step="0.01" name="partida_descuento_valor[]" id="partida_descuento_${indice}" value="0" readonly></td>
                <td><label class="visually-hidden" for="partida_subtotal_${indice}">Subtotal calculado</label><input class="form-control partida-subtotal text-end" type="text" id="partida_subtotal_${indice}" value="$0.00" readonly aria-readonly="true" tabindex="-1"><input class="partida-total" type="hidden" name="partida_total[]" value="0.00"></td>
                <td class="text-center"><button type="button" class="btn btn-outline-danger btn-sm btn-eliminar-partida" aria-label="Eliminar partida ${indice}"><i class="bi bi-trash" aria-hidden="true"></i><span class="d-none d-lg-inline"> Eliminar</span></button></td>
           </tr>`);
      actualizarEstadoPartidas();
      var fila = contenedorPartidas.querySelector('[data-partida="' + indice + '"]');
+     fila.querySelector('.partida-codigo').value = datos.codigo_catalogo || '';
+     fila.querySelector('.partida-catalogo-id').value = datos.catalogo_item_id || '';
+     fila.querySelector('.partida-catalogo-tipo').value = datos.tipo_catalogo || '';
      fila.querySelector('.partida-cantidad').value = datos.cantidad || '';
      var selectUnidad = fila.querySelector('.partida-unidad');
      if (datos.unidad && !Array.from(selectUnidad.options).some(function (opcion) { return opcion.value === datos.unidad; })) {
@@ -364,6 +409,9 @@ function agregarPartida(datos, enfocar) {
      selectUnidadSecundaria.value = datos.unidad_secundaria || '';
      fila.querySelector('.partida-descripcion').value = datos.descripcion || '';
      fila.querySelector('.partida-valor').value = datos.valor_unitario || '';
+     fila.querySelector('.partida-descuento-tipo').value = datos.descuento_tipo || 'ninguno';
+     fila.querySelector('.partida-descuento').value = datos.descuento_valor || '0';
+     fila.querySelector('.partida-descuento').readOnly = fila.querySelector('.partida-descuento-tipo').value === 'ninguno';
      actualizarPartidaSecundaria(fila);
      if (enfocar) {
           document.getElementById('partida_cantidad_' + indice).focus();
@@ -523,6 +571,11 @@ async function cargarCotizacionBase(id, duplicar) {
 }
 
 async function inicializarFormulario() {
+     try {
+          await cargarCatalogoComercial();
+     } catch (error) {
+          console.warn(error.message);
+     }
      totalizar();
      actualizarEstadoPartidas();
      actualizarTiempoEntrega();
@@ -558,7 +611,13 @@ function totalizar() {
           var cantidadSecundariaEntrada = fila.querySelector('.partida-cantidad-secundaria').value;
           var cantidadSecundaria = cantidadSecundariaEntrada === '' ? 1 : Number(cantidadSecundariaEntrada);
           var valor = Number(fila.querySelector('.partida-valor').value || 0);
-          var importe = cantidad * cantidadSecundaria * valor;
+          var importeBruto = cantidad * cantidadSecundaria * valor;
+          var descuentoTipo = fila.querySelector('.partida-descuento-tipo').value;
+          var descuentoValor = Number(fila.querySelector('.partida-descuento').value || 0);
+          var descuento = descuentoTipo === 'porcentaje'
+               ? importeBruto * Math.min(100, Math.max(0, descuentoValor)) / 100
+               : descuentoTipo === 'monto' ? Math.min(importeBruto, Math.max(0, descuentoValor)) : 0;
+          var importe = Math.max(0, importeBruto - descuento);
           fila.querySelector('.partida-total').value = importe.toFixed(2);
           fila.querySelector('.partida-subtotal').value = formatearSubtotalPartida(importe);
           subtotal += importe;
@@ -576,7 +635,7 @@ inputPagoAnticipo.addEventListener('input', actualizarCondicionPago);
 selectPagoSaldoMomento.addEventListener('change', actualizarCondicionPago);
 selectGarantiaTipo.addEventListener('change', actualizarGarantia);
 contenedorPartidas.addEventListener('input', function (event) {
-     if (event.target.matches('.partida-cantidad, .partida-cantidad-secundaria, .partida-valor')) {
+     if (event.target.matches('.partida-cantidad, .partida-cantidad-secundaria, .partida-valor, .partida-descuento')) {
           actualizarPartidaSecundaria(event.target.closest('.partida-cotizacion'));
           totalizar();
      }
@@ -585,6 +644,16 @@ contenedorPartidas.addEventListener('change', function (event) {
      if (event.target.matches('.partida-unidad-secundaria')) {
           actualizarPartidaSecundaria(event.target.closest('.partida-cotizacion'));
           totalizar();
+     }
+     if (event.target.matches('.partida-descuento-tipo')) {
+          var fila = event.target.closest('.partida-cotizacion');
+          var descuento = fila.querySelector('.partida-descuento');
+          descuento.readOnly = event.target.value === 'ninguno';
+          if (descuento.readOnly) { descuento.value = '0'; }
+          totalizar();
+     }
+     if (event.target.matches('.partida-codigo')) {
+          aplicarCatalogoPartida(event.target.closest('.partida-cotizacion'));
      }
 });
 contenedorPartidas.addEventListener('click', function (event) {

@@ -17,6 +17,14 @@ if ($cotizacion === null) {
     http_response_code(404);
     exit('La cotización no existe.');
 }
+$importeBrutoTotal = array_sum(array_map(
+    static fn(array $partida): float => (float) ($partida['importe_bruto'] ?? $partida['importe'] ?? 0),
+    $cotizacion['partidas']
+));
+$descuentoTotal = array_sum(array_map(
+    static fn(array $partida): float => (float) ($partida['descuento_importe'] ?? 0),
+    $cotizacion['partidas']
+));
 
 function cotEscapar($valor): string
 {
@@ -253,11 +261,12 @@ require __DIR__ . '/../construct/header.php';
         <div class="empresa-section-heading mb-3"><p class="empresa-section-kicker mb-1">Conceptos cotizados</p><h2 class="h5 card-title mb-1">Partidas</h2><p class="empresa-notes-help mb-0"><?= count($cotizacion['partidas']) ?> concepto<?= count($cotizacion['partidas']) === 1 ? '' : 's' ?> registrado<?= count($cotizacion['partidas']) === 1 ? '' : 's' ?>.</p></div>
         <div class="table-responsive data-table-shell empresa-table-wrap">
             <table id="tabla-partidas-cotizacion" class="table table-secondary table-striped align-middle mb-0 w-100">
-                <thead><tr><th>Posición</th><th>Cantidad</th><th>Unidad</th><th>Descripción</th><th class="text-end">Valor unitario</th><th class="text-end">Subtotal</th></tr></thead>
+                <thead><tr><th>Posición</th><th>Código</th><th>Cantidad</th><th>Unidad</th><th>Descripción</th><th class="text-end">Valor unitario</th><th class="text-end">Descuento</th><th class="text-end">Subtotal</th></tr></thead>
                 <tbody>
                     <?php foreach ($cotizacion['partidas'] as $partida): ?>
                         <tr>
                             <td><?= (int) $partida['posicion'] ?></td>
+                            <td class="text-nowrap"><?= cotEscapar($partida['codigo_catalogo'] ?: '—') ?></td>
                             <td>
                                 <span><?= $partida['cantidad'] === null ? '—' : cotEscapar(rtrim(rtrim(number_format((float) $partida['cantidad'], 3, '.', ''), '0'), '.')) ?></span>
                                 <?php if ($partida['unidad_secundaria'] !== null): ?>
@@ -272,6 +281,7 @@ require __DIR__ . '/../construct/header.php';
                             </td>
                             <td class="cotizacion-detail-description"><?= nl2br(cotEscapar($partida['descripcion'] ?: '—')) ?></td>
                             <td class="text-end text-nowrap"><?= $partida['valor_unitario'] === null ? '—' : cotEscapar(cotMoneda($partida['valor_unitario'])) ?></td>
+                            <td class="text-end text-nowrap"><?php if ((float) ($partida['descuento_importe'] ?? 0) <= 0): ?>—<?php elseif ($partida['descuento_tipo'] === 'porcentaje'): ?><?= cotEscapar(rtrim(rtrim(number_format((float) $partida['descuento_valor'], 2, '.', ''), '0'), '.') . '% · ' . cotMoneda($partida['descuento_importe'])) ?><?php else: ?><?= cotEscapar(cotMoneda($partida['descuento_importe'])) ?><?php endif; ?></td>
                             <td class="text-end text-nowrap fw-semibold"><?= $partida['importe'] === null ? '—' : cotEscapar(cotMoneda($partida['importe'])) ?></td>
                         </tr>
                     <?php endforeach; ?>
@@ -280,6 +290,8 @@ require __DIR__ . '/../construct/header.php';
         </div>
         <div class="row justify-content-end mt-4">
             <div class="col-12 col-md-6 col-xl-4 cotizacion-detail-totals">
+                <div><span>Importe bruto</span><strong><?= cotEscapar(cotMoneda($importeBrutoTotal)) ?></strong></div>
+                <div><span>Descuentos</span><strong>-<?= cotEscapar(cotMoneda($descuentoTotal)) ?></strong></div>
                 <div><span>Subtotal</span><strong><?= cotEscapar(cotMoneda($cotizacion['cot_subtotal'])) ?></strong></div>
                 <div><span>IVA 16%</span><strong><?= cotEscapar(cotMoneda($cotizacion['cot_iva'])) ?></strong></div>
                 <div class="cotizacion-detail-total"><span>Total</span><strong><?= cotEscapar(cotMoneda($cotizacion['cot_total'])) ?> <?= cotEscapar($cotizacion['cot_moneda']) ?></strong></div>

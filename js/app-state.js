@@ -15,6 +15,19 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.style.setProperty('--app-navbar-offset', `${height + 4}px`);
     }
 
+    // Contrae la navegación móvil al pulsar fuera de la barra cuando el menú está abierto.
+    function initializeResponsiveNavbarDismiss() {
+        const navbar = document.querySelector('.navbar');
+        const menu = document.getElementById('navbarDigitApp');
+        const toggler = navbar?.querySelector('.navbar-toggler');
+        if (!navbar || !menu || !toggler) return;
+        document.addEventListener('click', (event) => {
+            if (!menu.classList.contains('show') || navbar.contains(event.target)
+                || window.getComputedStyle(toggler).display === 'none') return;
+            bootstrap.Collapse.getOrCreateInstance(menu, { toggle: false }).hide();
+        });
+    }
+
     // Asigna prioridad visual a las acciones principales de la barra contextual.
     function pageHeaderActionPriority(action) {
         if (action.classList.contains('btn-success')) return 100;
@@ -245,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     updateHeaderOffset();
+    initializeResponsiveNavbarDismiss();
     initializePageHeader();
     window.addEventListener('resize', updateHeaderOffset, { passive: true });
     document.getElementById('navbarDigitApp')?.addEventListener('shown.bs.collapse', updateHeaderOffset);

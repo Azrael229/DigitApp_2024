@@ -32,8 +32,9 @@ if (empty($cotizacion['empresa_id']) || empty($cotizacion['contacto_id']) || emp
 }
 
 $consulta = $conexion->prepare(
-    'SELECT posicion, cantidad, unidad, cantidad_secundaria, unidad_secundaria,
-            descripcion, valor_unitario, importe
+    'SELECT posicion, codigo_catalogo, cantidad, unidad, cantidad_secundaria, unidad_secundaria,
+            descripcion, valor_unitario, importe_bruto, descuento_tipo,
+            descuento_valor, descuento_importe, importe
      FROM cotizacion_partidas WHERE cotizacion_id = ? ORDER BY posicion'
 );
 $consulta->bind_param('i', $cotizacionId);
@@ -57,6 +58,14 @@ if ($pendientesPdf !== []) {
     http_response_code(422);
     exit('Completa la cotización antes de imprimir: ' . implode(', ', $pendientesPdf) . '.');
 }
+$cotizacion['cot_importe_bruto'] = array_sum(array_map(
+    static fn(array $partida): float => (float) ($partida['importe_bruto'] ?? $partida['importe'] ?? 0),
+    $partidas
+));
+$cotizacion['cot_descuento'] = array_sum(array_map(
+    static fn(array $partida): float => (float) ($partida['descuento_importe'] ?? 0),
+    $partidas
+));
 
 $terminos = cotizacionTerminosDesdeSnapshot($cotizacion['cot_terminos_snapshot'] ?? null);
 
@@ -237,7 +246,18 @@ final class CotizacionPDF extends FPDF
     public function partida(array $partida): void
     {
         $this->SetFont('Arial', '', 8);
-        $descripcion = $this->texto((string) $partida['descripcion']);
+        $descripcion = trim(implode(' · ', array_filter([
+            trim((string) ($partida['codigo_catalogo'] ?? '')),
+            trim((string) $partida['descripcion']),
+        ])));
+        if ((float) ($partida['descuento_importe'] ?? 0) > 0) {
+            $detalleDescuento = $partida['descuento_tipo'] === 'porcentaje'
+                ? $this->formatoPorcentaje((float) $partida['descuento_valor']) . '%'
+                : formatoMonedaMXN($partida['descuento_valor']);
+            $descripcion .= ' · Descuento ' . $detalleDescuento
+                . ' (-' . formatoMonedaMXN($partida['descuento_importe']) . ')';
+        }
+        $descripcion = $this->texto($descripcion);
         $lineas = $this->lineasTexto(82, $descripcion);
         $altoCantidad = empty($partida['unidad_secundaria']) ? 10 : 13;
         $altoCompleto = max($altoCantidad, count($lineas) * 4 + 3);
@@ -354,13 +374,15 @@ final class CotizacionPDF extends FPDF
         $this->SetDrawColor(...self::GRIS);
         $this->rectanguloRedondeado(129, $y + 12, 73, $alto - 12, 3, 'D');
         $filas = [
+            ['Importe bruto', $this->cotizacion['cot_importe_bruto']],
+            ['Descuentos', -$this->cotizacion['cot_descuento']],
             ['Subtotal', $this->cotizacion['cot_subtotal']],
             ['IVA 16%', $this->cotizacion['cot_iva']],
             ['Total', $this->cotizacion['cot_total']],
         ];
         $yy = $y + 18;
         foreach ($filas as $indice => [$etiqueta, $valor]) {
-            $esTotal = $indice === 2;
+            $esTotal = $indice === count($filas) - 1;
             $this->SetTextColor(...($esTotal ? self::AZUL : self::MUTED));
             $this->SetFont('Arial', $esTotal ? 'B' : '', $esTotal ? 9 : 8);
             $this->SetXY(136, $yy);

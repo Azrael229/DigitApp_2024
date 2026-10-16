@@ -26,6 +26,9 @@ const OS_ESTATUS = [
     'cancelada' => 'Cancelada',
 ];
 
+const OS_SERVICOM_DELIVERY_KEY = 'servicom';
+const OS_SERVICOM_DELIVERY_ADDRESS = 'Calzada de Guadalupe 65, Villas de Guadalupe, C.P. 76116 Santiago de Querétaro, Querétaro.';
+
 // Una orden de servicio completada cierra su orden de venta; ningún otro estatus se propaga.
 function os_complete_sale_order(mysqli $db, int $saleOrderId): void
 {
@@ -54,6 +57,39 @@ function os_address(array $row): string
         $row['ciudad'] ?? '', $row['estado'] ?? '', $row['codigo_postal'] ?? '', $row['pais'] ?? '',
     ], static fn($value) => trim((string) $value) !== '');
     return implode(', ', array_map('trim', $parts));
+}
+
+// Obtiene y valida la fotografía vigente de un equipo perteneciente a la empresa indicada.
+function os_company_equipment(mysqli $db, int $equipmentId, int $companyId): array
+{
+    $rows = ov_rows($db, 'SELECT ee.id, ee.ubicacion, ee.modelo, ee.identificacion,
+            ee.numero_serie, ee.unidad, ee.capacidad_maxima, ee.division_real,
+            ee.division_verificacion, ee.clase_exactitud,
+            cd.nombre AS descripcion, cm.nombre AS marca
+        FROM empresa_equipos ee
+        LEFT JOIN catalogo_descripciones_equipo cd ON cd.id = ee.descripcion_id
+        LEFT JOIN catalogo_marcas_equipo cm ON cm.id = ee.marca_id
+        WHERE ee.id = ? AND ee.empresa_id = ?', 'ii', [$equipmentId, $companyId]);
+    if (!$rows) {
+        throw new InvalidArgumentException('El equipo seleccionado no pertenece a la empresa de la orden.');
+    }
+    return $rows[0];
+}
+
+// Guarda en la orden una fotografía inmutable del equipo seleccionado.
+function os_insert_equipment(mysqli $db, int $orderId, int $companyId, int $equipmentId, int $position): void
+{
+    $equipment = os_company_equipment($db, $equipmentId, $companyId);
+    ov_query($db, 'INSERT INTO orden_servicio_equipos
+        (orden_servicio_id, empresa_equipo_id, posicion, descripcion, marca, modelo,
+         identificacion, numero_serie, ubicacion, unidad, capacidad_maxima,
+         division_real, division_verificacion, clase_exactitud)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 'iiisssssssddds',
+        [$orderId, $equipmentId, $position, $equipment['descripcion'] ?: 'Equipo',
+        $equipment['marca'], $equipment['modelo'], $equipment['identificacion'],
+        $equipment['numero_serie'], $equipment['ubicacion'], $equipment['unidad'],
+        $equipment['capacidad_maxima'], $equipment['division_real'],
+        $equipment['division_verificacion'], $equipment['clase_exactitud']])->close();
 }
 
 // Obtiene la fotografía completa de una orden de servicio y sus equipos.
@@ -120,7 +156,11 @@ function os_get(mysqli $db, int $id, bool $lock = false): array
             $order['entrega_departamento_mostrado'] = trim((string) ($contacts[0]['departamento'] ?? ''));
         }
     }
-    $deliveryAddressId = (int) ($order['entrega_direccion_id'] ?: $order['direccion_id']);
+    $storedDeliveryAddress = trim((string) ($order['entrega_direccion'] ?? ''));
+    $deliveryAddressId = (int) ($order['entrega_direccion_id'] ?? 0);
+    if ($deliveryAddressId <= 0 && $storedDeliveryAddress === '') {
+        $deliveryAddressId = (int) $order['direccion_id'];
+    }
     if ($deliveryAddressId > 0) {
         $addresses = ov_rows($db, 'SELECT * FROM empresa_direcciones WHERE id = ? AND empresa_id = ?',
             'ii', [$deliveryAddressId, (int) $order['empresa_id']]);
@@ -129,6 +169,10 @@ function os_get(mysqli $db, int $id, bool $lock = false): array
             $order['entrega_direccion_alias'] = trim((string) ($addresses[0]['alias'] ?? ''));
         }
     }
+    $order['entrega_direccion_opcion'] = $deliveryAddressId <= 0
+        && $storedDeliveryAddress === OS_SERVICOM_DELIVERY_ADDRESS
+        ? OS_SERVICOM_DELIVERY_KEY
+        : ($deliveryAddressId > 0 ? (string) $deliveryAddressId : '');
     $order['equipos'] = ov_rows($db, 'SELECT * FROM orden_servicio_equipos
         WHERE orden_servicio_id = ? ORDER BY posicion, id', 'i', [$id]);
     return $order;
@@ -167,6 +211,13 @@ function os_source(mysqli $db, int $saleOrderId): array
         LEFT JOIN catalogo_departamentos cd ON cd.id = c.id_departamento
         WHERE d.empresa_id = ? AND edc.activo = 1 AND c.activo = 1
         ORDER BY edc.direccion_id, edc.es_principal DESC, c.nombre, c.id', 'i', [$order['empresa_id']]);
+    $companyContacts = ov_rows($db, 'SELECT c.id, c.nombre, c.celular, c.correo, c.puesto,
+            COALESCE(cd.nombre, c.depto) AS departamento
+        FROM empresa_contactos ec
+        JOIN contactos c ON c.id = ec.id_contacto
+        LEFT JOIN catalogo_departamentos cd ON cd.id = c.id_departamento
+        WHERE ec.id_empresa = ? AND ec.activo = 1 AND c.activo = 1
+        ORDER BY ec.es_principal DESC, c.nombre, c.id', 'i', [$order['empresa_id']]);
     $equipment = ov_rows($db, 'SELECT ee.id, ee.ubicacion, ee.modelo, ee.identificacion,
             ee.numero_serie, ee.unidad, ee.capacidad_maxima, ee.division_real,
             ee.division_verificacion, ee.clase_exactitud, ee.estatus,
@@ -198,6 +249,7 @@ function os_source(mysqli $db, int $saleOrderId): array
         ],
         'addresses' => $addresses,
         'contacts' => $contacts,
+        'company_contacts' => $companyContacts,
         'equipment' => $equipment,
     ];
 }

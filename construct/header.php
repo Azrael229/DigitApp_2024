@@ -23,10 +23,10 @@ if (!empty($authUser['debe_cambiar_password']) && $currentScript !== 'mi_cuenta.
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?= $prefijoRuta ?>estilos/style.css?v=20261015-5">
+    <link rel="stylesheet" href="<?= $prefijoRuta ?>estilos/style.css?v=20261015-11">
     <script src="<?= $prefijoRuta ?>js/date-format.js?v=20261009-1"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <script defer src="<?= $prefijoRuta ?>js/app-state.js?v=20261015-5"></script>
+    <script defer src="<?= $prefijoRuta ?>js/app-state.js?v=20261015-6"></script>
 </head>
 <body data-app-version="<?= htmlspecialchars(DIGITAPP_VERSION, ENT_QUOTES, 'UTF-8') ?>" data-user-id="<?= (int) $authUser['id'] ?>">
 <nav class="navbar fixed-top navbar-expand-xl navbar-dark bg-dark">
@@ -46,7 +46,7 @@ if (!empty($authUser['debe_cambiar_password']) && $currentScript !== 'mi_cuenta.
                 <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Operación</a><ul class="dropdown-menu"><li><a class="dropdown-item" href="<?= $prefijoRuta ?>paginas/ordenes_servicio.php">Órdenes de servicio</a></li><li><a class="dropdown-item" href="<?= $prefijoRuta ?>paginas/informe.php">Informes metrológicos</a></li></ul></li>
                 <?php endif; ?>
                 <?php if (auth_has_permission('productos', $authUser)): ?>
-                <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Catálogos</a><ul class="dropdown-menu"><li><a class="dropdown-item" href="<?= $prefijoRuta ?>paginas/Render_zonas_servicio.php">Zonas de servicio</a></li></ul></li>
+                <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Catálogo comercial</a><ul class="dropdown-menu"><li><a class="dropdown-item" href="<?= $prefijoRuta ?>paginas/productos.php">Productos</a></li><li><a class="dropdown-item" href="<?= $prefijoRuta ?>paginas/servicios.php">Servicios</a></li><li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="<?= $prefijoRuta ?>paginas/Render_zonas_servicio.php">Zonas de servicio</a></li></ul></li>
                 <?php endif; ?>
                 <?php if (auth_has_permission('facturacion', $authUser)): ?><li class="nav-item"><a class="nav-link" href="<?= $prefijoRuta ?>paginas/facturacion.php">Facturación</a></li><?php endif; ?>
                 <?php if (auth_has_permission('usuarios', $authUser)): ?><li class="nav-item"><a class="nav-link" href="<?= $prefijoRuta ?>paginas/usuarios.php">Administración</a></li><?php endif; ?>

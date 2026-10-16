@@ -1,6 +1,8 @@
 'use strict';
 
 const osDetailId = new URLSearchParams(location.search).get('id');
+let osDetailVersion = '';
+let osDetailAvailableEquipment = [];
 
 // Crea una celda segura para la tabla de equipos del detalle.
 function osDetailCell(row, value) {
@@ -30,8 +32,22 @@ function osRenderDetailEquipment(items) {
     });
 }
 
+// Actualiza el selector con los equipos de la empresa que todavía no pertenecen a la orden.
+function osRenderAvailableEquipment(selectedItems) {
+    const selectedIds = new Set(selectedItems.map(item => String(item.empresa_equipo_id)));
+    const select = document.getElementById('os-detail-equipment-select');
+    select.replaceChildren(new Option('Selecciona un equipo', ''));
+    osDetailAvailableEquipment.forEach(item => {
+        if (!selectedIds.has(String(item.id))) {
+            select.add(new Option([item.descripcion, item.marca, item.modelo, item.identificacion, item.numero_serie].filter(Boolean).join(' · '), item.id));
+        }
+    });
+    document.getElementById('os-detail-add-equipment').disabled = select.options.length <= 1;
+}
+
 // Llena la vista completa de una orden de servicio.
 function osRenderDetail(order) {
+    osDetailVersion = order.version;
     document.getElementById('os-number').textContent = order.numero_servicio;
     const status = document.getElementById('os-status');
     status.textContent = OS.statuses[order.estatus] || order.estatus;
@@ -50,6 +66,7 @@ function osRenderDetail(order) {
     document.getElementById('os-instructions').textContent = order.instrucciones || 'Sin instrucciones adicionales.';
     document.getElementById('os-notes').textContent = order.notas || 'Sin notas internas.';
     osRenderDetailEquipment(order.equipos || []);
+    osRenderAvailableEquipment(order.equipos || []);
     const edit = document.getElementById('os-edit');
     edit.href = 'form_orden_servicio.php?id=' + Number(order.id);
     edit.classList.remove('d-none');
@@ -63,7 +80,26 @@ function osRenderDetail(order) {
 async function osLoadDetail() {
     if (!/^[1-9]\d*$/.test(osDetailId || '')) { throw new Error('Identificador de orden no válido.'); }
     const result = await OS.request('get', {id: osDetailId});
+    osDetailAvailableEquipment = result.available_equipment || [];
     osRenderDetail(result.order);
 }
+
+// Añade inmediatamente a la orden el equipo elegido desde la vista de detalle.
+document.getElementById('os-detail-add-equipment').addEventListener('click', async function () {
+    const select = document.getElementById('os-detail-equipment-select');
+    if (!select.value) { select.focus(); return; }
+    this.disabled = true;
+    try {
+        const result = await OS.request('equipment_add', {
+            id: osDetailId, version: osDetailVersion, equipment_id: select.value
+        }, true);
+        osDetailAvailableEquipment = result.available_equipment || osDetailAvailableEquipment;
+        osRenderDetail(result.order);
+        OS.message('mensaje_servicio', 'Equipo agregado correctamente.', true);
+    } catch (error) {
+        OS.message('mensaje_servicio', error.message);
+        this.disabled = false;
+    }
+});
 
 osLoadDetail().catch(error => OS.message('mensaje_servicio', error.message));

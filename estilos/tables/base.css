@@ -141,6 +141,33 @@
     min-width: 155px;
 }
 
+/* Conserva legibles los directorios comerciales con muchas columnas y desplaza la tabla. */
+.catalogo-directory-table {
+    table-layout: fixed !important;
+}
+
+.catalogo-productos-table,
+.catalogo-servicios-table { min-width: 1600px !important; }
+
+.catalogo-directory-table :is(.catalogo-col-date, .catalogo-col-code, .catalogo-col-unit,
+    .catalogo-col-currency, .catalogo-col-origin, .catalogo-col-money, .catalogo-col-status,
+    .table-action-column) {
+    white-space: nowrap;
+    overflow-wrap: normal;
+}
+
+.catalogo-directory-table .catalogo-col-date { width: 140px; }
+.catalogo-directory-table .catalogo-col-code { width: 190px; }
+.catalogo-directory-table .catalogo-col-category { width: 105px; }
+.catalogo-directory-table .catalogo-col-description { width: 420px; }
+.catalogo-directory-table .catalogo-col-unit { width: 105px; }
+.catalogo-directory-table .catalogo-col-currency { width: 100px; }
+.catalogo-directory-table .catalogo-col-origin { width: 115px; }
+.catalogo-directory-table .catalogo-col-provider { width: 230px; }
+.catalogo-directory-table .catalogo-col-money { width: 155px; }
+.catalogo-directory-table .catalogo-col-status { width: 110px; }
+.catalogo-directory-table .table-action-column { width: 115px; }
+
 .empresa-directory-table :is(.empresa-col-ciudad, .empresa-col-municipio, .empresa-col-estado) {
     min-width: 165px;
     white-space: nowrap;

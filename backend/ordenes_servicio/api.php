@@ -17,7 +17,7 @@ try {
     }
     $input = $method === 'POST' ? $_POST : $_GET;
     $action = (string) ($input['action'] ?? 'list');
-    if (!in_array($action, $method === 'GET' ? ['list', 'get', 'source'] : ['save', 'status'], true)) {
+    if (!in_array($action, $method === 'GET' ? ['list', 'get', 'source'] : ['save', 'status', 'equipment_add'], true)) {
         throw new InvalidArgumentException('Acción no válida.');
     }
     if ($method === 'POST' && !hash_equals($_SESSION['ordenes_venta_csrf'], (string) ($input['csrf'] ?? ''))) {
@@ -48,6 +48,7 @@ try {
             'order' => $order,
             'addresses' => $source['addresses'],
             'contacts' => $source['contacts'],
+            'company_contacts' => $source['company_contacts'],
             'available_equipment' => $source['equipment'],
         ];
     } elseif ($action === 'source') {
@@ -72,6 +73,38 @@ try {
         $result = ['order' => os_get($conexion, $id)];
         $conexion->commit();
         $transaction = false;
+    } elseif ($action === 'equipment_add') {
+        $id = ov_id($input['id'] ?? null);
+        $equipmentId = ov_id($input['equipment_id'] ?? null);
+        $conexion->begin_transaction();
+        $transaction = true;
+        $old = os_get($conexion, $id, true);
+        if ((string) ($input['version'] ?? '') !== (string) $old['version']) {
+            throw new RuntimeException('Otra edición modificó esta orden. Recarga la página antes de agregar el equipo.');
+        }
+        if (!ov_rows($conexion, 'SELECT id FROM empresa_equipos
+            WHERE id = ? AND empresa_id = ? AND estatus = \'activo\'', 'ii',
+            [$equipmentId, (int) $old['empresa_id']])) {
+            throw new InvalidArgumentException('El equipo seleccionado no está activo o no pertenece a la empresa de la orden.');
+        }
+        $duplicates = ov_rows($conexion, 'SELECT id FROM orden_servicio_equipos
+            WHERE orden_servicio_id = ? AND empresa_equipo_id = ?', 'ii', [$id, $equipmentId]);
+        if ($duplicates) {
+            throw new InvalidArgumentException('El equipo seleccionado ya está incluido en la orden.');
+        }
+        $positions = ov_rows($conexion, 'SELECT COALESCE(MAX(posicion), 0) AS ultima
+            FROM orden_servicio_equipos WHERE orden_servicio_id = ?', 'i', [$id]);
+        os_insert_equipment($conexion, $id, (int) $old['empresa_id'], $equipmentId,
+            (int) $positions[0]['ultima'] + 1);
+        ov_query($conexion, 'UPDATE ordenes_servicio SET updated_at = CURRENT_TIMESTAMP,
+            version = version + 1 WHERE id = ?', 'i', [$id])->close();
+        ov_query($conexion, 'UPDATE ordenes_venta SET updated_at = CURRENT_TIMESTAMP,
+            version = version + 1 WHERE id = ?', 'i', [(int) $old['orden_venta_id']])->close();
+        $order = os_get($conexion, $id);
+        $source = os_source($conexion, (int) $order['orden_venta_id']);
+        $result = ['order' => $order, 'available_equipment' => $source['equipment']];
+        $conexion->commit();
+        $transaction = false;
     } else {
         $id = ov_id($input['id'] ?? '', true);
         $generationDate = ov_date($input['fecha_generacion'] ?? '');
@@ -83,7 +116,9 @@ try {
         if (!isset(OS_ESTATUS[$status])) {
             throw new InvalidArgumentException('El estatus de la orden de servicio no es válido.');
         }
-        $deliveryAddressId = ov_id($input['entrega_direccion_id'] ?? null);
+        $deliveryOption = trim((string) ($input['entrega_direccion_id'] ?? ''));
+        $isServicomDelivery = $deliveryOption === OS_SERVICOM_DELIVERY_KEY;
+        $deliveryAddressId = $isServicomDelivery ? null : ov_id($deliveryOption);
         $deliveryContactId = ov_id($input['entrega_contacto_id'] ?? null);
         $instructions = ov_text($input['instrucciones'] ?? '', 60000);
         $notes = ov_text($input['notas'] ?? '', 60000);
@@ -102,14 +137,24 @@ try {
         $saleOrderId = $old ? (int) $old['orden_venta_id'] : ov_id($input['orden_venta_id'] ?? null);
         ov_get($conexion, $saleOrderId, true);
         $source = os_source($conexion, $saleOrderId);
-        $deliveryRows = ov_rows($conexion, 'SELECT d.*, c.nombre, c.celular, c.correo, c.puesto,
-                COALESCE(cd.nombre, c.depto) AS departamento
-            FROM empresa_direcciones d
-            JOIN empresa_direccion_contactos edc ON edc.direccion_id = d.id AND edc.activo = 1
-            JOIN contactos c ON c.id = edc.contacto_id AND c.activo = 1
-            LEFT JOIN catalogo_departamentos cd ON cd.id = c.id_departamento
-            WHERE d.id = ? AND d.empresa_id = ? AND c.id = ?', 'iii',
-            [$deliveryAddressId, $source['order']['empresa_id'], $deliveryContactId]);
+        if ($isServicomDelivery) {
+            $deliveryRows = ov_rows($conexion, 'SELECT c.nombre, c.celular, c.correo, c.puesto,
+                    COALESCE(cd.nombre, c.depto) AS departamento
+                FROM empresa_contactos ec
+                JOIN contactos c ON c.id = ec.id_contacto AND c.activo = 1
+                LEFT JOIN catalogo_departamentos cd ON cd.id = c.id_departamento
+                WHERE ec.id_empresa = ? AND ec.activo = 1 AND c.id = ?', 'ii',
+                [$source['order']['empresa_id'], $deliveryContactId]);
+        } else {
+            $deliveryRows = ov_rows($conexion, 'SELECT d.*, c.nombre, c.celular, c.correo, c.puesto,
+                    COALESCE(cd.nombre, c.depto) AS departamento
+                FROM empresa_direcciones d
+                JOIN empresa_direccion_contactos edc ON edc.direccion_id = d.id AND edc.activo = 1
+                JOIN contactos c ON c.id = edc.contacto_id AND c.activo = 1
+                LEFT JOIN catalogo_departamentos cd ON cd.id = c.id_departamento
+                WHERE d.id = ? AND d.empresa_id = ? AND c.id = ?', 'iii',
+                [$deliveryAddressId, $source['order']['empresa_id'], $deliveryContactId]);
+        }
         if (!$deliveryRows) {
             throw new InvalidArgumentException('El contacto seleccionado no está asociado con la dirección de entrega.');
         }
@@ -119,7 +164,7 @@ try {
         $deliveryDepartment = trim((string) $delivery['departamento']);
         $deliveryPhone = trim((string) $delivery['celular']);
         $deliveryEmail = trim((string) $delivery['correo']);
-        $deliveryAddress = os_address($delivery);
+        $deliveryAddress = $isServicomDelivery ? OS_SERVICOM_DELIVERY_ADDRESS : os_address($delivery);
 
         if ($old) {
             ov_query($conexion, 'UPDATE ordenes_servicio SET fecha_generacion = ?, tipo = ?,
@@ -154,29 +199,8 @@ try {
         ov_query($conexion, 'DELETE FROM orden_servicio_equipos WHERE orden_servicio_id = ?', 'i', [$id])->close();
         $position = 0;
         foreach ($equipmentIds as $equipmentId) {
-            $rows = ov_rows($conexion, 'SELECT ee.id, ee.ubicacion, ee.modelo, ee.identificacion,
-                    ee.numero_serie, ee.unidad, ee.capacidad_maxima, ee.division_real,
-                    ee.division_verificacion, ee.clase_exactitud,
-                    cd.nombre AS descripcion, cm.nombre AS marca
-                FROM empresa_equipos ee
-                LEFT JOIN catalogo_descripciones_equipo cd ON cd.id = ee.descripcion_id
-                LEFT JOIN catalogo_marcas_equipo cm ON cm.id = ee.marca_id
-                WHERE ee.id = ? AND ee.empresa_id = ?', 'ii', [$equipmentId, $source['order']['empresa_id']]);
-            if (!$rows) {
-                throw new InvalidArgumentException('Uno de los equipos no pertenece a la empresa de la orden.');
-            }
-            $equipment = $rows[0];
             $position++;
-            ov_query($conexion, 'INSERT INTO orden_servicio_equipos
-                (orden_servicio_id, empresa_equipo_id, posicion, descripcion, marca, modelo,
-                 identificacion, numero_serie, ubicacion, unidad, capacidad_maxima,
-                 division_real, division_verificacion, clase_exactitud)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 'iiisssssssddds',
-                [$id, $equipmentId, $position, $equipment['descripcion'] ?: 'Equipo',
-                $equipment['marca'], $equipment['modelo'], $equipment['identificacion'],
-                $equipment['numero_serie'], $equipment['ubicacion'], $equipment['unidad'],
-                $equipment['capacidad_maxima'], $equipment['division_real'],
-                $equipment['division_verificacion'], $equipment['clase_exactitud']])->close();
+            os_insert_equipment($conexion, $id, (int) $source['order']['empresa_id'], $equipmentId, $position);
         }
         ov_query($conexion, 'UPDATE ordenes_venta SET updated_at = CURRENT_TIMESTAMP,
             version = version + 1 WHERE id = ?', 'i', [$saleOrderId])->close();

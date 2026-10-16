@@ -225,8 +225,10 @@ function cotizacionDetalle(mysqli $conexion, int $id): ?array
     }
 
     $consulta = $conexion->prepare(
-        'SELECT id, posicion, cantidad, unidad, cantidad_secundaria, unidad_secundaria,
-                descripcion, valor_unitario, importe
+        'SELECT id, posicion, catalogo_item_id, codigo_catalogo, tipo_catalogo,
+                cantidad, unidad, cantidad_secundaria, unidad_secundaria,
+                descripcion, valor_unitario, importe_bruto, descuento_tipo,
+                descuento_valor, descuento_importe, importe
          FROM cotizacion_partidas
          WHERE cotizacion_id = ?
          ORDER BY posicion'
