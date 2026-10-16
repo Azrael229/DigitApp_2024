@@ -82,10 +82,14 @@ try {
         if ((string) ($input['version'] ?? '') !== (string) $old['version']) {
             throw new RuntimeException('Otra edición modificó esta orden. Recarga la página antes de agregar el equipo.');
         }
-        if (!ov_rows($conexion, 'SELECT id FROM empresa_equipos
+        $equipmentRows = ov_rows($conexion, 'SELECT id, direccion_id FROM empresa_equipos
             WHERE id = ? AND empresa_id = ? AND estatus = \'activo\'', 'ii',
-            [$equipmentId, (int) $old['empresa_id']])) {
+            [$equipmentId, (int) $old['empresa_id']]);
+        if (!$equipmentRows) {
             throw new InvalidArgumentException('El equipo seleccionado no está activo o no pertenece a la empresa de la orden.');
+        }
+        if (!os_equipment_matches_delivery($equipmentRows[0], $old)) {
+            throw new InvalidArgumentException('El equipo seleccionado no está asociado con la dirección de entrega de la orden.');
         }
         $duplicates = ov_rows($conexion, 'SELECT id FROM orden_servicio_equipos
             WHERE orden_servicio_id = ? AND empresa_equipo_id = ?', 'ii', [$id, $equipmentId]);

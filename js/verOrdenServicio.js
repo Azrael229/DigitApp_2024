@@ -32,13 +32,16 @@ function osRenderDetailEquipment(items) {
     });
 }
 
-// Actualiza el selector con los equipos de la empresa que todavía no pertenecen a la orden.
-function osRenderAvailableEquipment(selectedItems) {
+// Ofrece equipos de la dirección de entrega; en SERVICOM admite todas las direcciones del cliente.
+function osRenderAvailableEquipment(selectedItems, deliveryOption) {
+    const deliveryId = String(deliveryOption || '');
     const selectedIds = new Set(selectedItems.map(item => String(item.empresa_equipo_id)));
     const select = document.getElementById('os-detail-equipment-select');
     select.replaceChildren(new Option('Selecciona un equipo', ''));
     osDetailAvailableEquipment.forEach(item => {
-        if (!selectedIds.has(String(item.id))) {
+        const matchesDelivery = deliveryId === 'servicom'
+            || (Number(deliveryId) > 0 && String(item.direccion_id) === deliveryId);
+        if (matchesDelivery && !selectedIds.has(String(item.id))) {
             select.add(new Option([item.descripcion, item.marca, item.modelo, item.identificacion, item.numero_serie].filter(Boolean).join(' · '), item.id));
         }
     });
@@ -62,11 +65,11 @@ function osRenderDetail(order) {
     company.href = 'ver_empresa.php?id=' + Number(order.empresa_id);
     document.getElementById('os-fiscal').textContent = [order.fiscal_razon_social, order.fiscal_rfc, order.fiscal_regimen, order.fiscal_direccion].filter(Boolean).join('\n');
     const deliveryRole = [order.entrega_puesto_mostrado, order.entrega_departamento_mostrado].filter(Boolean).join(' · ');
-    document.getElementById('os-delivery').textContent = [order.entrega_contacto, deliveryRole, order.entrega_telefono, order.entrega_correo, order.entrega_direccion].filter(Boolean).join('\n');
+    document.getElementById('os-delivery').textContent = [order.entrega_contacto, deliveryRole, order.entrega_telefono, order.entrega_correo, order.entrega_direccion_alias, order.entrega_direccion].filter(Boolean).join('\n');
     document.getElementById('os-instructions').textContent = order.instrucciones || 'Sin instrucciones adicionales.';
     document.getElementById('os-notes').textContent = order.notas || 'Sin notas internas.';
     osRenderDetailEquipment(order.equipos || []);
-    osRenderAvailableEquipment(order.equipos || []);
+    osRenderAvailableEquipment(order.equipos || [], order.entrega_direccion_opcion);
     const edit = document.getElementById('os-edit');
     edit.href = 'form_orden_servicio.php?id=' + Number(order.id);
     edit.classList.remove('d-none');

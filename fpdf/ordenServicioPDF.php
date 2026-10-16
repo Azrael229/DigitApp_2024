@@ -293,15 +293,23 @@ $deliveryBody = implode("\n", [
     trim((string) ($orden['entrega_direccion_alias'] ?? '')),
     trim((string) ($orden['entrega_direccion'] ?? '')),
 ]);
-$pdf->infoBox(14, 48, 92, 42, 'DATOS FISCALES DEL CLIENTE', $pdf->compact($fiscalBody, 360), [18, 56, 94]);
-$pdf->infoBox(110, 48, 92, 42, 'ENTREGA Y ATENCIÓN DEL SERVICIO', $pdf->compact($deliveryBody, 360), OrdenServicioPDF::ROJO);
+// Conserva completos el alias y la dirección; ajusta ambos bloques al texto de entrega.
+$fiscalBody = $pdf->compact($fiscalBody, 360);
+$pdf->SetFont('Arial', '', 7.2);
+$clientBoxHeight = max(42.0, 13.0 + 4.0 * max(
+    count($pdf->wrappedLines(88, $fiscalBody)),
+    count($pdf->wrappedLines(88, $deliveryBody))
+));
+$pdf->infoBox(14, 48, 92, $clientBoxHeight, 'DATOS FISCALES DEL CLIENTE', $fiscalBody, [18, 56, 94]);
+$pdf->infoBox(110, 48, 92, $clientBoxHeight, 'ENTREGA Y ATENCIÓN DEL SERVICIO', $deliveryBody, OrdenServicioPDF::ROJO);
 
 // Las instrucciones crecen con el texto y continúan en páginas nuevas sin omitir información.
 $pdf->SetFont('Arial', '', 7.2);
 $instructionLines = $pdf->wrappedLines(184, (string) ($orden['instrucciones'] ?: 'Sin instrucciones adicionales.'));
-$instructionSectionY = 94.0;
+$instructionStartY = 48.0 + $clientBoxHeight + 4.0;
+$instructionSectionY = $instructionStartY;
 do {
-    $pdf->section($instructionSectionY, $instructionSectionY === 94.0
+    $pdf->section($instructionSectionY, $instructionSectionY === $instructionStartY
         ? 'INSTRUCCIONES PARA EJECUTAR EL SERVICIO'
         : 'INSTRUCCIONES PARA EJECUTAR EL SERVICIO · CONTINUACIÓN');
     $instructionBoxY = $instructionSectionY + 6;

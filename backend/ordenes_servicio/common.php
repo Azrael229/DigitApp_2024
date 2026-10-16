@@ -27,6 +27,7 @@ const OS_ESTATUS = [
 ];
 
 const OS_SERVICOM_DELIVERY_KEY = 'servicom';
+const OS_SERVICOM_DELIVERY_ALIAS = 'Instalaciones de SERVICOM Básculas Digitales';
 const OS_SERVICOM_DELIVERY_ADDRESS = 'Calzada de Guadalupe 65, Villas de Guadalupe, C.P. 76116 Santiago de Querétaro, Querétaro.';
 
 // Una orden de servicio completada cierra su orden de venta; ningún otro estatus se propaga.
@@ -90,6 +91,14 @@ function os_insert_equipment(mysqli $db, int $orderId, int $companyId, int $equi
         $equipment['numero_serie'], $equipment['ubicacion'], $equipment['unidad'],
         $equipment['capacidad_maxima'], $equipment['division_real'],
         $equipment['division_verificacion'], $equipment['clase_exactitud']])->close();
+}
+
+// Permite cualquier dirección del cliente en SERVICOM; fuera de ahí exige la dirección de entrega.
+function os_equipment_matches_delivery(array $equipment, array $order): bool
+{
+    $deliveryOption = (string) ($order['entrega_direccion_opcion'] ?? '');
+    return $deliveryOption === OS_SERVICOM_DELIVERY_KEY
+        || ((int) $deliveryOption > 0 && (int) ($equipment['direccion_id'] ?? 0) === (int) $deliveryOption);
 }
 
 // Obtiene la fotografía completa de una orden de servicio y sus equipos.
@@ -173,6 +182,10 @@ function os_get(mysqli $db, int $id, bool $lock = false): array
         && $storedDeliveryAddress === OS_SERVICOM_DELIVERY_ADDRESS
         ? OS_SERVICOM_DELIVERY_KEY
         : ($deliveryAddressId > 0 ? (string) $deliveryAddressId : '');
+    if ($order['entrega_direccion_opcion'] === OS_SERVICOM_DELIVERY_KEY) {
+        $order['entrega_direccion_alias'] = OS_SERVICOM_DELIVERY_ALIAS;
+        $order['entrega_direccion'] = OS_SERVICOM_DELIVERY_ADDRESS;
+    }
     $order['equipos'] = ov_rows($db, 'SELECT * FROM orden_servicio_equipos
         WHERE orden_servicio_id = ? ORDER BY posicion, id', 'i', [$id]);
     return $order;
@@ -218,7 +231,7 @@ function os_source(mysqli $db, int $saleOrderId): array
         LEFT JOIN catalogo_departamentos cd ON cd.id = c.id_departamento
         WHERE ec.id_empresa = ? AND ec.activo = 1 AND c.activo = 1
         ORDER BY ec.es_principal DESC, c.nombre, c.id', 'i', [$order['empresa_id']]);
-    $equipment = ov_rows($db, 'SELECT ee.id, ee.ubicacion, ee.modelo, ee.identificacion,
+    $equipment = ov_rows($db, 'SELECT ee.id, ee.direccion_id, ee.ubicacion, ee.modelo, ee.identificacion,
             ee.numero_serie, ee.unidad, ee.capacidad_maxima, ee.division_real,
             ee.division_verificacion, ee.clase_exactitud, ee.estatus,
             cd.nombre AS descripcion, cm.nombre AS marca
