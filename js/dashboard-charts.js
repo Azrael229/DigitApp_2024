@@ -4,9 +4,9 @@ const dashboardNumber = new Intl.NumberFormat('es-MX');
 
 document.addEventListener('DOMContentLoaded', function () {
     inicializarGraficasHistoricas();
-    establecerPeriodoPredeterminado();
+    establecerMesPredeterminado();
     cargarGraficasDePeriodo();
-    document.getElementById('dashboard-aplicar').addEventListener('click', cargarGraficasDePeriodo);
+    document.getElementById('dashboard-periodo').addEventListener('change', cargarGraficasDePeriodo);
     document.getElementById('dashboard-estatus-oportunidad').addEventListener('change', cargarGraficasDePeriodo);
 });
 
@@ -65,12 +65,17 @@ function inicializarGraficasHistoricas() {
         options: crearOpcionesGrafica({ currency: true })
     });
 
+    const dailyOptions = crearOpcionesGrafica({ currency: true });
+    dailyOptions.scales.x.ticks.autoSkip = false;
+    dailyOptions.scales.x.ticks.maxRotation = 0;
+    dailyOptions.scales.x.ticks.minRotation = 0;
+
     dashboardCharts.opportunities = new Chart(document.getElementById('dashboard-oportunidades'), {
         type: 'bar',
         data: { labels: [], datasets: [{
             label: 'Importe de oportunidades', data: [], backgroundColor: '#35c7b3', borderRadius: 6
         }] },
-        options: crearOpcionesGrafica({ currency: true })
+        options: dailyOptions
     });
 
     dashboardCharts.orders = new Chart(document.getElementById('dashboard-ordenes'), {
@@ -78,100 +83,77 @@ function inicializarGraficasHistoricas() {
         data: { labels: [], datasets: [{
             label: 'Importe de órdenes completadas sin IVA', data: [], backgroundColor: '#60a5fa', borderRadius: 6
         }] },
-        options: crearOpcionesGrafica({ currency: true })
+        options: dailyOptions
     });
 }
 
-// Inicializa el periodo de análisis desde septiembre de 2026 hasta la fecha actual.
-function establecerPeriodoPredeterminado() {
-    const today = new Date();
-    document.getElementById('dashboard-desde').value = '2026-09-01';
-    document.getElementById('dashboard-hasta').value = dashboardFechaLocal(today);
+// Preselecciona el mes y año actuales para mostrar el análisis diario vigente.
+function establecerMesPredeterminado() {
+    document.getElementById('dashboard-periodo').value = dashboardMesLocal(new Date());
 }
 
-// Devuelve una fecha local en formato ISO sin convertirla a UTC.
-function dashboardFechaLocal(date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+// Devuelve el mes local en formato ISO sin convertirlo a UTC.
+function dashboardMesLocal(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
-// Carga oportunidades y órdenes completadas con agregación mensual desde septiembre de 2026.
+// Carga los importes diarios de ambas gráficas para el mes seleccionado.
 async function cargarGraficasDePeriodo() {
-    const from = document.getElementById('dashboard-desde').value;
-    const to = document.getElementById('dashboard-hasta').value;
+    const month = document.getElementById('dashboard-periodo').value;
     const errorBox = document.getElementById('dashboard-error');
     errorBox.classList.add('d-none');
 
-    if (!from || !to || from > to) {
-        errorBox.textContent = 'La fecha inicial debe ser anterior o igual a la fecha final.';
-        errorBox.classList.remove('d-none');
-        return;
-    }
-    if (from < '2026-09-01') {
-        errorBox.textContent = 'El periodo debe comenzar en septiembre de 2026 o después.';
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month) || month < '2026-09') {
+        errorBox.textContent = 'Selecciona un mes válido a partir de septiembre de 2026.';
         errorBox.classList.remove('d-none');
         return;
     }
     const parameters = new URLSearchParams({
-        desde: from,
-        hasta: to,
+        mes: month,
         estatus_oportunidad: document.getElementById('dashboard-estatus-oportunidad').value
     });
-    const button = document.getElementById('dashboard-aplicar');
-    button.disabled = true;
+    const monthInput = document.getElementById('dashboard-periodo');
+    const statusInput = document.getElementById('dashboard-estatus-oportunidad');
+    monthInput.disabled = true;
+    statusInput.disabled = true;
     try {
         const response = await fetch(`../backend/dashboard/api.php?${parameters}`, { headers: { Accept: 'application/json' } });
         const data = await response.json();
         if (!response.ok) {
             throw new Error(data.error || 'No se pudieron cargar los indicadores.');
         }
-        actualizarGraficasDePeriodo(data, from, to);
+        actualizarGraficasDePeriodo(data, month);
     } catch (error) {
         errorBox.textContent = error.message || 'No se pudieron cargar los indicadores.';
         errorBox.classList.remove('d-none');
     } finally {
-        button.disabled = false;
+        monthInput.disabled = false;
+        statusInput.disabled = false;
     }
 }
 
-// Convierte las respuestas del servicio en series mensuales compartidas y valores numéricos.
-function actualizarGraficasDePeriodo(data, from, to) {
+// Convierte los importes diarios en dos series alineadas con todos los días del mes seleccionado.
+function actualizarGraficasDePeriodo(data, month) {
     const opportunities = new Map();
     (data.oportunidades || []).forEach(function (row) {
         opportunities.set(row.periodo, sumarImporteDashboard(opportunities.get(row.periodo) || 0, row.importe));
     });
     const orders = new Map((data.ordenes_venta || []).map(row => [row.periodo, Number(row.importe || 0)]));
-    const periods = crearPeriodosDashboard(from, to, 'mes');
-    dashboardCharts.opportunities.data.labels = periods.map(formatearPeriodoDashboard);
-    dashboardCharts.opportunities.data.datasets[0].data = periods.map(period => opportunities.get(period) || 0);
-    dashboardCharts.orders.data.labels = periods.map(formatearPeriodoDashboard);
-    dashboardCharts.orders.data.datasets[0].data = periods.map(period => orders.get(period) || 0);
+    const days = crearDiasDelMesDashboard(month);
+    dashboardCharts.opportunities.data.labels = days.map(period => String(Number(period.slice(-2))));
+    dashboardCharts.opportunities.data.datasets[0].data = days.map(period => opportunities.get(period) || 0);
+    dashboardCharts.orders.data.labels = days.map(period => String(Number(period.slice(-2))));
+    dashboardCharts.orders.data.datasets[0].data = days.map(period => orders.get(period) || 0);
 
     dashboardCharts.opportunities.update();
     dashboardCharts.orders.update();
 }
 
-// Genera cada día, mes o año del periodo para conservar ceros y una escala comparable.
-function crearPeriodosDashboard(from, to, grouping) {
-    const periods = [];
-    const start = new Date(`${from}T12:00:00`);
-    const end = new Date(`${to}T12:00:00`);
-    if (grouping === 'anio') {
-        for (let year = start.getFullYear(); year <= end.getFullYear(); year++) periods.push(String(year));
-    } else if (grouping === 'mes') {
-        const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
-        const last = new Date(end.getFullYear(), end.getMonth(), 1);
-        while (cursor <= last) {
-            periods.push(`${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, '0')}`);
-            cursor.setMonth(cursor.getMonth() + 1);
-        }
-    } else {
-        const cursor = new Date(start);
-        while (cursor <= end) {
-            periods.push(dashboardFechaLocal(cursor));
-            cursor.setDate(cursor.getDate() + 1);
-        }
-    }
-    return periods;
+// Genera cada fecha real del mes para alinear los datos e incluir días sin importe.
+function crearDiasDelMesDashboard(month) {
+    const [year, monthNumber] = month.split('-').map(Number);
+    const dayCount = new Date(year, monthNumber, 0).getDate();
+    return Array.from({length: dayCount}, (_, index) => `${month}-${String(index + 1).padStart(2, '0')}`);
 }
 
 // Presenta claves de periodo con nombres de mes legibles para el usuario.

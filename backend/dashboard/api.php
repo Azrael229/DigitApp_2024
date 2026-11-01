@@ -19,13 +19,16 @@ function dashboard_fetch(mysqli $db, string $sql, string $types, array $values):
     return $rows;
 }
 
-function dashboard_date(string $value): bool
+function dashboard_month(string $value): bool
 {
-    $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value);
+    if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/D', $value)) {
+        return false;
+    }
+    $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value . '-01');
     $errors = DateTimeImmutable::getLastErrors();
     return $date !== false
         && ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0))
-        && $date->format('Y-m-d') === $value;
+        && $date->format('Y-m') === $value;
 }
 
 try {
@@ -36,12 +39,13 @@ try {
         exit;
     }
 
-    $from = trim((string) ($_GET['desde'] ?? ''));
-    $to = trim((string) ($_GET['hasta'] ?? ''));
+    $month = trim((string) ($_GET['mes'] ?? ''));
     $status = (string) ($_GET['estatus_oportunidad'] ?? 'todos');
-    if (!dashboard_date($from) || !dashboard_date($to) || $from < '2026-09-01' || $from > $to) {
-        throw new InvalidArgumentException('Selecciona un periodo de fechas válido.');
+    if (!dashboard_month($month) || $month < '2026-09') {
+        throw new InvalidArgumentException('Selecciona un mes válido a partir de septiembre de 2026.');
     }
+    $from = $month . '-01';
+    $to = (new DateTimeImmutable($from))->modify('last day of this month')->format('Y-m-d');
     $statuses = ['todos', 'preparacion', 'cotizada', 'negociacion', 'ganada', 'perdida', 'cancelada'];
     if (!in_array($status, $statuses, true)) {
         throw new InvalidArgumentException('Uno de los filtros no es válido.');
@@ -50,7 +54,7 @@ try {
     require __DIR__ . '/../../config/conexion.php';
     $conexion->set_charset('utf8mb4');
 
-    $opportunitySql = 'SELECT DATE_FORMAT(o.fecha, \'%Y-%m\') AS periodo, o.estatus,
+    $opportunitySql = 'SELECT DATE_FORMAT(o.fecha, \'%Y-%m-%d\') AS periodo, o.estatus,
             COUNT(*) AS cantidad, SUM(o.importe) AS importe
         FROM oportunidades_comerciales o
         WHERE o.fecha BETWEEN ? AND ?';
@@ -64,7 +68,7 @@ try {
     $opportunitySql .= ' GROUP BY periodo, o.estatus ORDER BY periodo';
     $opportunities = dashboard_fetch($conexion, $opportunitySql, $opportunityTypes, $opportunityValues);
 
-    $ordersSql = 'SELECT DATE_FORMAT(s.fecha_completada, \'%Y-%m\') AS periodo,
+    $ordersSql = 'SELECT DATE_FORMAT(s.fecha_completada, \'%Y-%m-%d\') AS periodo,
             COUNT(*) AS cantidad, SUM(ov.importe_sin_iva) AS importe
         FROM ordenes_venta ov
         JOIN (
