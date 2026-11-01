@@ -34,6 +34,7 @@ $navigationPages = [
     'ver_servicio.php' => ['title' => 'Servicios', 'group' => 'productos'],
     'Render_zonas_servicio.php' => ['title' => 'Zonas de servicio', 'group' => 'productos'],
     'facturacion.php' => ['title' => 'Facturación', 'group' => 'facturacion'],
+    'dashboard.php' => ['title' => 'Dashboard', 'group' => 'dashboard'],
     'usuarios.php' => ['title' => 'Administración', 'group' => 'usuarios'],
     'mi_cuenta.php' => ['title' => 'Mi cuenta', 'group' => 'cuenta'],
 ];
@@ -61,7 +62,7 @@ if (!empty($authUser['debe_cambiar_password']) && $currentScript !== 'mi_cuenta.
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?= $prefijoRuta ?>estilos/style.css?v=20261031-18">
+    <link rel="stylesheet" href="<?= $prefijoRuta ?>estilos/style.css?v=20261031-20">
     <script src="<?= $prefijoRuta ?>js/date-format.js?v=20261009-1"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script defer src="<?= $prefijoRuta ?>js/app-state.js?v=20261031-14"></script>
@@ -87,6 +88,7 @@ if (!empty($authUser['debe_cambiar_password']) && $currentScript !== 'mi_cuenta.
                 <li class="nav-item dropdown<?= $activeNavigationGroup === 'productos' ? ' active' : '' ?>"><a class="nav-link dropdown-toggle<?= $activeNavigationGroup === 'productos' ? ' active' : '' ?>" href="#" role="button" data-bs-toggle="dropdown"<?= $activeNavigationGroup === 'productos' ? ' aria-current="true"' : '' ?>>Catálogo comercial</a><ul class="dropdown-menu"><li><a class="dropdown-item<?= $isCurrentSection('Productos') ? ' active' : '' ?>" href="<?= $prefijoRuta ?>paginas/productos.php"<?= $isCurrentSection('Productos') ? ' aria-current="page"' : '' ?>>Productos</a></li><li><a class="dropdown-item<?= $isCurrentSection('Servicios') ? ' active' : '' ?>" href="<?= $prefijoRuta ?>paginas/servicios.php"<?= $isCurrentSection('Servicios') ? ' aria-current="page"' : '' ?>>Servicios</a></li><li><hr class="dropdown-divider"></li><li><a class="dropdown-item<?= $isCurrentSection('Zonas de servicio') ? ' active' : '' ?>" href="<?= $prefijoRuta ?>paginas/Render_zonas_servicio.php"<?= $isCurrentSection('Zonas de servicio') ? ' aria-current="page"' : '' ?>>Zonas de servicio</a></li></ul></li>
                 <?php endif; ?>
                 <?php if (auth_has_permission('facturacion', $authUser)): ?><li class="nav-item<?= $activeNavigationGroup === 'facturacion' ? ' active' : '' ?>"><a class="nav-link<?= $isCurrentSection('Facturación') ? ' active' : '' ?>" href="<?= $prefijoRuta ?>paginas/facturacion.php"<?= $isCurrentSection('Facturación') ? ' aria-current="page"' : '' ?>>Facturación</a></li><?php endif; ?>
+                <?php if (auth_has_permission('dashboard', $authUser)): ?><li class="nav-item<?= $activeNavigationGroup === 'dashboard' ? ' active' : '' ?>"><a class="nav-link<?= $isCurrentSection('Dashboard') ? ' active' : '' ?>" href="<?= $prefijoRuta ?>paginas/dashboard.php"<?= $isCurrentSection('Dashboard') ? ' aria-current="page"' : '' ?>><i class="bi bi-speedometer2 me-1" aria-hidden="true"></i>Dashboard</a></li><?php endif; ?>
                 <?php if (auth_has_permission('usuarios', $authUser)): ?><li class="nav-item<?= $activeNavigationGroup === 'usuarios' ? ' active' : '' ?>"><a class="nav-link<?= $isCurrentSection('Administración') ? ' active' : '' ?>" href="<?= $prefijoRuta ?>paginas/usuarios.php"<?= $isCurrentSection('Administración') ? ' aria-current="page"' : '' ?>>Administración</a></li><?php endif; ?>
             </ul>
             <div class="dropdown app-sidebar-user">

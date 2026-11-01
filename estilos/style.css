@@ -16,7 +16,7 @@
 
 @import url("./components/icons.css");
 @import url("./components/cards.css");
-@import url("./components/dashboard.css");
+@import url("./components/dashboard.css?v=20261031-3");
 @import url("./components/alerts.css?v=20261001-2");
 
 @import url("./main/utilities.css?v=20261001-1");

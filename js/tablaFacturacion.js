@@ -125,67 +125,105 @@ function configurarCargaArchivosCfdi() {
     }
 }
 
-function parseCfdiValue(value) {
-    if (typeof value !== 'string') {
-        return typeof value === 'number' ? value : 0;
-    }
-
-    return parseFloat(value.replace(/,/g, '')) || 0;
-}
-
-function formatCfdiValue(value) {
-    return new Intl.NumberFormat('es-MX', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(value);
-}
-
-function updateSummaryValue(id, value) {
-    const element = document.getElementById(id);
-
-    if (element) {
-        element.textContent = value;
-    }
-}
-
-function configurarResumenFacturacion() {
-    if (typeof jQuery === 'undefined' || !jQuery.fn || !jQuery.fn.dataTable || !jQuery.fn.dataTable.isDataTable('#example')) {
+// Mantiene la selección de cada CFDI aunque DataTables filtre, ordene o cambie de página.
+function configurarSeleccionFacturacion() {
+    const tableElement = document.getElementById('example');
+    if (!tableElement || typeof jQuery === 'undefined' || !jQuery.fn.dataTable.isDataTable(tableElement)) {
         return;
     }
 
-    const api = jQuery('#example').DataTable();
+    const api = jQuery(tableElement).DataTable();
+    const selection = new Set();
+    const modeSelect = document.getElementById('filtro-seleccion');
+    const pageCheckbox = document.getElementById('seleccionar-pagina');
+    const selectionFilter = function (settings, _data, dataIndex) {
+        if (settings.nTable !== tableElement) {
+            return true;
+        }
+        const rowNode = settings.aoData[dataIndex] ? settings.aoData[dataIndex].nTr : null;
+        if (!rowNode) {
+            return true;
+        }
+        const mode = modeSelect.value;
+        const isSelected = selection.has(rowNode.dataset.recordKey);
+        return mode === 'selected' ? isSelected : mode === 'unselected' ? !isSelected : true;
+    };
 
-    function updateFilteredCards() {
-        let subtotal = 0;
-        let iva = 0;
-        let total = 0;
+    jQuery.fn.dataTable.ext.search.push(selectionFilter);
 
-        const rows = api.rows({ search: 'applied', page: 'all' }).nodes().toArray();
-
+    // Refleja la selección almacenada en las filas actuales y el estado de selección de la página.
+    function syncVisibleCheckboxes() {
+        const rows = api.rows({ page: 'current' }).nodes().toArray();
         rows.forEach(function (row) {
-            const cells = row.querySelectorAll('td');
-
-            subtotal += parseCfdiValue(cells[3] ? cells[3].getAttribute('data-value') || '0' : '0');
-            iva += parseCfdiValue(cells[4] ? cells[4].getAttribute('data-value') || '0' : '0');
-            total += parseCfdiValue(cells[5] ? cells[5].getAttribute('data-value') || '0' : '0');
+            const checkbox = row.querySelector('.factura-seleccion');
+            if (checkbox) {
+                checkbox.checked = selection.has(row.dataset.recordKey);
+            }
         });
-
-        updateSummaryValue('card-registros', String(rows.length));
-        updateSummaryValue('card-subtotal', formatCfdiValue(subtotal));
-        updateSummaryValue('card-iva', formatCfdiValue(iva));
-        updateSummaryValue('card-total', formatCfdiValue(total));
-        updateSummaryValue('total-subtotal', formatCfdiValue(subtotal));
-        updateSummaryValue('total-iva', formatCfdiValue(iva));
-        updateSummaryValue('total-general', formatCfdiValue(total));
+        if (pageCheckbox) {
+            pageCheckbox.checked = rows.length > 0 && rows.every(function (row) {
+                return selection.has(row.dataset.recordKey);
+            });
+            pageCheckbox.indeterminate = rows.some(function (row) {
+                return selection.has(row.dataset.recordKey);
+            }) && !pageCheckbox.checked;
+        }
     }
 
-    jQuery('#example').off('.cfdiSummary');
-    jQuery('#example').on('draw.dt.cfdiSummary search.dt.cfdiSummary page.dt.cfdiSummary length.dt.cfdiSummary', updateFilteredCards);
+    // Actualiza el filtro y los totales después de cualquier cambio de selección o búsqueda.
+    function redrawSelection() {
+        api.draw(false);
+        syncVisibleCheckboxes();
+    }
 
-    updateFilteredCards();
+    tableElement.addEventListener('change', function (event) {
+        const checkbox = event.target.closest('.factura-seleccion');
+        if (!checkbox) {
+            return;
+        }
+        const row = checkbox.closest('tr[data-record-key]');
+        if (row) {
+            if (checkbox.checked) {
+                selection.add(row.dataset.recordKey);
+            } else {
+                selection.delete(row.dataset.recordKey);
+            }
+            redrawSelection();
+        }
+    });
+
+    if (pageCheckbox) {
+        pageCheckbox.addEventListener('change', function () {
+            api.rows({ page: 'current' }).nodes().toArray().forEach(function (row) {
+                if (pageCheckbox.checked) {
+                    selection.add(row.dataset.recordKey);
+                } else {
+                    selection.delete(row.dataset.recordKey);
+                }
+            });
+            redrawSelection();
+        });
+    }
+
+    modeSelect.addEventListener('change', redrawSelection);
+
+    document.getElementById('seleccionar-visibles').addEventListener('click', function () {
+        api.rows({ search: 'applied', page: 'all' }).nodes().toArray().forEach(function (row) {
+            selection.add(row.dataset.recordKey);
+        });
+        redrawSelection();
+    });
+
+    document.getElementById('limpiar-seleccion').addEventListener('click', function () {
+        selection.clear();
+        redrawSelection();
+    });
+
+    api.on('draw.dt.facturaSelection', syncVisibleCheckboxes);
+    syncVisibleCheckboxes();
 }
 
 document.addEventListener('DOMContentLoaded', function () {
     configurarCargaArchivosCfdi();
-    configurarResumenFacturacion();
+    configurarSeleccionFacturacion();
 });
