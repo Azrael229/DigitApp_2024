@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const dialog = document.getElementById('dialog-remision');
     const select = document.getElementById('orden-remision');
+    const dateInput = document.getElementById('fecha-remision');
     const detail = document.getElementById('detalle-remision');
     const errorBox = document.getElementById('error-remision');
     const saveButton = document.getElementById('confirmar-remision');
@@ -41,26 +42,36 @@ document.addEventListener('DOMContentLoaded', function () {
     // Muestra los datos canónicos de la orden y habilita su registro solo tras revisar el importe.
     select.addEventListener('change', function () {
         const order = orders.find(item => String(item.id) === select.value);
-        saveButton.disabled = !order;
+        saveButton.disabled = !order || !dateInput.value;
         errorBox.textContent = '';
         if (!order) {
             detail.classList.add('d-none');
             return;
         }
-        detail.innerHTML = `<strong>Revisa antes de agregar</strong><br>Fecha: ${escapeHtml(order.fecha_venta)}<br>Razón social: ${escapeHtml(order.cliente)}<br>Descripción: ${escapeHtml(order.descripcion)}<br>Total: ${money.format(Number(order.importe_sin_iva))}`;
+        dateInput.value = String(order.fecha_venta || '').slice(0, 10);
+        detail.innerHTML = `<strong>Revisa antes de agregar</strong><br>Fecha de registro: ${escapeHtml(dateInput.value)}<br>Razón social: ${escapeHtml(order.cliente)}<br>Descripción: ${escapeHtml(order.descripcion)}<br>Total: ${money.format(Number(order.importe_sin_iva))}`;
         detail.classList.remove('d-none');
+    });
+
+    // Actualiza la fecha mostrada y solo habilita el registro con una fecha válida seleccionada.
+    dateInput.addEventListener('change', function () {
+        const order = orders.find(item => String(item.id) === select.value);
+        saveButton.disabled = !order || !dateInput.value;
+        if (order) {
+            detail.innerHTML = `<strong>Revisa antes de agregar</strong><br>Fecha de registro: ${escapeHtml(dateInput.value)}<br>Razón social: ${escapeHtml(order.cliente)}<br>Descripción: ${escapeHtml(order.descripcion)}<br>Total: ${money.format(Number(order.importe_sin_iva))}`;
+        }
     });
 
     // Envía únicamente el identificador: el servidor vuelve a validar la orden y toma sus importes.
     saveButton.addEventListener('click', async function () {
         const order = orders.find(item => String(item.id) === select.value);
-        if (!order || !window.confirm(`¿Agregar la orden ${order.numero_venta} como remisión por ${money.format(Number(order.importe_sin_iva))}?`)) return;
+        if (!order || !dateInput.value || !window.confirm(`¿Agregar la orden ${order.numero_venta} como remisión por ${money.format(Number(order.importe_sin_iva))} con fecha ${dateInput.value}?`)) return;
         saveButton.disabled = true;
         errorBox.textContent = '';
         try {
             const response = await fetch('../backend/facturacion/remisiones_api.php', {
                 method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-                body: JSON.stringify({ orden_id: order.id, csrf: window.facturacionRemisionCsrf })
+                body: JSON.stringify({ orden_id: order.id, fecha_venta: dateInput.value, csrf: window.facturacionRemisionCsrf })
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'No se pudo registrar la remisión.');
@@ -75,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
     dialog.addEventListener('close', function () {
         detail.classList.add('d-none');
         select.value = '';
+        dateInput.value = '';
         errorBox.textContent = '';
     });
 

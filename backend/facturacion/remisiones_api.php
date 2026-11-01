@@ -41,6 +41,11 @@ try {
     if ($orderId === false) {
         remision_responder(422, ['error' => 'Selecciona una orden de venta válida.']);
     }
+    $saleDateInput = (string) ($input['fecha_venta'] ?? '');
+    if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $saleDateInput, $dateParts)
+        || !checkdate((int) $dateParts[2], (int) $dateParts[3], (int) $dateParts[1])) {
+        remision_responder(422, ['error' => 'Selecciona una fecha válida para registrar la remisión.']);
+    }
 
     $db->begin_transaction();
     $stmt = $db->prepare("SELECT ov.id, ov.numero_venta, ov.fecha_generacion, ov.empresa_id, ov.empresa_nombre,
@@ -65,7 +70,7 @@ try {
     $stmt = $db->prepare('INSERT INTO facturacion_remisiones (orden_venta_id, fecha_venta, numero_venta, cliente, rfc, descripcion, importe_sin_iva, creado_por) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
     $creator = (int) ($_SESSION['auth_user_id'] ?? 0);
     $amount = (string) $order['importe_sin_iva'];
-    $saleDate = (string) $order['fecha_venta'];
+    $saleDate = $saleDateInput;
     $orderNumber = (string) $order['numero_venta'];
     $clientName = (string) $order['cliente'];
     $clientRfc = $order['rfc'] === null ? null : (string) $order['rfc'];
