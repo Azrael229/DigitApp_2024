@@ -7,6 +7,9 @@
     --surface-light: rgba(13, 47, 100, 0.88);
     --border-soft: rgba(110, 181, 255, 0.2);
     --border-strong: rgba(228, 0, 124, 0.36);
+    --app-border-vivid: rgba(79, 248, 222, 0.86);
+    --app-shell-bg: rgba(2, 16, 39, 0.88);
+    --app-section-title: #35f59a;
     --text-main: #ffffff;
     --text-soft: rgba(255, 255, 255, 0.72);
     --accent: #59b6ff;
@@ -43,6 +46,9 @@ html[data-theme="dark"] {
     --surface-light: rgba(28, 36, 47, 0.96);
     --border-soft: rgba(159, 177, 198, 0.2);
     --border-strong: rgba(91, 192, 222, 0.42);
+    --app-border-vivid: rgba(103, 232, 219, 0.82);
+    --app-shell-bg: rgba(8, 11, 16, 0.94);
+    --app-section-title: #55f0ad;
     --text-main: #edf3f8;
     --text-soft: rgba(221, 231, 239, 0.7);
     --accent: #67c7e8;

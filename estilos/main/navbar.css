@@ -1,7 +1,7 @@
 .navbar.bg-dark {
     background: rgba(2, 16, 39, 0.88) !important;
     backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(89, 182, 255, 0.2);
+    border-bottom: 1px solid var(--app-border-vivid);
 }
 
 .navbar-brand,
@@ -16,16 +16,38 @@
     color: var(--accent) !important;
 }
 
+@media (hover: hover) {
+    .app-sidebar .navbar-nav > .nav-item > .nav-link:not(.active):hover,
+    .app-sidebar .navbar-nav > .nav-item > .nav-link:not(.active):focus:not(:focus-visible) {
+        background: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+        outline: none;
+    }
+}
+
+.navbar .nav-link.active,
+.navbar .nav-item.dropdown.active > .nav-link {
+    color: var(--app-section-title) !important;
+    background: linear-gradient(90deg, rgba(79, 248, 222, 0.17), rgba(79, 248, 222, 0.045));
+    border-radius: 8px;
+    box-shadow: inset 3px 0 0 var(--app-border-vivid), 0 0 18px rgba(79, 248, 222, 0.08);
+    font-weight: 700;
+}
+
+.navbar .dropdown-item.active {
+    color: var(--app-section-title) !important;
+    background: rgba(79, 248, 222, 0.14);
+    border-radius: 6px;
+    box-shadow: inset 3px 0 0 var(--app-border-vivid);
+    font-weight: 700;
+}
+
 .dropdown-menu {
     background: rgba(4, 22, 52, 0.98);
     border: 1px solid rgba(89, 182, 255, 0.18);
     border-radius: 14px;
     box-shadow: var(--shadow-md);
-}
-
-/* Mantiene accesibles los menús aun si el complemento externo tarda en cargar. */
-.navbar .dropdown:focus-within > .dropdown-menu {
-    display: block;
 }
 
 @media (hover: hover) and (min-width: 1200px) {
@@ -49,4 +71,197 @@
 
 .dropdown-divider {
     border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dark"] .navbar.bg-dark {
+    border-bottom-color: var(--app-border-vivid);
+}
+
+/* INICIO BLOQUE REVERSIBLE: panel lateral móvil 2026-10-31. */
+.app-mobile-nav-backdrop {
+    display: none;
+}
+
+@media (max-width: 767.98px) {
+    body.app-sidebar-layout.app-mobile-crm-layout.app-mobile-nav-open {
+        overflow: hidden;
+    }
+
+    .app-mobile-nav-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1040;
+        display: none;
+        background: rgba(3, 10, 22, 0.62);
+        backdrop-filter: blur(2px);
+    }
+
+    body.app-mobile-crm-layout.app-mobile-nav-open .app-mobile-nav-backdrop {
+        display: block;
+    }
+
+    body.app-mobile-crm-layout .navbar.app-sidebar {
+        position: fixed;
+        top: 0;
+        right: auto;
+        bottom: 0;
+        left: 0;
+        z-index: 1050;
+        display: flex;
+        width: min(84vw, 292px);
+        height: 100vh;
+        height: 100dvh;
+        padding: 12px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        border-right: 1px solid var(--app-border-vivid);
+        border-bottom: 0;
+        box-shadow: 12px 0 32px rgba(0, 0, 0, 0.3);
+        transform: translateX(-105%);
+        transition: transform 0.22s ease;
+    }
+
+    body.app-mobile-crm-layout.app-mobile-nav-open .navbar.app-sidebar {
+        transform: translateX(0);
+    }
+
+    body.app-mobile-crm-layout .app-sidebar > .container {
+        display: flex;
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0;
+    }
+
+    body.app-mobile-crm-layout .app-sidebar .navbar-collapse {
+        display: flex !important;
+        flex: 1 1 auto;
+        flex-direction: column;
+        align-items: stretch;
+        padding-top: 1rem;
+    }
+
+    body.app-mobile-crm-layout .app-sidebar .navbar-nav {
+        width: 100%;
+        flex-direction: column;
+        margin-right: 0 !important;
+        margin-bottom: auto !important;
+    }
+
+    body.app-mobile-crm-layout .app-sidebar .nav-item,
+    body.app-mobile-crm-layout .app-sidebar .nav-link {
+        width: 100%;
+    }
+
+    body.app-mobile-crm-layout .app-sidebar .navbar-nav .dropdown-menu {
+        position: static;
+        width: 100%;
+        margin: 0;
+        padding-left: 0.75rem;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    body.app-mobile-crm-layout .app-sidebar .navbar-collapse > .dropdown {
+        margin-top: 1rem;
+    }
+
+    body.app-mobile-crm-layout .app-sidebar .app-sidebar-user {
+        position: relative;
+    }
+
+    body.app-mobile-crm-layout .app-sidebar .app-sidebar-user > .dropdown-toggle {
+        width: 100%;
+    }
+
+    body.app-mobile-crm-layout .app-sidebar .app-sidebar-user > .dropdown-menu {
+        top: auto;
+        right: auto;
+        bottom: 100%;
+        left: 0;
+        min-width: min(250px, calc(84vw - 24px));
+        margin: 0 0 0.25rem;
+    }
+}
+/* FIN BLOQUE REVERSIBLE: panel lateral móvil 2026-10-31. */
+
+@media (min-width: 1200px) {
+    .navbar.app-sidebar {
+        top: 0;
+        right: auto;
+        bottom: 0;
+        left: 0;
+        width: 260px;
+        height: 100vh;
+        align-items: stretch;
+        padding: 12px;
+        overflow-y: auto;
+        border-right: 1px solid var(--app-border-vivid);
+        border-bottom: 0;
+    }
+
+    .app-sidebar > .container {
+        display: flex;
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0;
+    }
+
+    .app-sidebar .navbar-collapse {
+        flex-grow: 1;
+        flex-direction: column;
+        align-items: stretch;
+        padding-top: 1rem;
+    }
+
+    .app-sidebar .navbar-nav {
+        width: 100%;
+        flex-direction: column;
+        margin-right: 0 !important;
+        margin-bottom: auto !important;
+    }
+
+    .app-sidebar .nav-item,
+    .app-sidebar .nav-link {
+        width: 100%;
+    }
+
+    .app-sidebar .navbar-nav .dropdown-menu {
+        position: static;
+        width: 100%;
+        margin: 0;
+        padding-left: 0.75rem;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .app-sidebar .navbar-collapse > .dropdown {
+        margin-top: 1rem;
+    }
+
+    .app-sidebar .app-sidebar-user .dropdown-menu {
+        top: auto;
+        right: auto;
+        bottom: 100%;
+        left: 0;
+        margin-bottom: 0;
+    }
+
+    body.app-sidebar-layout {
+        margin-top: 20px;
+        margin-left: 260px;
+    }
+
+    body.app-sidebar-layout .contain {
+        width: min(1520px, calc(100vw - 292px));
+    }
 }

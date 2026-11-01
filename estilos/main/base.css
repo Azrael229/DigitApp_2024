@@ -47,7 +47,7 @@ html[data-theme="dark"] body::after {
 
 html[data-theme="dark"] .contain {
     background: linear-gradient(180deg, rgba(24, 31, 41, 0.97), rgba(13, 18, 25, 0.98));
-    border-color: rgba(159, 177, 198, 0.2);
+    border-color: var(--app-border-vivid);
 }
 
 html[data-theme="dark"] .contain::before {

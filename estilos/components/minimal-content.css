@@ -1,0 +1,57 @@
+/* INICIO BLOQUE REVERSIBLE: contenido minimalista y desplazamiento global 2026-10-31. */
+body.app-sidebar-layout .contain {
+    max-height: none !important;
+    margin-top: calc(var(--app-navbar-offset, 78px) + 96px) !important;
+    margin-bottom: 24px !important;
+    overflow: visible !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+body.app-sidebar-layout .contain::before {
+    display: none !important;
+    content: none !important;
+}
+
+body.app-sidebar-layout .contain .table-responsive:not(.data-table-shell) {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+body.app-sidebar-layout .contain .data-table-shell {
+    padding: 1.5rem !important;
+    background: var(--surface) !important;
+    border: 1px solid var(--app-border-vivid) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-md) !important;
+}
+
+body.app-sidebar-layout .contain.detail-page .data-table-shell {
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 767.98px) {
+    body.app-sidebar-layout .contain .data-table-shell {
+        padding: 1rem !important;
+    }
+
+    /* INICIO BLOQUE REVERSIBLE: espacio bajo encabezado móvil 2026-10-31. */
+    body.app-sidebar-layout.app-mobile-crm-layout .contain {
+        width: calc(100vw - 16px);
+        max-width: none;
+        margin-top: 68px !important;
+        margin-bottom: 12px !important;
+    }
+    /* FIN BLOQUE REVERSIBLE: espacio bajo encabezado móvil 2026-10-31. */
+}
+
+/* FIN BLOQUE REVERSIBLE: contenido minimalista y desplazamiento global 2026-10-31. */

@@ -14,9 +14,9 @@ require __DIR__ . '/../construct/header.php';
         <div class="factura-resumen-item factura-resumen-total"><span class="factura-resumen-label">Subtotal sin IVA · MXN</span><strong id="op-subtotal">$0.00</strong></div>
     </div>
     <p class="contactos-muted">El subtotal incluye todas las páginas que coincidan con los filtros.</p>
-    <div class="table-responsive data-table-shell table-wide mt-4">
+    <div class="data-table-shell table-wide mt-4 oportunidades-table-shell">
         <table id="tabla-oportunidades" class="table table-secondary table-striped align-middle mb-0 w-100">
-            <thead><tr><th>Fecha</th><th>Número</th><th>Razón social</th><th>Contacto</th><th>Proyecto</th><th>Importe sin IVA</th><th>Estatus</th><th>Registro</th></tr></thead>
+            <thead><tr><th>Fecha</th><th>Número</th><th>Razón social</th><th>Contacto</th><th>Proyecto</th><th>Importe sin IVA</th><th>Colaborador</th><th>Estatus</th><th>Registro</th></tr></thead>
             <tbody></tbody>
         </table>
     </div>

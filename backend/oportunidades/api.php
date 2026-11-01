@@ -44,11 +44,12 @@ try {
         $result['addresses'] = op_rows($conexion, 'SELECT * FROM empresa_direcciones WHERE empresa_id = ?
             ORDER BY es_principal DESC, tipo_direccion, id', 'i', [$company]);
     } elseif ($action === 'list') {
-        $result['data'] = op_rows($conexion, 'SELECT o.*,
+        $result['data'] = op_rows($conexion, 'SELECT o.*, u.nombre_completo AS colaborador,
             CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa), NULLIF(TRIM(e.regimen_capital), \'\')) AS empresa,
             c.nombre AS contacto
             FROM oportunidades_comerciales o JOIN empresas e ON e.id_e = o.empresa_id
-            LEFT JOIN contactos c ON c.id = o.contacto_id ORDER BY o.created_at DESC, o.id DESC');
+            LEFT JOIN contactos c ON c.id = o.contacto_id
+            LEFT JOIN usuarios u ON u.id = o.created_by ORDER BY o.created_at DESC, o.id DESC');
     } elseif ($action === 'get') {
         $result['opportunity'] = op_get($conexion, op_id($input['id'] ?? null));
     } elseif ($action === 'quotes') {

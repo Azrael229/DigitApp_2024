@@ -11,6 +11,23 @@
 .op-status-perdida, .op-status-cancelada { background: rgba(255, 184, 84, .22); color: #ffe0a6; }
 #tabla-oportunidades td:nth-child(4) { min-width: 12rem; overflow-wrap: anywhere; }
 #tabla-oportunidades td:nth-child(2), #tabla-oportunidades td:nth-child(6), #tabla-oportunidades td:nth-child(7) { white-space: nowrap; }
+#tabla-oportunidades thead tr:first-child th:nth-child(7),
+#tabla-oportunidades tbody td:nth-child(7) {
+    min-width: 150px;
+    white-space: nowrap;
+    overflow-wrap: normal;
+}
+.oportunidades-table-shell .dataTables_scrollBody {
+    max-width: 100%;
+    overflow-x: auto !important;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+}
+.oportunidades-table-shell .dataTables_scrollHeadInner,
+.oportunidades-table-shell .dataTables_scrollHeadInner table,
+.oportunidades-table-shell .dataTables_scrollBody table {
+    min-width: 1180px !important;
+}
 
 .op-detail-copy {
     align-items: flex-start;
