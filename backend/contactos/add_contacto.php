@@ -34,24 +34,26 @@ function normalizarTelefonoContacto($valor): ?string
     return normalizarTelefonoMX($original);
 }
 
-function redirigirContacto(?int $empresaContexto, ?int $empresaRetorno, bool $esNuevo, array $empresas): void
+function redirigirContacto(?int $empresaContexto, ?int $empresaRetorno, bool $esNuevo, array $empresas, int $contactoId): void
 {
+    $marca = '&master_sync=contacto&master_id=' . $contactoId;
     $returnUrl = trim((string) ($_POST['return_url'] ?? ''));
     if ($returnUrl !== '' && preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
-        header('Location: ../../paginas/' . $returnUrl);
+        $separador = str_contains($returnUrl, '?') ? '&' : '?';
+        header('Location: ../../paginas/' . $returnUrl . $separador . 'master_sync=contacto&master_id=' . $contactoId);
         exit;
     }
     if ($esNuevo && $empresaContexto !== null && in_array($empresaContexto, $empresas, true)) {
-        header('Location: ../../paginas/ver_empresa.php?id=' . $empresaContexto);
+        header('Location: ../../paginas/ver_empresa.php?id=' . $empresaContexto . $marca);
         exit;
     }
 
     if ($empresaRetorno !== null && in_array($empresaRetorno, $empresas, true)) {
-        header('Location: ../../paginas/ver_empresa.php?id=' . $empresaRetorno);
+        header('Location: ../../paginas/ver_empresa.php?id=' . $empresaRetorno . $marca);
         exit;
     }
 
-    header('Location: ../../paginas/contactos.php');
+    header('Location: ../../paginas/contactos.php?master_sync=contacto&master_id=' . $contactoId);
     exit;
 }
 
@@ -380,5 +382,5 @@ try {
 }
 
 mysqli_close($conexion);
-redirigirContacto($empresaContexto, $empresaRetorno, $esNuevo, $empresas);
+redirigirContacto($empresaContexto, $empresaRetorno, $esNuevo, $empresas, (int) $idContacto);
 ?>

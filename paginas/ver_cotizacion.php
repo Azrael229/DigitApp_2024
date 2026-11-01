@@ -145,7 +145,7 @@ require __DIR__ . '/../construct/header.php';
             <a href="nuevaCotizacion.php?id=<?= (int) $cotizacion['id_coti'] ?>" class="btn btn-secondary text-nowrap"><i class="bi bi-pencil" aria-hidden="true"></i> Editar cotización</a>
             <form action="../fpdf/cotizacionPDF.php" method="post" target="_blank" class="m-0">
                 <input type="hidden" name="cotizacion_id" value="<?= (int) $cotizacion['id_coti'] ?>">
-                <button type="submit" class="btn btn-secondary w-100 text-nowrap"><i class="bi bi-printer" aria-hidden="true"></i> Imprimir o guardar PDF</button>
+                <button type="submit" class="btn btn-secondary w-100 text-nowrap"><i class="bi bi-printer" aria-hidden="true"></i> Imprimir</button>
             </form>
             <a href="tablaCotizaciones.php" class="btn btn-secondary text-nowrap"><i class="bi bi-arrow-left" aria-hidden="true"></i> Cotizaciones</a>
         </div>
@@ -318,6 +318,7 @@ require __DIR__ . '/../construct/header.php';
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="../js/datatable-filters.js?v=20261008-2"></script>
 <script src="../js/datatable-config.js"></script>
-<script src="../js/ver_cotizacion.js?v=20261004-2"></script>
+<script src="../js/cotizaciones-status.js?v=20261003-1"></script>
+<script src="../js/ver_cotizacion.js?v=20261101-1"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

@@ -27,5 +27,5 @@ require __DIR__ . '/../construct/header.php';
 <script src="../js/datatable-filters.js?v=20261008-2"></script>
 <script src="../js/datatable-config.js"></script>
 <script src="../js/oportunidades-common.js?v=20261009-1"></script>
-<script src="../js/tablaOportunidades.js?v=20261007-1"></script>
+<script src="../js/tablaOportunidades.js?v=20261101-1"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

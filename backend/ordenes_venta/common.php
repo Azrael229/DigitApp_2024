@@ -147,7 +147,7 @@ function ov_get(mysqli $db, int $id, bool $lock = false): array
         }
     }
     $rows = ov_rows($db, 'SELECT ov.*, o.numero_oportunidad, o.descripcion_corta, o.descripcion_larga,
-            c.cot_numero
+            c.cot_numero, c.cot_subtotal AS importe_cotizacion
         FROM ordenes_venta ov
         JOIN oportunidades_comerciales o ON o.id = ov.oportunidad_id
         JOIN cotizaciones c ON c.id_coti = ov.cotizacion_id
@@ -156,6 +156,7 @@ function ov_get(mysqli $db, int $id, bool $lock = false): array
         throw new OutOfBoundsException('Orden de venta no encontrada.');
     }
     $order = $rows[0];
+    $order['importe_sin_iva'] = $order['importe_cotizacion'];
     $companies = ov_rows($db, 'SELECT empresa, razon_social, regimen_capital FROM empresas WHERE id_e = ?', 'i', [(int) $order['empresa_id']]);
     if ($companies) {
         $order['empresa_nombre'] = trim(implode(' ', array_filter([

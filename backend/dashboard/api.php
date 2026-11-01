@@ -55,7 +55,9 @@ try {
     $conexion->set_charset('utf8mb4');
 
     $opportunitySql = 'SELECT DATE_FORMAT(o.fecha, \'%Y-%m-%d\') AS periodo, o.estatus,
-            COUNT(*) AS cantidad, SUM(o.importe) AS importe
+            COUNT(*) AS cantidad, SUM(COALESCE((SELECT SUM(c.cot_subtotal)
+                FROM oportunidad_cotizaciones oc JOIN cotizaciones c ON c.id_coti = oc.cotizacion_id
+                WHERE oc.oportunidad_id = o.id AND LOWER(c.cot_status) LIKE \'%aceptada%\'), o.importe)) AS importe
         FROM oportunidades_comerciales o
         WHERE o.fecha BETWEEN ? AND ?';
     $opportunityTypes = 'ss';
@@ -69,8 +71,9 @@ try {
     $opportunities = dashboard_fetch($conexion, $opportunitySql, $opportunityTypes, $opportunityValues);
 
     $ordersSql = 'SELECT DATE_FORMAT(s.fecha_completada, \'%Y-%m-%d\') AS periodo,
-            COUNT(*) AS cantidad, SUM(ov.importe_sin_iva) AS importe
+            COUNT(*) AS cantidad, SUM(c.cot_subtotal) AS importe
         FROM ordenes_venta ov
+        JOIN cotizaciones c ON c.id_coti = ov.cotizacion_id
         JOIN (
             SELECT orden_venta_id, MIN(created_at) AS fecha_completada
             FROM orden_venta_seguimiento

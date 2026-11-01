@@ -157,3 +157,4 @@ document.getElementById('ov-copy').addEventListener('click', function () {
 });
 
 ovLoadOrder().catch(error => OV.message('mensaje_orden', error.message));
+window.DigitAppMasterSync?.subscribe(() => ovLoadOrder().catch(error => OV.message('mensaje_orden', error.message)));

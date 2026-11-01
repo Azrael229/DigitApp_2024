@@ -58,7 +58,7 @@ require __DIR__ . '/../construct/header.php';
                     <div class="col-12 empresa-data-field"><div class="empresa-data-label">Descripción corta</div><div id="op-descripcion-corta" class="empresa-data-value op-project-title"></div></div>
                     <div class="col-12 empresa-data-field"><div class="empresa-data-label">Descripción detallada</div><div id="op-descripcion" class="empresa-data-value op-detail-copy"></div></div>
                     <div class="col-md-6 empresa-data-field"><div class="empresa-data-label">Fecha</div><div id="op-fecha" class="empresa-data-value"></div></div>
-                    <div class="col-md-6 empresa-data-field"><div class="empresa-data-label">Importe propuesto sin IVA (MXN)</div><div id="op-importe" class="empresa-data-value"></div></div>
+                    <div class="col-md-6 empresa-data-field"><div class="empresa-data-label">Importe sin IVA vigente (MXN)</div><div id="op-importe" class="empresa-data-value"></div></div>
                 </div>
             </div>
         </section>
@@ -69,7 +69,7 @@ require __DIR__ . '/../construct/header.php';
                     <a id="op-nueva-cotizacion" class="btn btn-secondary btn-sm d-none"><i class="bi bi-plus-lg" aria-hidden="true"></i> Nueva cotización</a>
                 </div>
                 <div id="mensaje_cotizaciones" class="alert d-none" role="status" aria-live="polite"></div>
-                <div class="table-responsive data-table-shell empresa-table-wrap table-wide"><table id="op-tabla-cotizaciones" class="table table-secondary table-striped align-middle mb-0 w-100"><thead><tr><th>Fecha</th><th>Cotización</th><th>Contacto</th><th>Importe registrado</th><th>Acción</th><th>Estatus</th><th>Duplicar</th></tr></thead><tbody id="op-cotizaciones"></tbody></table></div>
+                <div class="table-responsive data-table-shell empresa-table-wrap table-wide"><table id="op-tabla-cotizaciones" class="table table-secondary table-striped align-middle mb-0 w-100"><thead><tr><th>Fecha</th><th>Cotización</th><th>Contacto</th><th>Importe sin IVA</th><th>Acción</th><th>Estatus</th><th>Duplicar</th></tr></thead><tbody id="op-cotizaciones"></tbody></table></div>
                 <form id="op-vincular" class="row g-3 mt-3"><div class="col-md-9"><label for="op-cotizacion" class="form-label">Vincular una cotización de esta empresa</label><select id="op-cotizacion" class="form-select" required disabled><option value="">Seleccionar cotización</option></select></div><div class="col-md-3 d-flex align-items-end"><button id="op-vincular-boton" class="btn btn-secondary" disabled>Vincular</button></div></form>
             </div>
         </section>
@@ -89,5 +89,5 @@ require __DIR__ . '/../construct/header.php';
 <script src="../js/datatable-config.js"></script>
 <script src="../js/oportunidades-common.js?v=20261009-1"></script>
 <script src="../js/cotizaciones-status.js?v=20261003-1"></script>
-<script src="../js/ver_oportunidad.js?v=20261012-1"></script>
+<script src="../js/ver_oportunidad.js?v=20261101-2"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

@@ -35,12 +35,17 @@
         select.disabled = true;
         try {
             const result = await OV.request('status', {id: data.id, version: data.version, estatus: select.value}, true);
+            window.DigitAppMasterSync?.publish('orden_venta', data.id);
             row.data({...data, ...result.order}).draw(false);
             OV.message('mensaje_ordenes', 'Estatus actualizado.', true);
         } catch (error) { OV.message('mensaje_ordenes', error.message); row.data(data).draw(false); }
     });
-    try {
+    // Vuelve a consultar los datos maestros y el subtotal vigente sin recargar la página.
+    async function refreshSalesOrders() {
         const result = await OV.request('list');
-        table.rows.add(result.data).draw();
-    } catch (error) { OV.message('mensaje_ordenes', error.message); }
+        table.clear().rows.add(result.data).draw();
+    }
+    window.DigitAppMasterSync?.subscribe(() => refreshSalesOrders().catch(error => OV.message('mensaje_ordenes', error.message)));
+    try { await refreshSalesOrders(); }
+    catch (error) { OV.message('mensaje_ordenes', error.message); }
 })();

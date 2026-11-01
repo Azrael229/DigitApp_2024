@@ -4,7 +4,14 @@ require __DIR__ . '/../backend/auth/bootstrap.php';
 $authUser = auth_require_permission('facturacion');
 require __DIR__ . '/../construct/header.php';
 require __DIR__ . '/../backend/facturacion/query_xml_cfdi.php';
-$stmtRemisiones = auth_db()->query('SELECT id, fecha_venta AS fecha, cliente, rfc, descripcion, importe_sin_iva, numero_venta FROM facturacion_remisiones ORDER BY fecha_venta DESC, id DESC');
+$stmtRemisiones = auth_db()->query('SELECT r.id, r.fecha_venta AS fecha,
+    COALESCE(NULLIF(TRIM(CONCAT_WS(\' \', e.razon_social, e.regimen_capital)), \'\'), e.empresa, r.cliente) AS cliente,
+    COALESCE(e.rfc, r.rfc) AS rfc, r.descripcion, c.cot_subtotal AS importe_sin_iva, r.numero_venta
+    FROM facturacion_remisiones r
+    LEFT JOIN ordenes_venta ov ON ov.id = r.orden_venta_id
+    LEFT JOIN empresas e ON e.id_e = ov.empresa_id
+    LEFT JOIN cotizaciones c ON c.id_coti = ov.cotizacion_id
+    ORDER BY r.fecha_venta DESC, r.id DESC');
 $remisiones = $stmtRemisiones ? $stmtRemisiones->fetch_all(MYSQLI_ASSOC) : [];
 $datosVentasMensuales = array_map(static fn(array $factura): array => [
     'fecha' => $factura['fecha'], 'importe_neto' => (float) ($factura['subtotal'] ?: 0),
@@ -47,6 +54,6 @@ usort($registrosFacturacion, static fn(array $a, array $b): int => (strtotime($b
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script><script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script><script src="../js/datatable-filters.js?v=20261008-2"></script><script src="../js/datatable-config.js"></script><script src="../js/main.js"></script><script src="../js/tablaFacturacion.js?v=20261031-1"></script>
 <dialog id="dialog-remision" class="facturacion-remision-dialog"><form method="dialog"><div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h5 mb-0">Agregar venta por remisión</h2><button class="btn-close" aria-label="Cerrar"></button></div><label for="orden-remision" class="form-label">Orden de venta completada</label><select id="orden-remision" class="form-select"><option value="">Cargando órdenes…</option></select><div id="detalle-remision" class="alert alert-light mt-3 d-none"></div><div id="error-remision" class="text-danger small mb-3" role="alert"></div><div class="d-flex justify-content-end gap-2"><button class="btn btn-outline-secondary" value="cancel">Cancelar</button><button id="confirmar-remision" class="btn btn-success" type="button" disabled>Confirmar registro</button></div></form></dialog>
-<script>window.facturacionRemisionCsrf = <?= json_encode(auth_csrf()) ?>;</script><script src="../js/facturacion-remisiones.js?v=20261031-1"></script>
-<?php if (auth_has_permission('facturacion_graficas', $authUser)): ?><script>window.facturacionDatosVentas = <?= json_encode($datosVentasMensuales, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="../js/facturacion-charts.js?v=20261031-3"></script><?php endif; ?>
+<script>window.facturacionRemisionCsrf = <?= json_encode(auth_csrf()) ?>;</script><script src="../js/facturacion-remisiones.js?v=20261101-1"></script>
+<?php if (auth_has_permission('facturacion_graficas', $authUser)): ?><script>window.facturacionDatosVentas = <?= json_encode($datosVentasMensuales, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="../js/facturacion-charts.js?v=20261101-1"></script><?php endif; ?>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

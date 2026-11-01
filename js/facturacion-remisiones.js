@@ -64,7 +64,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'No se pudo registrar la remisión.');
-            window.location.reload();
+            window.DigitAppMasterSync?.publish('remision', data.id);
+            dialog.close();
         } catch (error) {
             errorBox.textContent = error.message;
             saveButton.disabled = false;
@@ -76,6 +77,26 @@ document.addEventListener('DOMContentLoaded', function () {
         select.value = '';
         errorBox.textContent = '';
     });
+
+    // Reemplaza las filas y los datos mensuales con la respuesta actual del servidor, sin recargar el navegador.
+    async function refreshBillingData() {
+        const response = await fetch(location.href, {cache: 'no-store', credentials: 'same-origin'});
+        if (!response.ok) { throw new Error('No se pudieron actualizar los registros de ventas.'); }
+        const html = await response.text();
+        const updatedPage = new DOMParser().parseFromString(html, 'text/html');
+        const rows = Array.from(updatedPage.querySelectorAll('#example tbody tr'));
+        const table = jQuery('#example').DataTable();
+        table.clear().rows.add(rows).draw();
+        const dataScript = Array.from(updatedPage.scripts).find(script => script.textContent.includes('window.facturacionDatosVentas'));
+        if (dataScript) {
+            const assignment = dataScript.textContent.match(/window\.facturacionDatosVentas\s*=\s*(\[[\s\S]*\]);?/);
+            if (assignment) { window.facturacionDatosVentas = JSON.parse(assignment[1]); }
+        }
+        window.dispatchEvent(new Event('digitapp:facturacion-data-refreshed'));
+        await loadOrders();
+    }
+    window.refrescarFacturacionSinRecarga = refreshBillingData;
+    window.DigitAppMasterSync?.subscribe(() => refreshBillingData().catch(error => { errorBox.textContent = error.message; }));
 });
 
 // Escapa los textos provenientes de la orden antes de presentarlos en el resumen del diálogo.

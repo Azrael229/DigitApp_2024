@@ -13,6 +13,9 @@ function valorPostDireccion(string $campo): ?string
 
 function redirigirEmpresaDireccion(int $empresaId, string $parametro = ''): void
 {
+    if (str_contains($parametro, 'direccion_actualizada=1') || str_contains($parametro, 'direccion_guardada=1')) {
+        $parametro .= '&master_sync=direccion&master_id=' . $empresaId;
+    }
     $returnUrl = trim((string) ($_POST['return_url'] ?? ''));
     if ($returnUrl !== '' && preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
         $separador = str_contains($returnUrl, '?') ? '&' : '?';

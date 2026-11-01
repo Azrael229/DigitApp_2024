@@ -25,7 +25,7 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
             <strong id="cot-registros">0</strong>
         </div>
         <div class="factura-resumen-item factura-resumen-total">
-            <span class="factura-resumen-label">Importe total filtrado · MXN</span>
+            <span class="factura-resumen-label">Importe sin IVA filtrado · MXN</span>
             <strong id="cot-total-filtrado">$0.00</strong>
         </div>
     </div>
@@ -39,7 +39,7 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
                             <th scope="col" class="cot-col-company">RAZÓN SOCIAL</th>
                             <th scope="col" class="cot-col-contact">CONTACTO</th>
                             <th scope="col" class="cot-col-email">CORREO ELECTRÓNICO</th>
-                            <th scope="col" class="cot-col-amount">IMPORTE</th>
+                            <th scope="col" class="cot-col-amount">IMPORTE SIN IVA</th>
                             <th scope="col" class="cot-col-status">ESTATUS</th>
                             <th scope="col" class="table-action-column">DUPLICAR</th>
                             <?php if ($esAdministrador): ?><th scope="col" class="admin-delete-column">ELIMINAR</th><?php endif; ?>
@@ -59,7 +59,7 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
                             <td class="cot-col-email">
                                 <div class="table-text-two-lines"><?= htmlspecialchars((string) (($row_coti['cot_correo'] ?? '') ?: 'Sin correo'), ENT_QUOTES, 'UTF-8') ?></div>
                             </td>
-                            <td class="cot-col-amount" data-cot-total="<?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" data-order="<?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>">$ <?= htmlspecialchars(number_format((float) $row_coti['cot_total'], 2, '.', ' '), ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="cot-col-amount" data-cot-total="<?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" data-order="<?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>">$ <?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ' '), ENT_QUOTES, 'UTF-8') ?></td>
                             <?php $estatusClave = cotizacionEstatusClave($row_coti['cot_status'] ?? ''); ?>
                             <td class="cot-col-status"><select class="form-select form-select-sm cot-status-select" data-id="<?= (int) $row_coti['id_coti'] ?>" aria-label="Estatus de cotización <?= htmlspecialchars((string) ($row_coti['cot_numero'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"><?php foreach (COTIZACION_ESTATUS as $clave => $etiqueta): ?><option value="<?= $clave ?>"<?= $estatusClave === $clave ? ' selected' : '' ?>><?= htmlspecialchars($etiqueta, ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select></td>
                             <td class="table-action-column"><a class="btn btn-outline-secondary btn-sm text-nowrap" href="nuevaCotizacion.php?duplicar_id=<?= (int) $row_coti['id_coti'] ?>"><i class="bi bi-copy" aria-hidden="true"></i> Duplicar</a></td>
@@ -94,5 +94,5 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
-<script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261012-1"></script>
+<script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261101-2"></script>
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>

@@ -35,12 +35,24 @@ try {
 
     if ($action === 'list') {
         $result['data'] = ov_rows($conexion, 'SELECT ov.*, o.numero_oportunidad, c.cot_numero,
+                c.cot_subtotal AS importe_cotizacion,
+                COALESCE(ct.nombre, ov.contacto_nombre) AS contacto_maestro,
+                COALESCE(ct.correo, ov.contacto_correo) AS correo_maestro,
+                COALESCE(ct.celular, ov.contacto_telefono) AS telefono_maestro,
                 CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa, ov.empresa_nombre), NULLIF(TRIM(e.regimen_capital), \'\')) AS empresa_nombre
             FROM ordenes_venta ov
             JOIN oportunidades_comerciales o ON o.id = ov.oportunidad_id
             JOIN cotizaciones c ON c.id_coti = ov.cotizacion_id
             LEFT JOIN empresas e ON e.id_e = ov.empresa_id
+            LEFT JOIN contactos ct ON ct.id = ov.contacto_id
             ORDER BY ov.created_at DESC, ov.id DESC');
+        foreach ($result['data'] as &$order) {
+            $order['importe_sin_iva'] = $order['importe_cotizacion'];
+            $order['contacto_nombre'] = $order['contacto_maestro'];
+            $order['contacto_correo'] = $order['correo_maestro'];
+            $order['contacto_telefono'] = $order['telefono_maestro'];
+        }
+        unset($order);
     } elseif ($action === 'get') {
         $result['order'] = ov_get($conexion, ov_id($input['id'] ?? null));
     } elseif ($action === 'sources') {
@@ -51,7 +63,7 @@ try {
             c.nombre AS contacto, c.celular, c.correo,
             q.id_coti AS cotizacion_id, q.cot_numero, q.cot_status,
             q.cot_contacto, q.cot_telefono, q.cot_correo, q.cot_direccion,
-            CASE WHEN q.cot_subtotal > 0 THEN q.cot_subtotal ELSE o.importe END AS importe_sin_iva,
+            q.cot_subtotal AS importe_sin_iva,
             ov.id AS orden_id,
             d.calle, d.numero_exterior, d.numero_interior, d.colonia, d.ciudad,
             d.estado, d.codigo_postal, d.pais
@@ -218,9 +230,7 @@ try {
             }
         } else {
             $number = reservarFolioComercial($conexion, 'OV', $generationDate);
-            $amount = (float) $source['cot_subtotal'] > 0
-                ? number_format((float) $source['cot_subtotal'], 2, '.', '')
-                : number_format((float) $source['oportunidad_importe'], 2, '.', '');
+            $amount = number_format((float) $source['cot_subtotal'], 2, '.', '');
             ov_query($conexion, 'INSERT INTO ordenes_venta
                 (numero_venta, fecha_generacion, fecha_programada, oportunidad_id, cotizacion_id,
                  empresa_id, contacto_id, direccion_id, empresa_nombre, contacto_nombre,

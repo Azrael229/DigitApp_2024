@@ -5,7 +5,13 @@ require __DIR__ . '/../backend/auth/bootstrap.php';
 $authUser = auth_require_permission('dashboard');
 require __DIR__ . '/../construct/header.php';
 require __DIR__ . '/../backend/facturacion/query_xml_cfdi.php';
-$remisionesDashboard = auth_db()->query('SELECT fecha_venta AS fecha, cliente, rfc, importe_sin_iva FROM facturacion_remisiones')->fetch_all(MYSQLI_ASSOC);
+$remisionesDashboard = auth_db()->query('SELECT r.fecha_venta AS fecha,
+    COALESCE(NULLIF(TRIM(CONCAT_WS(\' \', e.razon_social, e.regimen_capital)), \'\'), e.empresa, r.cliente) AS cliente,
+    COALESCE(e.rfc, r.rfc) AS rfc, c.cot_subtotal AS importe_sin_iva
+    FROM facturacion_remisiones r
+    LEFT JOIN ordenes_venta ov ON ov.id = r.orden_venta_id
+    LEFT JOIN empresas e ON e.id_e = ov.empresa_id
+    LEFT JOIN cotizaciones c ON c.id_coti = ov.cotizacion_id')->fetch_all(MYSQLI_ASSOC);
 $datosDashboardCfdi = array_map(static fn(array $factura): array => [
     'fecha' => $factura['fecha'],
     'cliente' => $factura['cliente'],
@@ -51,5 +57,5 @@ foreach ($remisionesDashboard as $remision) {
 </main>
 <script>window.dashboardInvoiceData = <?= json_encode($datosDashboardCfdi, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="../js/dashboard-charts.js?v=20261101-2"></script>
+<script src="../js/dashboard-charts.js?v=20261101-3"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

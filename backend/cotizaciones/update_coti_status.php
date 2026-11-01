@@ -45,6 +45,13 @@ try {
     if ($cotizacion['orden_venta_id'] !== null && $estatus !== 'aceptada') {
         throw new InvalidArgumentException('Una cotización con orden de venta debe permanecer Aceptada.');
     }
+    if ($estatus === 'aceptada') {
+        $detalle = cotizacionDetalle($conexion, (int) $id);
+        $pendientes = cotizacionPendientesParaPdf($detalle, $detalle['partidas']);
+        if ($pendientes !== []) {
+            throw new InvalidArgumentException('Completa la cotización antes de aceptarla: ' . implode(', ', $pendientes) . '.');
+        }
+    }
 
     $actualizar = $conexion->prepare('UPDATE cotizaciones SET cot_status = ?, version = version + 1 WHERE id_coti = ?');
     $actualizar->bind_param('si', $estatus, $id);

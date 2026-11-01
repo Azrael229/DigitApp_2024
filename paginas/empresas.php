@@ -92,6 +92,6 @@ if (empty($_SESSION['empresas_tabla_csrf'])) {
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js?v=20261008-2"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
-<script src="<?= $prefijoRuta ?>js/tablaEmpresas.js?v=20261009-1"></script>
+<script src="<?= $prefijoRuta ?>js/tablaEmpresas.js?v=20261101-1"></script>
 
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>

@@ -19,7 +19,7 @@ try {
     $input = $method === 'POST' ? $_POST : $_GET;
     $action = (string) ($input['action'] ?? 'list');
     $reads = ['list', 'get', 'companies', 'options', 'quotes'];
-    $writes = ['save', 'amount', 'link', 'unlink'];
+    $writes = ['save', 'link', 'unlink'];
     if (!in_array($action, $method === 'GET' ? $reads : $writes, true)) {
         throw new InvalidArgumentException('Acción no válida.');
     }
@@ -44,7 +44,11 @@ try {
         $result['addresses'] = op_rows($conexion, 'SELECT * FROM empresa_direcciones WHERE empresa_id = ?
             ORDER BY es_principal DESC, tipo_direccion, id', 'i', [$company]);
     } elseif ($action === 'list') {
-        $result['data'] = op_rows($conexion, 'SELECT o.*, u.nombre_completo AS colaborador,
+        $result['data'] = op_rows($conexion, 'SELECT o.*,
+            COALESCE((SELECT SUM(c.cot_subtotal) FROM oportunidad_cotizaciones oc
+                JOIN cotizaciones c ON c.id_coti = oc.cotizacion_id
+                WHERE oc.oportunidad_id = o.id AND LOWER(c.cot_status) LIKE \'%aceptada%\'), o.importe) AS importe_vigente,
+            u.nombre_completo AS colaborador,
             CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa), NULLIF(TRIM(e.regimen_capital), \'\')) AS empresa,
             c.nombre AS contacto
             FROM oportunidades_comerciales o JOIN empresas e ON e.id_e = o.empresa_id
@@ -54,9 +58,31 @@ try {
         $result['opportunity'] = op_get($conexion, op_id($input['id'] ?? null));
     } elseif ($action === 'quotes') {
         $op = op_get($conexion, op_id($input['id'] ?? null));
-        $result['linked'] = op_rows($conexion, 'SELECT c.* FROM oportunidad_cotizaciones oc
-            JOIN cotizaciones c ON c.id_coti = oc.cotizacion_id WHERE oc.oportunidad_id = ? ORDER BY c.id_coti DESC', 'i', [$op['id']]);
+        $result['linked'] = op_rows($conexion, 'SELECT c.*,
+            CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa), NULLIF(TRIM(e.regimen_capital), \'\')) AS empresa_actual,
+            ct.nombre AS contacto_actual, ct.celular AS telefono_actual,
+            ct.correo AS correo_actual, COALESCE(cd.nombre, ct.depto) AS departamento_actual,
+            d.id AS direccion_actual_id, d.calle, d.numero_exterior, d.numero_interior,
+            d.colonia, d.localidad, d.municipio, d.ciudad, d.estado, d.codigo_postal,
+            d.pais, d.entre_calles, d.referencia, d.direccion_original
+            FROM oportunidad_cotizaciones oc
+            JOIN cotizaciones c ON c.id_coti = oc.cotizacion_id
+            LEFT JOIN empresas e ON e.id_e = c.empresa_id
+            LEFT JOIN contactos ct ON ct.id = c.contacto_id
+            LEFT JOIN catalogo_departamentos cd ON cd.id = ct.id_departamento
+            LEFT JOIN empresa_direcciones d ON d.id = c.direccion_id AND d.empresa_id = c.empresa_id
+            WHERE oc.oportunidad_id = ? ORDER BY c.id_coti DESC', 'i', [$op['id']]);
         foreach ($result['linked'] as &$quote) {
+            if ($quote['empresa_actual'] !== null) { $quote['cot_empresa'] = $quote['empresa_actual']; }
+            if ($quote['contacto_actual'] !== null) {
+                $quote['cot_contacto'] = $quote['contacto_actual'];
+                $quote['cot_telefono'] = $quote['telefono_actual'] ?? '';
+                $quote['cot_correo'] = $quote['correo_actual'] ?? '';
+                $quote['cot_departamento'] = $quote['departamento_actual'] ?? '';
+            }
+            if ($quote['direccion_id'] !== null && $quote['direccion_actual_id'] !== null) {
+                $quote['cot_direccion'] = cotizacionDireccionActual($quote);
+            }
             $file = trim((string) ($quote['cot_archivo'] ?? ''));
             $quote['pdf_disponible'] = $file !== '' && !preg_match('/[\\\\\/]/', $file)
                 && preg_match('/\.pdf$/i', $file) === 1
@@ -72,7 +98,7 @@ try {
         $transaction = true;
         $id = op_id($input['id'] ?? '', $action === 'save');
         $old = $id ? op_get($conexion, $id, true) : null;
-        if ($old && in_array($action, ['save', 'amount'], true)
+        if ($old && $action === 'save'
             && (string) ($input['version'] ?? '') !== (string) $old['version']) {
             throw new RuntimeException('Otra edición modificó esta oportunidad. Recarga la página antes de guardar.');
         }
@@ -89,10 +115,10 @@ try {
             }
             $short = trim((string) ($input['descripcion_corta'] ?? ''));
             $long = trim((string) ($input['descripcion_larga'] ?? ''));
-            if ($short === '' || mb_strlen($short, 'UTF-8') > 150 || strlen($long) > 60000) {
-                throw new InvalidArgumentException('Escribe una descripción corta de hasta 150 caracteres y un detalle de hasta 60,000 bytes.');
+            if (mb_strlen($short, 'UTF-8') > 150 || strlen($long) > 60000) {
+                throw new InvalidArgumentException('La descripción excede la longitud permitida.');
             }
-            $amount = op_amount($input['importe'] ?? '');
+            $amount = trim((string) ($input['importe'] ?? '')) === '' ? '0.00' : op_amount($input['importe']);
             $status = $id ? (string) ($input['estatus'] ?? '') : 'preparacion';
             if (!isset(OP_ESTATUS[$status])) {
                 throw new InvalidArgumentException('El estatus no es válido.');
@@ -115,10 +141,6 @@ try {
                 $id = (int) $conexion->insert_id;
             }
             sincronizarEstatusOportunidadCotizaciones($conexion, $id);
-        } elseif ($action === 'amount') {
-            $amount = op_amount($input['importe'] ?? '');
-            op_query($conexion, 'UPDATE oportunidades_comerciales SET importe = ?, updated_by = ?,
-                updated_at = CURRENT_TIMESTAMP, version = version + 1 WHERE id = ?', 'sii', [$amount, $actor, $id])->close();
         } else {
             $quoteId = op_id($input['cotizacion_id'] ?? null);
             if ($action === 'link') {

@@ -28,6 +28,7 @@ function redirigirFormulario(string $parametro, ?int $contactoId = null): void
 
 function redirigirVistaEmpresa(int $empresaId, string $parametro): void
 {
+    $parametro .= '&master_sync=empresa&master_id=' . $empresaId;
     $returnUrl = trim((string) ($_POST['return_url'] ?? ''));
     if ($returnUrl !== '' && preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
         $separador = str_contains($returnUrl, '?') ? '&' : '?';
@@ -157,10 +158,10 @@ try {
         redirigirVistaEmpresa($empresaId, 'empresa_actualizada=1');
     }
     if ($contactoRetornoId !== null) {
-        header('Location: ../../paginas/ver_contacto.php?id=' . $contactoRetornoId . '&empresa_relacionada=1');
+        header('Location: ../../paginas/ver_contacto.php?id=' . $contactoRetornoId . '&empresa_relacionada=1&master_sync=empresa&master_id=' . $empresaId);
         exit;
     }
-    redirigirFormulario('guardado=1');
+    redirigirFormulario('guardado=1&master_sync=empresa&master_id=' . $empresaId);
 } catch (Throwable $error) {
     mysqli_rollback($conexion);
     mysqli_close($conexion);

@@ -238,6 +238,6 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
 <script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
-<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261009-3"></script>
+<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261101-1"></script>
 
 <?php require (__DIR__ . "/../construct/footer.html"); ?>

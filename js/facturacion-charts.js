@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const ventas = Array.isArray(window.facturacionDatosVentas) ? window.facturacionDatosVentas : [];
     const mensual = obtenerVentasMensuales(ventas, 13);
-    new Chart(canvas, {
+    window.facturacionChartVentas = new Chart(canvas, {
         type: 'bar',
         data: {
             labels: mensual.map(([periodo]) => formatearMesFacturacion(periodo)),
@@ -32,6 +32,15 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
+});
+
+// Actualiza la gráfica mensual cuando otra pestaña registra o cambia una venta.
+window.addEventListener('digitapp:facturacion-data-refreshed', function () {
+    if (!window.facturacionChartVentas) { return; }
+    const monthly = obtenerVentasMensuales(window.facturacionDatosVentas || [], 13);
+    window.facturacionChartVentas.data.labels = monthly.map(([period]) => formatearMesFacturacion(period));
+    window.facturacionChartVentas.data.datasets[0].data = monthly.map(([, amount]) => amount);
+    window.facturacionChartVentas.update();
 });
 
 // Muestra el periodo como mes abreviado y año para facilitar la comparación interanual.

@@ -99,7 +99,11 @@ $consultaEquipos->close();
 
 $consultaOportunidades = $conexion->prepare(
     'SELECT o.id, o.numero_oportunidad, o.fecha, o.contacto_id, c.nombre AS contacto,
-            o.descripcion_corta, o.importe, o.estatus, o.created_at
+            o.descripcion_corta,
+            COALESCE((SELECT SUM(q.cot_subtotal) FROM oportunidad_cotizaciones oc
+                JOIN cotizaciones q ON q.id_coti = oc.cotizacion_id
+                WHERE oc.oportunidad_id = o.id AND LOWER(q.cot_status) LIKE \'%aceptada%\'), o.importe) AS importe,
+            o.estatus, o.created_at
      FROM oportunidades_comerciales o
      LEFT JOIN contactos c ON c.id = o.contacto_id
      WHERE o.empresa_id = ?
@@ -111,11 +115,12 @@ $oportunidades = $consultaOportunidades->get_result()->fetch_all(MYSQLI_ASSOC);
 $consultaOportunidades->close();
 
 $consultaCotizaciones = $conexion->prepare(
-    'SELECT id_coti, cot_fecha, cot_contacto, cot_total, cot_archivo,
-            cot_numero, cot_status
-     FROM cotizaciones
-     WHERE empresa_id = ?
-     ORDER BY id_coti DESC'
+    'SELECT c.id_coti, c.cot_fecha, COALESCE(ct.nombre, c.cot_contacto) AS cot_contacto,
+            c.cot_total, c.cot_archivo, c.cot_numero, c.cot_status
+     FROM cotizaciones c
+     LEFT JOIN contactos ct ON ct.id = c.contacto_id
+     WHERE c.empresa_id = ?
+     ORDER BY c.id_coti DESC'
 );
 $consultaCotizaciones->bind_param('i', $id);
 $consultaCotizaciones->execute();

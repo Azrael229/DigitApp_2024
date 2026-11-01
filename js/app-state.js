@@ -1,3 +1,26 @@
+// Propaga cambios confirmados en datos maestros entre pestañas del mismo navegador.
+window.DigitAppMasterSync = {
+    key: 'digitapp:master-data-update',
+    // Publica el registro guardado para que las demás pestañas consulten de nuevo sus datos.
+    publish(entity, id) {
+        const detail = {entity, id: Number(id) || null, updatedAt: Date.now()};
+        try { localStorage.setItem(this.key, JSON.stringify(detail)); } catch (_) {}
+        window.dispatchEvent(new CustomEvent('digitapp:master-data-updated', {detail}));
+    },
+    // Registra una actualización local de datos maestros, oportunidades o documentos.
+    subscribe(callback) {
+        window.addEventListener('digitapp:master-data-updated', event => callback(event.detail));
+    }
+};
+
+window.addEventListener('storage', event => {
+    if (event.key !== window.DigitAppMasterSync.key || !event.newValue) { return; }
+    try {
+        const detail = JSON.parse(event.newValue);
+        window.dispatchEvent(new CustomEvent('digitapp:master-data-updated', {detail}));
+    } catch (_) {}
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     const body = document.body;
     const version = body.dataset.appVersion;
@@ -9,6 +32,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeSwitch = document.getElementById('digitapp-theme-switch');
     // Cámbialo a false para volver al diseño móvil anterior sin alterar el escritorio.
     const mobileNavigationEnabled = true;
+
+    const masterUpdate = new URLSearchParams(location.search);
+    const masterEntity = masterUpdate.get('master_sync');
+    const masterId = masterUpdate.get('master_id');
+    if (masterEntity && masterId) {
+        window.DigitAppMasterSync.publish(masterEntity, masterId);
+        masterUpdate.delete('master_sync');
+        masterUpdate.delete('master_id');
+        const query = masterUpdate.toString();
+        history.replaceState(null, '', location.pathname + (query ? '?' + query : '') + location.hash);
+    }
 
     // Mantiene abierto el grupo de la página actual sin cerrar otros grupos desplegados.
     function initializeSidebarDropdownPersistence() {

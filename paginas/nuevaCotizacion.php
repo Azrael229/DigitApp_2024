@@ -401,6 +401,6 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
-<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261015-1"></script>
+<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261101-1"></script>
 
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>

@@ -69,6 +69,7 @@
         try {
             const result = await Op.request('save', params, true);
             dirty = false;
+            window.DigitAppMasterSync?.publish('oportunidad', result.opportunity.id);
             window.location.href = 'ver_oportunidad.php?id=' + encodeURIComponent(result.opportunity.id);
         } catch (error) { busy = false; fields.disabled = false; save.disabled = false; Op.message('mensaje_oportunidad', error.message); }
     });

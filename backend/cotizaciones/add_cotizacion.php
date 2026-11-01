@@ -367,8 +367,8 @@ try {
             throw new InvalidArgumentException('La oportunidad no corresponde a la empresa seleccionada.');
         }
     }
-    if ($empresaNombre === '' && $contactoNombre === '') {
-        throw new InvalidArgumentException('Para guardar el borrador indica al menos una empresa o un contacto.');
+    if ($empresaId === null || $fecha === null) {
+        throw new InvalidArgumentException('Para guardar el borrador selecciona una empresa e indica la fecha.');
     }
 
     $moneda = 'MXN';

@@ -8,6 +8,13 @@ document.addEventListener('DOMContentLoaded', function () {
     cargarGraficasDePeriodo();
     document.getElementById('dashboard-periodo').addEventListener('change', cargarGraficasDePeriodo);
     document.getElementById('dashboard-estatus-oportunidad').addEventListener('change', cargarGraficasDePeriodo);
+    window.DigitAppMasterSync?.subscribe(() => {
+        cargarGraficasDePeriodo();
+        actualizarGraficasHistoricasDesdeServidor().catch(error => {
+            document.getElementById('dashboard-error').textContent = error.message;
+            document.getElementById('dashboard-error').classList.remove('d-none');
+        });
+    });
 });
 
 // Construye las gráficas históricas con la base homogénea de ventas netas sin IVA.
@@ -20,7 +27,7 @@ function inicializarGraficasHistoricas() {
     const monthlySales = obtenerVentasMensualesDashboard(invoices, 13);
     const topClientsOptions = crearOpcionesGrafica({ horizontal: true, currency: true });
     topClientsOptions.scales.y.ticks.autoSkip = false;
-    topClientsOptions.scales.y.ticks.callback = value => topClients[value]?.name ?? '';
+    topClientsOptions.scales.y.ticks.callback = value => dashboardCharts.clients?.data.labels[value] ?? '';
 
     dashboardCharts.clients = new Chart(document.getElementById('dashboard-top-clientes'), {
         type: 'bar',
@@ -44,7 +51,7 @@ function inicializarGraficasHistoricas() {
     topMonthsOptions.scales.y.ticks.autoSkip = false;
     topMonthsOptions.scales.y.ticks.maxRotation = 0;
     topMonthsOptions.scales.y.ticks.font = { size: 12 };
-    topMonthsOptions.scales.y.ticks.callback = value => rankedTopMonths[value]?.label ?? '';
+    topMonthsOptions.scales.y.ticks.callback = value => dashboardCharts.months?.data.labels[value] ?? '';
     dashboardCharts.months = new Chart(document.getElementById('dashboard-top-meses'), {
         type: 'bar',
         data: { labels: rankedTopMonths.map(item => item.label), datasets: [{
@@ -85,6 +92,34 @@ function inicializarGraficasHistoricas() {
         }] },
         options: dailyOptions
     });
+}
+
+// Actualiza los gráficos históricos desde las ventas y nombres maestros que devuelve la página.
+async function actualizarGraficasHistoricasDesdeServidor() {
+    const response = await fetch(location.href, {cache: 'no-store', credentials: 'same-origin'});
+    if (!response.ok) { throw new Error('No se pudieron actualizar las ventas históricas.'); }
+    const documentActualizado = new DOMParser().parseFromString(await response.text(), 'text/html');
+    const script = Array.from(documentActualizado.scripts).find(item => item.textContent.includes('window.dashboardInvoiceData'));
+    const assignment = script?.textContent.match(/window\.dashboardInvoiceData\s*=\s*(\[[\s\S]*\]);?/);
+    if (!assignment) { return; }
+    window.dashboardInvoiceData = JSON.parse(assignment[1]);
+    const invoices = window.dashboardInvoiceData;
+    const clients = obtenerTopClientesDashboard(invoices);
+    dashboardCharts.clients.data.labels = clients.map(item => item.name);
+    dashboardCharts.clients.data.datasets[0].data = clients.map(item => item.total);
+    dashboardCharts.clients.update();
+    const years = obtenerVentasAnualesDashboard(invoices);
+    dashboardCharts.yearly.data.labels = years.map(item => item.year);
+    dashboardCharts.yearly.data.datasets[0].data = years.map(item => item.total);
+    dashboardCharts.yearly.update();
+    const months = obtenerTopMesesDashboard(invoices).map((item, index) => ({...item, label: `${index + 1}. ${item.label}`}));
+    dashboardCharts.months.data.labels = months.map(item => item.label);
+    dashboardCharts.months.data.datasets[0].data = months.map(item => item.total);
+    dashboardCharts.months.update();
+    const monthly = obtenerVentasMensualesDashboard(invoices, 13);
+    dashboardCharts.monthly.data.labels = monthly.map(item => item.label);
+    dashboardCharts.monthly.data.datasets[0].data = monthly.map(item => item.total);
+    dashboardCharts.monthly.update();
 }
 
 // Preselecciona el mes y año actuales para mostrar el análisis diario vigente.

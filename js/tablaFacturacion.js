@@ -82,10 +82,7 @@ function guardarArchivoCfdi(file, tipo) {
 
             alert(data.message || 'Archivo guardado correctamente.');
 
-            // Recargar la página automáticamente para actualizar la tabla con el nuevo CFDI cargado
-            setTimeout(function () {
-                window.location.reload();
-            }, 500);
+            window.DigitAppMasterSync?.publish('cfdi', Date.now());
         })
         .catch(function () {
             alert('Ocurrio un error al enviar el archivo.');

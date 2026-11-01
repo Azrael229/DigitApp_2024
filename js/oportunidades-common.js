@@ -11,9 +11,9 @@ window.Op = {
     // Formatea un importe para mostrarlo como moneda mexicana.
     money(value) { return Number(value || 0).toLocaleString('es-MX', {style: 'currency', currency: 'MXN'}); },
     // Suma importes en centavos exactos para evitar errores de punto flotante.
-    total(rows) {
+    total(rows, field = 'importe') {
         const cents = rows.reduce((sum, row) => {
-            const [whole, decimals = ''] = String(row.importe).split('.');
+            const [whole, decimals = ''] = String(row[field] ?? 0).split('.');
             return sum + BigInt(whole) * 100n + BigInt(decimals.padEnd(2, '0'));
         }, 0n);
         return '$' + (cents / 100n).toLocaleString('es-MX') + '.' + String(cents % 100n).padStart(2, '0');

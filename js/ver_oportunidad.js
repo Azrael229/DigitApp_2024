@@ -20,7 +20,7 @@
             {data: 'cot_fecha', render: (value, type) => type === 'display' ? Op.date(value) : value},
             {data: 'cot_numero', render: (value, type, row) => type === 'display' ? `<a class="entity-link fw-semibold" href="ver_cotizacion.php?id=${Number(row.id_coti)}">${Op.escape(value || '#' + row.id_coti)}</a>` : (value || '')},
             {data: 'cot_contacto', defaultContent: '', render: DataTable.render.text()},
-            {data: 'cot_total', render: (value, type) => type === 'display' ? Op.money(value) : Number(value || 0)},
+            {data: 'cot_subtotal', render: (value, type) => type === 'display' ? Op.money(value) : Number(value || 0)},
             {data: 'id_coti', orderable: false, searchable: false, render: value => `<button type="button" class="btn btn-outline-secondary btn-sm" data-quote="${Number(value)}">Desvincular</button>`},
             {data: 'cot_status', defaultContent: '', render: (value, type, row) => {
                 const key = CotStatus.key(value);
@@ -82,6 +82,7 @@
                 throw new Error(result.error || 'No fue posible actualizar el estatus.');
             }
             select.dataset.previous = result.estatus;
+            window.DigitAppMasterSync?.publish('cotizacion', select.dataset.id);
             select.className = `form-select form-select-sm cot-status-select cot-status-${result.estatus}`;
             const opportunityStatus = Op.statuses[result.oportunidad_estatus] ? result.oportunidad_estatus : 'preparacion';
             const badge = document.getElementById('op-estatus');
@@ -89,6 +90,7 @@
             badge.className = 'badge op-status op-title-status op-status-' + opportunityStatus;
             const quotes = await loadQuotes();
             const refreshed = await Op.request('get', {id});
+            document.getElementById('op-importe').textContent = Op.money(refreshed.opportunity.importe_vigente);
             document.getElementById('op-auditoria').textContent = Op.audit(refreshed.opportunity);
             const accepted = quotes.linked.some(quote => CotStatus.key(quote.cot_status) === 'aceptada');
             createOrder.classList.toggle('d-none', opportunityStatus !== 'ganada' || !accepted);
@@ -127,7 +129,7 @@
         document.getElementById('op-descripcion-corta').textContent = op.descripcion_corta || 'Sin descripción corta.';
         document.getElementById('op-descripcion').textContent = op.descripcion_larga || 'Sin descripción detallada.';
         document.getElementById('op-fecha').textContent = Op.date(op.fecha);
-        document.getElementById('op-importe').textContent = Op.money(op.importe);
+        document.getElementById('op-importe').textContent = Op.money(op.importe_vigente);
         document.getElementById('op-auditoria').textContent = Op.audit(op);
         document.getElementById('op-detalle').classList.remove('d-none');
         try {
@@ -139,4 +141,28 @@
         } catch (error) { Op.message('mensaje_cotizaciones', error.message); }
         if (window.jQuery && jQuery.fn.select2) { jQuery(quoteSelect).select2({width: '100%'}); }
     } catch (error) { Op.message('mensaje_oportunidad', error.message); }
+
+    // Sincroniza datos maestros e importes calculados de una oportunidad ya abierta.
+    async function refreshOpportunity() {
+        const {opportunity: op} = await Op.request('get', {id});
+        const statusKey = Op.statuses[op.estatus] ? op.estatus : 'preparacion';
+        const badge = document.getElementById('op-estatus');
+        badge.textContent = Op.statuses[statusKey] || op.estatus;
+        badge.className = 'badge op-status op-title-status op-status-' + statusKey;
+        const company = document.getElementById('op-empresa');
+        company.textContent = op.empresa || 'Empresa sin nombre';
+        company.href = 'ver_empresa.php?id=' + Number(op.empresa_id);
+        document.getElementById('op-direccion').textContent = op.direccion_id ? Op.address(op) : 'Sin dirección asignada';
+        const contact = document.getElementById('op-contacto');
+        contact.textContent = op.contacto || 'Sin contacto asignado';
+        if (op.contacto_id) { contact.href = 'ver_contacto.php?id=' + Number(op.contacto_id); }
+        else { contact.removeAttribute('href'); }
+        document.getElementById('op-contacto-telefono').textContent = op.contacto_telefono || 'Sin teléfono';
+        document.getElementById('op-contacto-correo').textContent = op.contacto_correo || 'Sin correo electrónico';
+        document.getElementById('op-importe').textContent = Op.money(op.importe_vigente);
+        const quotes = await loadQuotes();
+        const accepted = quotes.linked.some(quote => CotStatus.key(quote.cot_status) === 'aceptada');
+        createOrder.classList.toggle('d-none', statusKey !== 'ganada' || !accepted);
+    }
+    window.DigitAppMasterSync?.subscribe(() => refreshOpportunity().catch(error => Op.message('mensaje_oportunidad', error.message)));
 })();

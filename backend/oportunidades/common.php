@@ -65,6 +65,10 @@ function op_get(mysqli $db, int $id, bool $lock = false): array {
         }
     }
     $rows = op_rows($db, 'SELECT o.*,
+        COALESCE((SELECT SUM(c.cot_subtotal)
+            FROM oportunidad_cotizaciones oc
+            JOIN cotizaciones c ON c.id_coti = oc.cotizacion_id
+            WHERE oc.oportunidad_id = o.id AND LOWER(c.cot_status) LIKE \'%aceptada%\'), o.importe) AS importe_vigente,
         CONCAT_WS(\' \', COALESCE(NULLIF(TRIM(e.razon_social), \'\'), e.empresa), NULLIF(TRIM(e.regimen_capital), \'\')) AS empresa,
         c.nombre AS contacto,
         c.celular AS contacto_telefono, c.correo AS contacto_correo,

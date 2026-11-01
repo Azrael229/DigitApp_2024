@@ -27,12 +27,17 @@
         select.disabled = true;
         try {
             const result = await OS.request('status', {id: data.id, version: data.version, estatus: select.value}, true);
+            window.DigitAppMasterSync?.publish('orden_servicio', data.id);
             row.data({...data, ...result.order}).draw(false);
             OS.message('mensaje_servicios', 'Estatus actualizado.', true);
         } catch (error) { OS.message('mensaje_servicios', error.message); row.data(data).draw(false); }
     });
-    try {
+    // Actualiza cliente y contacto desde los registros maestros sin recargar la página.
+    async function refreshServiceOrders() {
         const result = await OS.request('list');
-        table.rows.add(result.data).draw();
-    } catch (error) { OS.message('mensaje_servicios', error.message); }
+        table.clear().rows.add(result.data).draw();
+    }
+    window.DigitAppMasterSync?.subscribe(() => refreshServiceOrders().catch(error => OS.message('mensaje_servicios', error.message)));
+    try { await refreshServiceOrders(); }
+    catch (error) { OS.message('mensaje_servicios', error.message); }
 })();

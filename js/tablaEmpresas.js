@@ -38,3 +38,12 @@ document.querySelector('#example tbody').addEventListener('change', async functi
 });
 
 document.querySelectorAll('.empresa-role-select').forEach(select => { select.dataset.previous = select.value; });
+
+// Recarga las filas de empresas con sus nombres y contactos actuales desde los registros maestros.
+async function actualizarTablaEmpresasMaestras() {
+    const response = await fetch(location.href, {cache: 'no-store', credentials: 'same-origin'});
+    if (!response.ok) { throw new Error('No se pudieron actualizar las empresas.'); }
+    const documentUpdated = new DOMParser().parseFromString(await response.text(), 'text/html');
+    table.clear().rows.add(Array.from(documentUpdated.querySelectorAll('#example tbody tr'))).draw();
+}
+window.DigitAppMasterSync?.subscribe(() => actualizarTablaEmpresasMaestras().catch(error => console.error(error)));

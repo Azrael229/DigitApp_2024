@@ -18,10 +18,11 @@ try {
                 COALESCE(NULLIF(TRIM(CONCAT_WS(' ', e.razon_social, e.regimen_capital)), ''), e.empresa, ov.empresa_nombre) AS cliente,
                 e.rfc,
                 COALESCE(NULLIF(TRIM(o.descripcion_corta), ''), NULLIF(TRIM(o.descripcion_larga), ''), ov.numero_venta) AS descripcion,
-                ov.importe_sin_iva,
+                c.cot_subtotal AS importe_sin_iva,
                 COALESCE((SELECT DATE(MAX(s.created_at)) FROM orden_venta_seguimiento s
                     WHERE s.orden_venta_id = ov.id AND s.tipo = 'estatus' AND s.estatus = 'completada'), ov.fecha_generacion) AS fecha_venta
             FROM ordenes_venta ov
+            JOIN cotizaciones c ON c.id_coti = ov.cotizacion_id
             JOIN oportunidades_comerciales o ON o.id = ov.oportunidad_id
             JOIN empresas e ON e.id_e = ov.empresa_id
             LEFT JOIN facturacion_remisiones r ON r.orden_venta_id = ov.id
@@ -42,13 +43,15 @@ try {
     }
 
     $db->begin_transaction();
-    $stmt = $db->prepare("SELECT ov.id, ov.numero_venta, ov.fecha_generacion, ov.empresa_id, ov.empresa_nombre, ov.importe_sin_iva,
+    $stmt = $db->prepare("SELECT ov.id, ov.numero_venta, ov.fecha_generacion, ov.empresa_id, ov.empresa_nombre,
+            c.cot_subtotal AS importe_sin_iva,
             COALESCE(NULLIF(TRIM(CONCAT_WS(' ', e.razon_social, e.regimen_capital)), ''), e.empresa, ov.empresa_nombre) AS cliente,
             e.rfc,
             COALESCE(NULLIF(TRIM(o.descripcion_corta), ''), NULLIF(TRIM(o.descripcion_larga), ''), ov.numero_venta) AS descripcion,
             COALESCE((SELECT DATE(MAX(s.created_at)) FROM orden_venta_seguimiento s
                 WHERE s.orden_venta_id = ov.id AND s.tipo = 'estatus' AND s.estatus = 'completada'), ov.fecha_generacion) AS fecha_venta
-        FROM ordenes_venta ov JOIN oportunidades_comerciales o ON o.id = ov.oportunidad_id
+        FROM ordenes_venta ov JOIN cotizaciones c ON c.id_coti = ov.cotizacion_id
+        JOIN oportunidades_comerciales o ON o.id = ov.oportunidad_id
         JOIN empresas e ON e.id_e = ov.empresa_id
         WHERE ov.id = ? AND ov.estatus = 'completada'");
     $stmt->bind_param('i', $orderId);

@@ -57,6 +57,6 @@ require __DIR__ . '/../construct/header.php';
     </div>
 </div>
 
-<script src="<?= $prefijoRuta ?>js/ver_contacto.js"></script>
+<script src="<?= $prefijoRuta ?>js/ver_contacto.js?v=20261101-1"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

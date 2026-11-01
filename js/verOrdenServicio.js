@@ -106,3 +106,4 @@ document.getElementById('os-detail-add-equipment').addEventListener('click', asy
 });
 
 osLoadDetail().catch(error => OS.message('mensaje_servicio', error.message));
+window.DigitAppMasterSync?.subscribe(() => osLoadDetail().catch(error => OS.message('mensaje_servicio', error.message)));

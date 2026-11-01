@@ -327,6 +327,7 @@ ovForm.addEventListener('submit', async function (event) {
             instrucciones: document.getElementById('ov-instructions').value,
             notas: document.getElementById('ov-notas').value
         }, true);
+        window.DigitAppMasterSync?.publish('orden_venta', result.order.id);
         location.href = 'ver_orden_venta.php?id=' + encodeURIComponent(result.order.id);
     } catch (error) {
         OV.message('mensaje_form_orden', error.message);

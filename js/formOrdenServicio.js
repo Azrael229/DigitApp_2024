@@ -234,6 +234,7 @@ document.getElementById('form_orden_servicio').addEventListener('submit', async 
             notas: document.getElementById('os-notes').value,
             equipos: JSON.stringify([...osSelectedEquipment])
         }, true);
+        window.DigitAppMasterSync?.publish('orden_servicio', result.order.id);
         location.href = 'ver_orden_servicio.php?id=' + Number(result.order.id);
     } catch (error) {
         osMessage(error.message);

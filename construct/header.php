@@ -65,7 +65,7 @@ if (!empty($authUser['debe_cambiar_password']) && $currentScript !== 'mi_cuenta.
     <link rel="stylesheet" href="<?= $prefijoRuta ?>estilos/style.css?v=20261101-3">
     <script src="<?= $prefijoRuta ?>js/date-format.js?v=20261009-1"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <script defer src="<?= $prefijoRuta ?>js/app-state.js?v=20261031-14"></script>
+    <script defer src="<?= $prefijoRuta ?>js/app-state.js?v=20261101-1"></script>
 </head>
 <body class="app-sidebar-layout" data-app-version="<?= htmlspecialchars(DIGITAPP_VERSION, ENT_QUOTES, 'UTF-8') ?>" data-user-id="<?= (int) $authUser['id'] ?>" data-section-title="<?= htmlspecialchars($currentSectionTitle, ENT_QUOTES, 'UTF-8') ?>">
 <nav class="navbar fixed-top navbar-expand-xl navbar-dark bg-dark app-sidebar">

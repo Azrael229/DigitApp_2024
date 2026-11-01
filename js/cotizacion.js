@@ -672,8 +672,8 @@ formulario.addEventListener('submit', async function (event) {
           return;
      }
      contenedorPartidas.querySelectorAll('.partida-cotizacion').forEach(actualizarPartidaSecundaria);
-     if (!inputNombreEmpresa.value.trim() && !inputNombreContacto.value.trim()) {
-          alert('Para guardar el borrador indica al menos una empresa o un contacto.');
+     if (!selectEmpresaCotizacion.value || !document.getElementById('coti_fecha').value) {
+          alert('Para guardar el borrador selecciona una empresa e indica la fecha.');
           selectEmpresaCotizacion.focus();
           return;
      }
@@ -703,6 +703,7 @@ formulario.addEventListener('submit', async function (event) {
           formulario.dataset.cotizacionId = cotizacionEditarId;
           formularioModificado = false;
           formulario.dispatchEvent(new CustomEvent('digitapp:draft-saved', {bubbles: true}));
+          window.DigitAppMasterSync?.publish('cotizacion', resultado.id);
           btnGuardar.innerHTML = '<i class="bi bi-save" aria-hidden="true"></i> Guardar cambios';
           window.history.replaceState(null, '', 'nuevaCotizacion.php?id=' + encodeURIComponent(resultado.id));
           alert(resultado.message || 'El borrador se guardó correctamente.');

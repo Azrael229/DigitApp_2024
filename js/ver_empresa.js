@@ -696,3 +696,6 @@ window.addEventListener('beforeunload', function (evento) {
 });
 
 cargarDetalleEmpresa();
+window.DigitAppMasterSync?.subscribe(() => {
+    if (!notasConCambios) { cargarDetalleEmpresa(); }
+});

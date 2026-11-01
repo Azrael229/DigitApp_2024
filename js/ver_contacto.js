@@ -158,3 +158,4 @@ function cargarContacto() {
 }
 
 cargarContacto();
+window.DigitAppMasterSync?.subscribe(() => cargarContacto());
