@@ -9,14 +9,14 @@
 
 @import url("./main/buttons.css?v=20261007-2");
 
-@import url("./tables/base.css?v=20261015-6");
+@import url("./tables/base.css?v=20261101-2");
 @import url("./tables/datatables.css?v=20261007-2");
 @import url("./tables/facturacion.css?v=20261007-1");
 @import url("./tables/cotizacion.css?v=20261009-1");
 
 @import url("./components/icons.css");
 @import url("./components/cards.css");
-@import url("./components/dashboard.css?v=20261031-3");
+@import url("./components/dashboard.css?v=20261101-1");
 @import url("./components/alerts.css?v=20261001-2");
 
 @import url("./main/utilities.css?v=20261001-1");

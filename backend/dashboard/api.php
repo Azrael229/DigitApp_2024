@@ -38,30 +38,19 @@ try {
 
     $from = trim((string) ($_GET['desde'] ?? ''));
     $to = trim((string) ($_GET['hasta'] ?? ''));
-    $group = (string) ($_GET['agrupacion'] ?? 'mes');
     $status = (string) ($_GET['estatus_oportunidad'] ?? 'todos');
-    if (!dashboard_date($from) || !dashboard_date($to) || $from > $to) {
+    if (!dashboard_date($from) || !dashboard_date($to) || $from < '2026-09-01' || $from > $to) {
         throw new InvalidArgumentException('Selecciona un periodo de fechas válido.');
     }
-    $grouping = [
-        'dia' => "DATE_FORMAT(o.fecha, '%Y-%m-%d')",
-        'mes' => "DATE_FORMAT(o.fecha, '%Y-%m')",
-        'anio' => "DATE_FORMAT(o.fecha, '%Y')",
-    ];
-    $orderGrouping = [
-        'dia' => "DATE_FORMAT(s.fecha_completada, '%Y-%m-%d')",
-        'mes' => "DATE_FORMAT(s.fecha_completada, '%Y-%m')",
-        'anio' => "DATE_FORMAT(s.fecha_completada, '%Y')",
-    ];
     $statuses = ['todos', 'preparacion', 'cotizada', 'negociacion', 'ganada', 'perdida', 'cancelada'];
-    if (!isset($grouping[$group]) || !in_array($status, $statuses, true)) {
+    if (!in_array($status, $statuses, true)) {
         throw new InvalidArgumentException('Uno de los filtros no es válido.');
     }
 
     require __DIR__ . '/../../config/conexion.php';
     $conexion->set_charset('utf8mb4');
 
-    $opportunitySql = 'SELECT ' . $grouping[$group] . ' AS periodo, o.estatus,
+    $opportunitySql = 'SELECT DATE_FORMAT(o.fecha, \'%Y-%m\') AS periodo, o.estatus,
             COUNT(*) AS cantidad, SUM(o.importe) AS importe
         FROM oportunidades_comerciales o
         WHERE o.fecha BETWEEN ? AND ?';
@@ -75,7 +64,7 @@ try {
     $opportunitySql .= ' GROUP BY periodo, o.estatus ORDER BY periodo';
     $opportunities = dashboard_fetch($conexion, $opportunitySql, $opportunityTypes, $opportunityValues);
 
-    $ordersSql = 'SELECT ' . $orderGrouping[$group] . ' AS periodo,
+    $ordersSql = 'SELECT DATE_FORMAT(s.fecha_completada, \'%Y-%m\') AS periodo,
             COUNT(*) AS cantidad, SUM(ov.importe_sin_iva) AS importe
         FROM ordenes_venta ov
         JOIN (
@@ -88,18 +77,9 @@ try {
         GROUP BY periodo ORDER BY periodo';
     $orders = dashboard_fetch($conexion, $ordersSql, 'ss', [$from, $to]);
 
-    $companies = dashboard_fetch($conexion, 'SELECT DATE_FORMAT(created_at, \'%Y-%m\') AS periodo,
-            SUM(CASE WHEN rol IN (\'Cliente\', \'Cliente-Proveedor\') THEN 1 ELSE 0 END) AS clientes,
-            SUM(CASE WHEN rol = \'Prospecto\' THEN 1 ELSE 0 END) AS prospectos
-        FROM empresas
-        WHERE created_at >= ? AND created_at < DATE_ADD(?, INTERVAL 1 DAY)
-            AND rol IN (\'Cliente\', \'Cliente-Proveedor\', \'Prospecto\')
-        GROUP BY periodo ORDER BY periodo', 'ss', [$from, $to]);
-
     echo json_encode([
         'oportunidades' => $opportunities,
         'ordenes_venta' => $orders,
-        'registros_empresa' => $companies,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 } catch (InvalidArgumentException $error) {
     http_response_code(422);

@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function () {
     cargarGraficasDePeriodo();
     document.getElementById('dashboard-aplicar').addEventListener('click', cargarGraficasDePeriodo);
     document.getElementById('dashboard-estatus-oportunidad').addEventListener('change', cargarGraficasDePeriodo);
-    document.getElementById('dashboard-agrupacion').addEventListener('change', cargarGraficasDePeriodo);
 });
 
 // Construye las gráficas históricas con la base homogénea de ventas netas sin IVA.
@@ -19,6 +18,9 @@ function inicializarGraficasHistoricas() {
     const topMonths = obtenerTopMesesDashboard(invoices);
     const rankedTopMonths = topMonths.map((item, index) => ({ ...item, label: `${index + 1}. ${item.label}` }));
     const monthlySales = obtenerVentasMensualesDashboard(invoices, 13);
+    const topClientsOptions = crearOpcionesGrafica({ horizontal: true, currency: true });
+    topClientsOptions.scales.y.ticks.autoSkip = false;
+    topClientsOptions.scales.y.ticks.callback = value => topClients[value]?.name ?? '';
 
     dashboardCharts.clients = new Chart(document.getElementById('dashboard-top-clientes'), {
         type: 'bar',
@@ -26,7 +28,7 @@ function inicializarGraficasHistoricas() {
             label: 'Ventas netas sin IVA', data: topClients.map(item => item.total),
             backgroundColor: '#35c7b3', borderRadius: 6
         }] },
-        options: crearOpcionesGrafica({ horizontal: true, currency: true })
+        options: topClientsOptions
     });
 
     dashboardCharts.yearly = new Chart(document.getElementById('dashboard-ventas-anuales'), {
@@ -64,38 +66,26 @@ function inicializarGraficasHistoricas() {
     });
 
     dashboardCharts.opportunities = new Chart(document.getElementById('dashboard-oportunidades'), {
-        type: 'line',
+        type: 'bar',
         data: { labels: [], datasets: [{
-            label: 'Importe de oportunidades', data: [], borderColor: '#35c7b3',
-            backgroundColor: 'rgba(53, 199, 179, 0.18)', fill: true, tension: 0.25, pointRadius: 3
+            label: 'Importe de oportunidades', data: [], backgroundColor: '#35c7b3', borderRadius: 6
         }] },
         options: crearOpcionesGrafica({ currency: true })
     });
 
     dashboardCharts.orders = new Chart(document.getElementById('dashboard-ordenes'), {
-        type: 'line',
+        type: 'bar',
         data: { labels: [], datasets: [{
-            label: 'Importe de órdenes completadas sin IVA', data: [], borderColor: '#60a5fa',
-            backgroundColor: 'rgba(96, 165, 250, 0.16)', fill: true, tension: 0.25, pointRadius: 3
+            label: 'Importe de órdenes completadas sin IVA', data: [], backgroundColor: '#60a5fa', borderRadius: 6
         }] },
         options: crearOpcionesGrafica({ currency: true })
     });
-
-    dashboardCharts.registrations = new Chart(document.getElementById('dashboard-clientes-prospectos'), {
-        type: 'bar',
-        data: { labels: [], datasets: [
-            { label: 'Clientes', data: [], backgroundColor: '#35c7b3', borderRadius: 5 },
-            { label: 'Prospectos', data: [], backgroundColor: '#fbbf24', borderRadius: 5 }
-        ] },
-        options: crearOpcionesGrafica({ grouped: true })
-    });
 }
 
-// Aplica una ventana móvil de doce meses como periodo inicial en los gráficos filtrables.
+// Inicializa el periodo de análisis desde septiembre de 2026 hasta la fecha actual.
 function establecerPeriodoPredeterminado() {
     const today = new Date();
-    const start = new Date(today.getFullYear(), today.getMonth() - 11, 1);
-    document.getElementById('dashboard-desde').value = dashboardFechaLocal(start);
+    document.getElementById('dashboard-desde').value = '2026-09-01';
     document.getElementById('dashboard-hasta').value = dashboardFechaLocal(today);
 }
 
@@ -104,7 +94,7 @@ function dashboardFechaLocal(date) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
-// Carga en paralelo oportunidades, órdenes terminadas y registros de clientes/prospectos para el periodo.
+// Carga oportunidades y órdenes completadas con agregación mensual desde septiembre de 2026.
 async function cargarGraficasDePeriodo() {
     const from = document.getElementById('dashboard-desde').value;
     const to = document.getElementById('dashboard-hasta').value;
@@ -116,17 +106,14 @@ async function cargarGraficasDePeriodo() {
         errorBox.classList.remove('d-none');
         return;
     }
-    if (document.getElementById('dashboard-agrupacion').value === 'dia'
-        && (new Date(`${to}T12:00:00`) - new Date(`${from}T12:00:00`)) / 86400000 > 366) {
-        errorBox.textContent = 'Para intervalos mayores de un año, selecciona agrupación mensual o anual.';
+    if (from < '2026-09-01') {
+        errorBox.textContent = 'El periodo debe comenzar en septiembre de 2026 o después.';
         errorBox.classList.remove('d-none');
         return;
     }
-
     const parameters = new URLSearchParams({
         desde: from,
         hasta: to,
-        agrupacion: document.getElementById('dashboard-agrupacion').value,
         estatus_oportunidad: document.getElementById('dashboard-estatus-oportunidad').value
     });
     const button = document.getElementById('dashboard-aplicar');
@@ -146,30 +133,21 @@ async function cargarGraficasDePeriodo() {
     }
 }
 
-// Convierte las respuestas del servicio en series con periodos compartidos y valores numéricos.
+// Convierte las respuestas del servicio en series mensuales compartidas y valores numéricos.
 function actualizarGraficasDePeriodo(data, from, to) {
     const opportunities = new Map();
     (data.oportunidades || []).forEach(function (row) {
         opportunities.set(row.periodo, sumarImporteDashboard(opportunities.get(row.periodo) || 0, row.importe));
     });
     const orders = new Map((data.ordenes_venta || []).map(row => [row.periodo, Number(row.importe || 0)]));
-    const periods = crearPeriodosDashboard(from, to, document.getElementById('dashboard-agrupacion').value);
+    const periods = crearPeriodosDashboard(from, to, 'mes');
     dashboardCharts.opportunities.data.labels = periods.map(formatearPeriodoDashboard);
     dashboardCharts.opportunities.data.datasets[0].data = periods.map(period => opportunities.get(period) || 0);
     dashboardCharts.orders.data.labels = periods.map(formatearPeriodoDashboard);
     dashboardCharts.orders.data.datasets[0].data = periods.map(period => orders.get(period) || 0);
 
-    const registrations = new Map((data.registros_empresa || []).map(row => [row.periodo, {
-        clients: Number(row.clientes || 0), prospects: Number(row.prospectos || 0)
-    }]));
-    const months = crearPeriodosDashboard(from, to, 'mes');
-    dashboardCharts.registrations.data.labels = months.map(formatearPeriodoDashboard);
-    dashboardCharts.registrations.data.datasets[0].data = months.map(period => registrations.get(period)?.clients || 0);
-    dashboardCharts.registrations.data.datasets[1].data = months.map(period => registrations.get(period)?.prospects || 0);
-
     dashboardCharts.opportunities.update();
     dashboardCharts.orders.update();
-    dashboardCharts.registrations.update();
 }
 
 // Genera cada día, mes o año del periodo para conservar ceros y una escala comparable.
@@ -281,7 +259,7 @@ function crearOpcionesGrafica({ horizontal = false, currency = false, grouped = 
         maintainAspectRatio: false,
         layout: { padding: { top: 18, right: 28, bottom: 40, left: 28 } },
         indexAxis: horizontal ? 'y' : 'x',
-        interaction: { intersect: false, mode: 'index' },
+        interaction: { intersect: true, mode: 'nearest', axis: horizontal ? 'xy' : 'x' },
         scales: {
             x: { stacked: false, ticks: { color: '#e2e8f0', padding: 14, maxRotation: 45 } },
             y: { beginAtZero: true, stacked: false, ticks: {

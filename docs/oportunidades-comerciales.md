@@ -23,6 +23,7 @@ La migración corresponde a los tipos de identificadores verificados en MariaDB 
 
 - La fecha visible es editable; `created_at` registra automáticamente cuándo se capturó la oportunidad. El orden inicial sigue `created_at` e ID descendentes incluso para proyectos con fecha anterior.
 - Los filtros Desde/Hasta permiten consultar uno o varios meses. El subtotal suma todas las páginas filtradas, usando el importe propuesto de cada oportunidad, sin sumar sus cotizaciones.
+- La tabla usa desplazamiento horizontal compartido con DataTables y conserva cada encabezado y valor en una sola línea; el filtro por fecha puede combinarse con los demás filtros.
 - Los importes se almacenan como `DECIMAL(12,2)` en MXN, entre cero y 9,999,999,999.99. No incluyen IVA.
 - Estatus: En preparación, Cotizada, En negociación, Ganada, Perdida y Cancelada. Los cambios son manuales; vincular una cotización no cambia el estatus automáticamente.
 - Contactos filtrados con `empresa_contactos.activo = 1` y `contactos.activo = 1`; direcciones filtradas por empresa. El servidor valida estas relaciones además del formulario.

@@ -30,9 +30,8 @@ foreach ($remisionesDashboard as $remision) {
         <div class="card-body">
             <h2 id="dashboard-period-title" class="h5 mb-3">Periodo de análisis</h2>
             <div class="row g-3 align-items-end">
-                <div class="col-12 col-sm-6 col-lg-3"><label for="dashboard-desde" class="form-label">Desde</label><input id="dashboard-desde" class="form-control" type="date" required></div>
+                <div class="col-12 col-sm-6 col-lg-3"><label for="dashboard-desde" class="form-label">Desde</label><input id="dashboard-desde" class="form-control" type="date" min="2026-09-01" required></div>
                 <div class="col-12 col-sm-6 col-lg-3"><label for="dashboard-hasta" class="form-label">Hasta</label><input id="dashboard-hasta" class="form-control" type="date" required></div>
-                <div class="col-12 col-sm-6 col-lg-3"><label for="dashboard-agrupacion" class="form-label">Agrupar oportunidades y órdenes</label><select id="dashboard-agrupacion" class="form-select"><option value="dia">Por día</option><option value="mes" selected>Por mes</option><option value="anio">Por año</option></select></div>
                 <div class="col-12 col-sm-6 col-lg-3"><label for="dashboard-estatus-oportunidad" class="form-label">Estatus de oportunidad</label><select id="dashboard-estatus-oportunidad" class="form-select"><option value="todos">Todos los estatus</option><option value="preparacion">Preparación</option><option value="cotizada">Cotizada</option><option value="negociacion">Negociación</option><option value="ganada">Ganada</option><option value="perdida">Perdida</option><option value="cancelada">Cancelada</option></select></div>
                 <div class="col-12 d-flex justify-content-end"><button id="dashboard-aplicar" class="btn btn-success" type="button"><i class="bi bi-funnel me-1" aria-hidden="true"></i>Aplicar periodo</button></div>
             </div>
@@ -41,18 +40,17 @@ foreach ($remisionesDashboard as $remision) {
 
     <section class="dashboard-admin-grid" aria-label="Indicadores históricos">
         <article class="dashboard-hero dashboard-admin-chart dashboard-admin-chart-wide"><h2 class="h5 text-white mb-3">Ventas mensuales · últimos 13 meses</h2><canvas id="dashboard-ventas-mensuales" aria-label="Ventas netas mensuales de los últimos 13 meses" role="img"></canvas></article>
-        <article class="dashboard-hero dashboard-admin-chart"><h2 class="h5 text-white mb-3">Top 10 clientes por ventas netas</h2><canvas id="dashboard-top-clientes" aria-label="Top 10 clientes por ventas netas sin IVA" role="img"></canvas></article>
+        <article class="dashboard-hero dashboard-admin-chart"><h2 class="h5 text-white mb-3">Top 10 clientes por ventas netas</h2><canvas id="dashboard-top-clientes" aria-label="Top 10 clientes por nombre y ventas netas sin IVA" role="img"></canvas></article>
         <article class="dashboard-hero dashboard-admin-chart"><h2 class="h5 text-white mb-3">Ventas netas sin IVA por año</h2><canvas id="dashboard-ventas-anuales" aria-label="Ventas netas sin IVA por año" role="img"></canvas></article>
         <article class="dashboard-hero dashboard-admin-chart"><h2 class="h5 text-white mb-3">Top 10 meses por ventas netas</h2><canvas id="dashboard-top-meses" aria-label="Diez meses con mayores ventas netas, con posición, nombre de mes y año" role="img"></canvas></article>
     </section>
 
     <section class="dashboard-period-charts mt-4" aria-label="Indicadores por periodo">
-        <article class="dashboard-hero dashboard-admin-chart dashboard-admin-chart-wide mb-4"><h2 class="h5 text-white mb-1">Importe de oportunidades comerciales</h2><p class="dashboard-chart-note">Agrupado por fecha de oportunidad y filtrable por estatus.</p><canvas id="dashboard-oportunidades" aria-label="Importe de oportunidades comerciales por periodo" role="img"></canvas></article>
-        <article class="dashboard-hero dashboard-admin-chart dashboard-admin-chart-wide mb-4"><h2 class="h5 text-white mb-1">Órdenes de venta completadas</h2><p class="dashboard-chart-note">Importes sin IVA agrupados por fecha de finalización.</p><canvas id="dashboard-ordenes" aria-label="Importe de órdenes de venta completadas por periodo" role="img"></canvas></article>
-        <article class="dashboard-hero dashboard-admin-chart dashboard-admin-chart-wide"><h2 class="h5 text-white mb-1">Clientes y prospectos registrados por mes</h2><p class="dashboard-chart-note">Incluye Cliente, Cliente-Proveedor y Prospecto; excluye proveedores puros.</p><canvas id="dashboard-clientes-prospectos" aria-label="Cantidad mensual de clientes y prospectos registrados" role="img"></canvas></article>
+        <article class="dashboard-hero dashboard-admin-chart"><h2 class="h5 text-white mb-1">Importe de oportunidades comerciales</h2><p class="dashboard-chart-note">Importes agrupados por mes desde septiembre de 2026.</p><canvas id="dashboard-oportunidades" aria-label="Importe mensual de oportunidades comerciales desde septiembre de 2026" role="img"></canvas></article>
+        <article class="dashboard-hero dashboard-admin-chart"><h2 class="h5 text-white mb-1">Órdenes de venta completadas</h2><p class="dashboard-chart-note">Importes sin IVA agrupados por mes desde septiembre de 2026.</p><canvas id="dashboard-ordenes" aria-label="Importe mensual de órdenes de venta completadas desde septiembre de 2026" role="img"></canvas></article>
     </section>
 </main>
 <script>window.dashboardInvoiceData = <?= json_encode($datosDashboardCfdi, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="../js/dashboard-charts.js?v=20261031-4"></script>
+<script src="../js/dashboard-charts.js?v=20261101-1"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

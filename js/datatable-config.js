@@ -1,7 +1,9 @@
 const defaultDataTableOptions = {
     pageLength: 10,
     lengthMenu: [10, 20, 25, 50, 100],
-    responsive: true,
+    responsive: false,
+    scrollX: true,
+    scrollCollapse: true,
     autoWidth: false,
     searching: true,
     dom: '<"dt-top"flp>rt<"dt-bottom"lip>',

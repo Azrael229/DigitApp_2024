@@ -72,6 +72,38 @@
     table-layout: auto;
 }
 
+/* Mantiene legibles las columnas de DataTables y deja el desbordamiento al slider horizontal. */
+.data-table-shell .dataTables_scrollBody {
+    max-width: 100%;
+    overflow-x: auto !important;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.data-table-shell .dataTables_scrollHead th,
+.data-table-shell .dataTables_scrollBody td {
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+}
+
+.data-table-shell .dataTables_scrollBody .table-text-two-lines,
+.data-table-shell .dataTables_scrollBody .op-multiline {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* Los contenedores responsivos desplazan tablas anchas sin partir los valores de sus celdas. */
+.table-responsive > .table th,
+.table-responsive > .table td {
+    white-space: nowrap;
+    overflow-wrap: normal;
+}
+
+.table-responsive > .table :is(.table-text-two-lines, .op-multiline) {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 .table tbody tr {
     transition: background-color 0.18s ease, transform 0.18s ease;
 }
