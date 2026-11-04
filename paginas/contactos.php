@@ -39,7 +39,7 @@ function escaparContacto($valor): string
 
     <div class="row">
         <div class="col">
-            <div class="table-responsive data-table-shell table-wide contactos-table-wrap">
+            <div class="table-responsive data-table-shell data-table-managed table-wide contactos-table-wrap">
                 <table id="example" class="table table-secondary table-striped align-middle contactos-table mb-0">
                     <caption class="visually-hidden">Directorio de contactos</caption>
                     <thead>
@@ -48,7 +48,7 @@ function escaparContacto($valor): string
                             <th scope="col">Teléfono</th>
                             <th scope="col">Correo</th>
                             <th scope="col">Departamento</th>
-                            <th scope="col">Razón social principal / empresas</th>
+                            <th scope="col" class="table-razon-social-column">Razón social principal / empresas</th>
                             <th scope="col">Estado</th>
                             <?php if ($esAdministrador): ?><th scope="col" class="admin-delete-column">Eliminar</th><?php endif; ?>
                         </tr>
@@ -69,10 +69,10 @@ function escaparContacto($valor): string
                                 <td>
                                     <?= renderizarEnlaceEntidad('contacto', $id, (string) $contacto['nombre']) ?>
                                 </td>
-                                <td><?= escaparContacto($contacto['celular'] ?: '—') ?></td>
-                                <td class="contactos-email"><?= escaparContacto($contacto['correo'] ?: '—') ?></td>
+                                <td class="table-nowrap"><?= escaparContacto($contacto['celular'] ?: '—') ?></td>
+                                <td class="contactos-email table-nowrap"><?= escaparContacto($contacto['correo'] ?: '—') ?></td>
                                 <td><?= escaparContacto($contacto['departamento'] ?: '—') ?></td>
-                                <td class="contactos-empresas">
+                                <td class="contactos-empresas table-razon-social-column">
                                     <?php if ($totalEmpresas === 0): ?>
                                         <span class="badge contactos-sin-empresa">Sin empresa</span>
                                     <?php else: ?>
@@ -98,7 +98,7 @@ function escaparContacto($valor): string
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js?v=20261008-2"></script>
-<script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
+<script src="<?= $prefijoRuta ?>js/datatable-config.js?v=20261104-2"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
 <script src="<?= $prefijoRuta ?>js/tablaContactos.js?v=20261101-1"></script>
 

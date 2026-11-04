@@ -34,5 +34,5 @@ require __DIR__ . '/../construct/header.php';
     </form>
 </div>
 <script src="../js/ordenes-servicio-common.js?v=20261015-1"></script>
-<script src="../js/formOrdenServicio.js?v=20261101-1"></script>
+<script src="../js/formOrdenServicio.js?v=20261104-1"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

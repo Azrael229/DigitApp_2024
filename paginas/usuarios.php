@@ -16,11 +16,11 @@ require __DIR__ . '/../construct/header.php';
     </ul>
     <div class="tab-content pt-4">
         <div id="tab-usuarios" class="tab-pane fade show active">
-            <div class="table-responsive data-table-shell"><table class="table table-secondary table-striped align-middle"><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Último acceso</th><th>Acciones</th></tr></thead><tbody id="usuarios-body"></tbody></table></div>
+            <div class="table-responsive data-table-shell data-table-managed"><table id="usuarios-table" class="table table-secondary table-striped align-middle w-100 auth-users-table"><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Último acceso</th><th>Acciones</th></tr></thead><tbody id="usuarios-body"></tbody></table></div>
         </div>
         <div id="tab-bitacora" class="tab-pane fade">
             <p class="contactos-muted">Eventos de seguridad de los últimos 90 días.</p>
-            <div class="table-responsive data-table-shell"><table class="table table-secondary table-striped align-middle"><thead><tr><th>Fecha</th><th>Usuario</th><th>Evento</th><th>Resultado</th><th>IP</th><th>Detalle</th></tr></thead><tbody id="bitacora-body"></tbody></table></div>
+            <div class="table-responsive data-table-shell data-table-managed"><table id="bitacora-table" class="table table-secondary table-striped align-middle w-100 auth-audit-table"><thead><tr><th>Fecha</th><th>Usuario</th><th>Evento</th><th>Resultado</th><th>IP</th><th>Detalle</th></tr></thead><tbody id="bitacora-body"></tbody></table></div>
         </div>
     </div>
 </div>
@@ -38,5 +38,10 @@ require __DIR__ . '/../construct/header.php';
     <div class="modal-footer"><button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-secondary">Guardar usuario</button></div>
 </form></div></div></div>
 <div class="modal fade" id="sesiones-modal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h2 class="modal-title h5">Sesiones y dispositivos</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><h3 class="h6">Sesiones activas</h3><div id="admin-sesiones"></div><h3 class="h6 mt-4">Dispositivos confiables</h3><div id="admin-dispositivos"></div></div></div></div></div>
-<script src="../js/usuarios.js?v=20261009-1"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="../js/datatable-filters.js?v=20261008-2"></script>
+<script src="../js/datatable-config.js?v=20261104-2"></script>
+<script src="../js/usuarios.js?v=20261104-2"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

@@ -7,6 +7,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('form-usuario');
     const sessionsModal = new bootstrap.Modal(document.getElementById('sesiones-modal'));
     let users = [];
+    let auditTable = null;
+    const usersTable = new DataTable('#usuarios-table', getDataTableOptions({
+        order: [[0, 'asc']],
+        orderCellsTop: true,
+        columns: [
+            { data: 'nombre_completo', render: DataTable.render.text() },
+            { data: 'correo', render: DataTable.render.text() },
+            { data: 'rol', render: (value, type) => type === 'display' ? escapeTableText(String(value || '').replaceAll('_', ' ')) : value },
+            { data: 'estado', render: DataTable.render.text() },
+            { data: 'ultimo_acceso_at', defaultContent: '', render: (value, type) => type === 'display' ? (value ? DigitAppDate.dateTime(value) : 'Sin acceso') : (value || '') },
+            {
+                data: null,
+                className: 'auth-user-actions',
+                orderable: false,
+                searchable: false,
+                render: (_value, type, user) => type === 'display'
+                    ? `<div class="d-flex flex-nowrap gap-2"><button type="button" class="btn btn-sm btn-outline-secondary text-nowrap" data-user-action="edit" data-user-id="${Number(user.id)}">Editar</button><button type="button" class="btn btn-sm btn-outline-primary text-nowrap" data-user-action="sessions" data-user-id="${Number(user.id)}">Sesiones</button><button type="button" class="btn btn-sm btn-outline-warning text-nowrap" data-user-action="reset" data-user-id="${Number(user.id)}">Restablecer</button><button type="button" class="btn btn-sm btn-outline-success text-nowrap" data-user-action="unlock" data-user-id="${Number(user.id)}">Desbloquear</button></div>`
+                    : ''
+            }
+        ]
+    }));
+    applyColumnFilters(usersTable);
 
     // Presenta mensajes de administración sin insertar contenido HTML recibido.
     function showMessage(text, type = 'success') {
@@ -31,6 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
         button.textContent = label;
         button.addEventListener('click', handler);
         return button;
+    }
+
+    // Escapa los valores de la bitácora antes de insertarlos como texto visible.
+    function escapeTableText(value) {
+        const element = document.createElement('span');
+        element.textContent = value === null || value === undefined ? '' : String(value);
+        return element.innerHTML;
     }
 
     // Abre el formulario para alta o edición sin duplicar una segunda vista.
@@ -77,38 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
         sessionsModal.show();
     }
 
-    // Carga la tabla de usuarios y enlaza sus acciones administrativas.
+    // Carga los usuarios en la tabla paginada sin perder sus acciones por fila.
     async function loadUsers() {
         const response = await fetch('../backend/auth/admin_api.php?action=list', { headers: { 'Accept': 'application/json' } });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'No fue posible consultar los usuarios.');
         users = data.data;
-        const body = document.getElementById('usuarios-body');
-        body.replaceChildren();
-        users.forEach((user) => {
-            const row = document.createElement('tr');
-            [user.nombre_completo, user.correo, user.rol.replaceAll('_', ' '), user.estado, user.ultimo_acceso_at ? DigitAppDate.dateTime(user.ultimo_acceso_at) : 'Sin acceso'].forEach((value) => {
-                const cell = document.createElement('td');
-                cell.textContent = value;
-                row.append(cell);
-            });
-            const actions = document.createElement('td');
-            actions.className = 'd-flex flex-wrap gap-2';
-            actions.append(actionButton('Editar', 'btn-outline-secondary', () => openUser(user)));
-            actions.append(actionButton('Sesiones', 'btn-outline-primary', () => openSessions(user).catch((error) => showMessage(error.message, 'danger'))));
-            actions.append(actionButton('Restablecer', 'btn-outline-warning', async () => {
-                const password = window.prompt('Escribe una contraseña temporal de al menos 5 caracteres:');
-                if (!password) return;
-                try { await adminAction('reset_password', { usuario_id: user.id, password_temporal: password }); showMessage('Contraseña temporal asignada.'); }
-                catch (error) { showMessage(error.message, 'danger'); }
-            }));
-            actions.append(actionButton('Desbloquear', 'btn-outline-success', async () => {
-                try { await adminAction('unlock', { usuario_id: user.id }); showMessage('Cuenta desbloqueada.'); await loadUsers(); }
-                catch (error) { showMessage(error.message, 'danger'); }
-            }));
-            row.append(actions);
-            body.append(row);
-        });
+        usersTable.clear().rows.add(users).draw();
     }
 
     // Recupera la bitácora de seguridad limitada al periodo autorizado.
@@ -116,18 +120,53 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch('../backend/auth/admin_api.php?action=audit', { headers: { 'Accept': 'application/json' } });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'No fue posible consultar la bitácora.');
-        const body = document.getElementById('bitacora-body');
-        body.replaceChildren();
-        data.data.forEach((entry) => {
-            const row = document.createElement('tr');
-            [DigitAppDate.dateTime(entry.created_at), entry.usuario || 'Sistema', entry.evento, entry.resultado, entry.ip || '', entry.detalle || ''].forEach((value) => {
-                const cell = document.createElement('td');
-                cell.textContent = value;
-                row.append(cell);
-            });
-            body.append(row);
-        });
+        const rows = data.data.map((entry) => [entry.created_at, entry.usuario || 'Sistema', entry.evento, entry.resultado, entry.ip || '', entry.detalle || '']);
+        if (!auditTable) {
+            auditTable = new DataTable('#bitacora-table', getDataTableOptions({
+                data: rows,
+                order: [[0, 'desc']],
+                orderCellsTop: true,
+                columns: [
+                    { data: 0, className: 'table-nowrap', render: (value, type) => type === 'display' ? DigitAppDate.dateTime(value) : value },
+                    { data: 1, render: DataTable.render.text() },
+                    { data: 2, render: DataTable.render.text() },
+                    { data: 3, render: DataTable.render.text() },
+                    { data: 4, className: 'table-nowrap', render: DataTable.render.text() },
+                    {
+                        data: 5,
+                        className: 'auth-audit-detail',
+                        render: (value, type) => type === 'display' ? `<div class="table-text-wrap">${escapeTableText(value)}</div>` : value
+                    }
+                ]
+            }));
+            applyColumnFilters(auditTable);
+            return;
+        }
+        auditTable.clear().rows.add(rows).draw();
     }
+
+    document.querySelector('#usuarios-table tbody').addEventListener('click', async (event) => {
+        const button = event.target.closest('[data-user-action]');
+        if (!button) return;
+        const user = users.find((item) => String(item.id) === button.dataset.userId);
+        if (!user) return;
+        if (button.dataset.userAction === 'edit') { openUser(user); return; }
+        if (button.dataset.userAction === 'sessions') {
+            openSessions(user).catch((error) => showMessage(error.message, 'danger'));
+            return;
+        }
+        if (button.dataset.userAction === 'reset') {
+            const password = window.prompt('Escribe una contraseña temporal de al menos 5 caracteres:');
+            if (!password) return;
+            try { await adminAction('reset_password', { usuario_id: user.id, password_temporal: password }); showMessage('Contraseña temporal asignada.'); }
+            catch (error) { showMessage(error.message, 'danger'); }
+            return;
+        }
+        if (button.dataset.userAction === 'unlock') {
+            try { await adminAction('unlock', { usuario_id: user.id }); showMessage('Cuenta desbloqueada.'); await loadUsers(); }
+            catch (error) { showMessage(error.message, 'danger'); }
+        }
+    });
 
     document.getElementById('nuevo-usuario').addEventListener('click', () => openUser());
     document.querySelector('[data-bs-target="#tab-bitacora"]').addEventListener('shown.bs.tab', () => loadAudit().catch((error) => showMessage(error.message, 'danger')));

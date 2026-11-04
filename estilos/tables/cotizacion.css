@@ -19,11 +19,6 @@
     overflow-wrap: normal;
 }
 
-.cotizaciones-directory-table .cot-col-company {
-    width: 260px;
-    min-width: 230px;
-}
-
 .cotizaciones-directory-table .cot-col-contact {
     width: 220px;
     min-width: 190px;

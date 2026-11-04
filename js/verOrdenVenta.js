@@ -14,8 +14,9 @@ const ovServiceStatuses = {
 };
 
 // Crea una celda de tabla sin interpretar el contenido como HTML.
-function ovCell(row, value) {
+function ovCell(row, value, className = '') {
     const cell = document.createElement('td');
+    if (className) { cell.className = className; }
     cell.textContent = value || '—';
     row.appendChild(cell);
     return cell;
@@ -29,16 +30,16 @@ function ovRenderServiceOrders(items) {
     empty.classList.toggle('d-none', items.length > 0);
     items.forEach(item => {
         const row = document.createElement('tr');
-        const numberCell = ovCell(row, '');
+        const numberCell = ovCell(row, '', 'table-nowrap');
         const number = document.createElement('a');
         number.className = 'entity-link fw-semibold';
         number.textContent = item.numero_servicio;
         number.href = 'ver_orden_servicio.php?id=' + Number(item.id);
         numberCell.replaceChildren(number);
-        ovCell(row, OV.date(item.fecha_generacion));
+        ovCell(row, OV.date(item.fecha_generacion), 'table-nowrap');
         ovCell(row, ovServiceTypes[item.tipo] || item.tipo);
-        ovCell(row, ovServiceStatuses[item.estatus] || item.estatus);
-        ovCell(row, OV.date(item.updated_at, true));
+        ovCell(row, ovServiceStatuses[item.estatus] || item.estatus, 'table-nowrap');
+        ovCell(row, OV.date(item.updated_at, true), 'table-nowrap');
         body.appendChild(row);
     });
 }

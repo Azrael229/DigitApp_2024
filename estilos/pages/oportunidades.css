@@ -1,6 +1,6 @@
 .op-amount { display: flex; align-items: center; gap: .4rem; min-width: 11rem; }
 .op-amount input { min-width: 8rem; text-align: right; }
-.op-multiline { white-space: pre-wrap; overflow-wrap: anywhere; }
+.op-multiline { white-space: pre-wrap; overflow-wrap: break-word; }
 .op-filter-label { display: block; color: var(--text-main); font-size: .75rem; }
 .op-title-number { color: var(--accent-mint); font-size: .72em; font-weight: 700; letter-spacing: .02em; }
 .op-title-status { font-size: .42em; vertical-align: middle; }
@@ -9,14 +9,13 @@
 .op-status { padding: .5rem .65rem; background: rgba(78, 144, 230, .25); color: #d0e5ff; }
 .op-status-ganada { background: rgba(45, 186, 121, .22); color: #b9f6d6; }
 .op-status-perdida, .op-status-cancelada { background: rgba(255, 184, 84, .22); color: #ffe0a6; }
-#tabla-oportunidades td:nth-child(4) { min-width: 12rem; overflow-wrap: anywhere; }
-#tabla-oportunidades td:nth-child(2), #tabla-oportunidades td:nth-child(6), #tabla-oportunidades td:nth-child(7) { white-space: nowrap; }
+#tabla-oportunidades td:nth-child(4) { min-width: 12rem; overflow-wrap: break-word; }
+#tabla-oportunidades td:nth-child(2), #tabla-oportunidades td:nth-child(6) { white-space: nowrap; }
 #tabla-oportunidades thead tr:first-child th:nth-child(7),
 #tabla-oportunidades tbody td:nth-child(7) {
     min-width: 150px;
-    white-space: nowrap;
-    overflow-wrap: normal;
 }
+#tabla-oportunidades thead tr:first-child th:nth-child(7) { white-space: nowrap; }
 .oportunidades-table-shell .dataTables_scrollBody {
     max-width: 100%;
     overflow-x: auto !important;

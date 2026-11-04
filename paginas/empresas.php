@@ -31,14 +31,14 @@ if (empty($_SESSION['empresas_tabla_csrf'])) {
           <div class="row">
                <div class="col">
                     <!-- col Tabla -->
-                    <div class="col table-responsive table-wide data-table-shell empresa-directory-table-wrap" >
+                    <div class="col table-responsive table-wide data-table-shell data-table-managed empresa-directory-table-wrap" >
                          <!-- tabla -->
                          <table id="example" class="table table-secondary table-striped empresa-directory-table">
                               <thead>
                                    <tr>
                                         <th class="empresa-col-fecha">Fecha de creación</th>
                                         <th class="empresa-col-nombre">Nombre comercial</th>
-                                        <th class="empresa-col-razon">Razón social</th>
+                                        <th class="empresa-col-razon table-razon-social-column">Razón social</th>
                                         <th class="empresa-col-ciudad">Ciudad</th>
                                         <th class="empresa-col-municipio">Municipio</th>
                                         <th class="empresa-col-estado">Estado</th>
@@ -53,8 +53,8 @@ if (empty($_SESSION['empresas_tabla_csrf'])) {
                                    <?php  foreach ($result_empresas as $row): ?>
                                         <tr>
                                              <td class="empresa-col-fecha" data-order="<?= htmlspecialchars((string) ($row['created_at'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars(substr((string) ($row['created_at'] ?? ''), 0, 10), ENT_QUOTES, 'UTF-8') ?></td>
-                                             <td class="empresa-col-nombre"><div class="empresa-texto-dos-lineas"><?= renderizarEnlaceEntidad('empresa', $row['id_e'] ?? null, (string) ($row['empresa'] ?? '')) ?></div></td>
-                                             <td class="empresa-col-razon"><div class="empresa-texto-dos-lineas"><?= htmlspecialchars(trim(implode(' ', array_filter([($row['razon_social'] ?? '') ?: ($row['empresa'] ?? ''), $row['regimen_capital'] ?? '']))), ENT_QUOTES, 'UTF-8') ?></div></td>
+                                             <td class="empresa-col-nombre"><div class="empresa-text-wrap"><?= renderizarEnlaceEntidad('empresa', $row['id_e'] ?? null, (string) ($row['empresa'] ?? '')) ?></div></td>
+                                             <td class="empresa-col-razon table-razon-social-column"><div class="empresa-text-wrap"><?= htmlspecialchars(trim(implode(' ', array_filter([($row['razon_social'] ?? '') ?: ($row['empresa'] ?? ''), $row['regimen_capital'] ?? '']))), ENT_QUOTES, 'UTF-8') ?></div></td>
                                              <td class="empresa-col-ciudad"><?php echo htmlspecialchars($row['ciudad_principal'] ?? '') ?></td>
                                              <td class="empresa-col-municipio"><?php echo htmlspecialchars($row['municipio_principal'] ?? '') ?></td>
                                              <td class="empresa-col-estado"><?php echo htmlspecialchars($row['estado_principal'] ?? '') ?></td>
@@ -90,7 +90,7 @@ if (empty($_SESSION['empresas_tabla_csrf'])) {
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js?v=20261008-2"></script>
-<script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
+<script src="<?= $prefijoRuta ?>js/datatable-config.js?v=20261104-2"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
 <script src="<?= $prefijoRuta ?>js/tablaEmpresas.js?v=20261101-1"></script>
 

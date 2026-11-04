@@ -27,7 +27,8 @@
 }
 
 .contactos-email {
-    overflow-wrap: anywhere;
+    white-space: nowrap;
+    overflow-wrap: normal;
 }
 
 .contactos-table th:nth-child(1),
@@ -52,18 +53,13 @@
     width: 14%;
 }
 
-.contactos-table th:nth-child(5),
-.contactos-table td:nth-child(5) {
-    width: 30%;
-}
-
 .contactos-table th:nth-child(6),
 .contactos-table td:nth-child(6) {
     width: 10%;
 }
 
 .contactos-empresas {
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
 .contactos-status {
@@ -197,7 +193,7 @@
     border: 1px solid rgba(89, 182, 255, 0.24);
     border-radius: 12px;
     color: var(--text-main);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
 .contacto-empresas-list {
@@ -221,7 +217,7 @@
 }
 
 .contacto-empresa-link {
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
 .contacto-principal-badge {

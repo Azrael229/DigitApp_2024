@@ -30,13 +30,13 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
         </div>
     </div>
     <p class="contactos-muted">El importe incluye todas las páginas que coincidan con los filtros.</p>
-    <div class="table-responsive data-table-shell table-wide mt-4 empresa-table-wrap">
+    <div class="table-responsive data-table-shell data-table-managed table-wide mt-4 empresa-table-wrap">
                 <table id="example" class="table table-secondary table-striped align-middle mb-0 w-100 cotizaciones-directory-table">
                     <thead>
                         <tr>
                             <th scope="col" class="table-date-column">FECHA</th>
                             <th scope="col" class="cot-col-number">NÚMERO</th>
-                            <th scope="col" class="cot-col-company">RAZÓN SOCIAL</th>
+                            <th scope="col" class="cot-col-company table-razon-social-column">RAZÓN SOCIAL</th>
                             <th scope="col" class="cot-col-contact">CONTACTO</th>
                             <th scope="col" class="cot-col-email">CORREO ELECTRÓNICO</th>
                             <th scope="col" class="cot-col-amount">IMPORTE SIN IVA</th>
@@ -54,11 +54,9 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
                                     <?= htmlspecialchars((string) (($row_coti['cot_numero'] ?? '') ?: $row_coti['id_coti']), ENT_QUOTES, 'UTF-8') ?>
                                 </a>
                             </td>
-                            <td class="cot-col-company"><div class="table-text-two-lines"><?= htmlspecialchars((string) ($row_coti['cot_empresa'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div></td>
-                            <td class="cot-col-contact"><div class="table-text-two-lines"><?= htmlspecialchars((string) ($row_coti['cot_contacto'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div></td>
-                            <td class="cot-col-email">
-                                <div class="table-text-two-lines"><?= htmlspecialchars((string) (($row_coti['cot_correo'] ?? '') ?: 'Sin correo'), ENT_QUOTES, 'UTF-8') ?></div>
-                            </td>
+                            <td class="cot-col-company table-razon-social-column"><div class="table-text-wrap"><?= htmlspecialchars((string) ($row_coti['cot_empresa'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div></td>
+                            <td class="cot-col-contact"><div class="table-text-wrap"><?= htmlspecialchars((string) ($row_coti['cot_contacto'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div></td>
+                            <td class="cot-col-email table-nowrap"><?= htmlspecialchars((string) (($row_coti['cot_correo'] ?? '') ?: 'Sin correo'), ENT_QUOTES, 'UTF-8') ?></td>
                             <td class="cot-col-amount" data-cot-total="<?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" data-order="<?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>">$ <?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ' '), ENT_QUOTES, 'UTF-8') ?></td>
                             <?php $estatusClave = cotizacionEstatusClave($row_coti['cot_status'] ?? ''); ?>
                             <td class="cot-col-status"><select class="form-select form-select-sm cot-status-select" data-id="<?= (int) $row_coti['id_coti'] ?>" aria-label="Estatus de cotización <?= htmlspecialchars((string) ($row_coti['cot_numero'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"><?php foreach (COTIZACION_ESTATUS as $clave => $etiqueta): ?><option value="<?= $clave ?>"<?= $estatusClave === $clave ? ' selected' : '' ?>><?= htmlspecialchars($etiqueta, ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select></td>
@@ -91,7 +89,7 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js?v=20261008-2"></script>
-<script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
+<script src="<?= $prefijoRuta ?>js/datatable-config.js?v=20261104-2"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
 <script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261101-2"></script>

@@ -17,7 +17,10 @@
 
 .data-table-shell .dt-top,
 .data-table-shell .dt-bottom {
+    box-sizing: border-box;
     display: flex;
+    width: 100%;
+    min-width: 0;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
@@ -30,6 +33,34 @@
 
 .data-table-shell .dt-bottom {
     margin-top: 18px;
+}
+
+/* Deja que DataTables administre el único desplazamiento horizontal, en el cuerpo de la tabla. */
+.data-table-shell.data-table-managed {
+    overflow: visible;
+}
+
+.data-table-shell.data-table-managed > .dataTables_wrapper,
+.data-table-shell.data-table-managed .dataTables_scroll {
+    width: 100% !important;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.data-table-shell.data-table-managed .dataTables_scrollBody {
+    width: 100% !important;
+}
+
+.data-table-shell.data-table-managed .dataTables_length label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+}
+
+.data-table-shell.data-table-managed .dataTables_length select {
+    min-width: 5rem;
 }
 
 .table {
@@ -61,7 +92,7 @@
     border-color: rgba(255, 255, 255, 0.08);
     vertical-align: middle;
     white-space: normal;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     word-break: normal;
 }
 
@@ -72,7 +103,7 @@
     table-layout: auto;
 }
 
-/* Mantiene legibles las columnas de DataTables y deja el desbordamiento al slider horizontal. */
+/* Deja el único desplazamiento horizontal en el cuerpo de DataTables. */
 .data-table-shell .dataTables_scrollBody {
     max-width: 100%;
     overflow-x: auto !important;
@@ -80,28 +111,27 @@
     -webkit-overflow-scrolling: touch;
 }
 
-.data-table-shell .dataTables_scrollHead th,
-.data-table-shell .dataTables_scrollBody td {
-    white-space: nowrap !important;
-    overflow-wrap: normal !important;
-}
-
-.data-table-shell .dataTables_scrollBody .table-text-two-lines,
+.data-table-shell .dataTables_scrollBody .table-text-wrap,
 .data-table-shell .dataTables_scrollBody .op-multiline {
     white-space: normal;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
-/* Los contenedores responsivos desplazan tablas anchas sin partir los valores de sus celdas. */
-.table-responsive > .table th,
-.table-responsive > .table td {
+.table-responsive > .table :is(.table-text-wrap, .op-multiline) {
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+/* Solo las columnas con datos atómicos conservan una línea; las demás aprovechan el ancho y envuelven texto si hace falta. */
+.table td.table-nowrap,
+.table th.table-nowrap {
     white-space: nowrap;
     overflow-wrap: normal;
 }
 
-.table-responsive > .table :is(.table-text-two-lines, .op-multiline) {
-    white-space: normal;
-    overflow-wrap: anywhere;
+.table .text-end {
+    white-space: nowrap;
+    overflow-wrap: normal;
 }
 
 .table tbody tr {
@@ -202,13 +232,20 @@
 
 .empresa-directory-table :is(.empresa-col-ciudad, .empresa-col-municipio, .empresa-col-estado) {
     min-width: 165px;
-    white-space: nowrap;
-    overflow-wrap: normal;
 }
 
-.empresa-directory-table :is(.empresa-col-nombre, .empresa-col-razon) {
+.empresa-directory-table .empresa-col-nombre {
     min-width: 220px;
     max-width: 285px;
+}
+
+/* Ancho común para columnas rotuladas Razón social en todo el proyecto. */
+.table .table-razon-social-column {
+    width: 260px;
+    min-width: 230px;
+    max-width: none;
+    white-space: normal;
+    overflow-wrap: break-word;
 }
 
 .table .admin-delete-column {
@@ -228,27 +265,14 @@
     overflow-wrap: normal;
 }
 
-.table-text-two-lines {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    line-height: 1.45;
-    max-height: 2.9em;
+.table-text-wrap {
     white-space: normal;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
-.empresa-texto-dos-lineas {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    line-height: 1.45;
-    max-height: 2.9em;
-    overflow-wrap: anywhere;
+.empresa-text-wrap {
+    white-space: normal;
+    overflow-wrap: break-word;
 }
 
 /* Selectores rápidos con apariencia de etiqueta para roles y estatus. */
@@ -278,13 +302,35 @@
 }
 
 @media (max-width: 767px) {
-    .table-responsive > .table,
-    .table-responsive > .dataTables_wrapper {
+    .table-responsive:not(.data-table-managed) > .table {
         min-width: var(--table-min-width, 760px);
     }
 
-    .table-responsive.table-wide {
+    .table-responsive.table-wide:not(.data-table-managed) {
         --table-min-width: 900px;
+    }
+
+    .data-table-shell.data-table-managed .dt-top {
+        justify-content: flex-start;
+    }
+
+    .data-table-shell.data-table-managed .dt-bottom {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .data-table-shell.data-table-managed .dataTables_info {
+        text-align: center;
+    }
+
+    .data-table-shell.data-table-managed .dataTables_paginate {
+        align-self: center;
+        max-width: 100%;
+    }
+
+    .data-table-shell.data-table-managed .dataTables_paginate .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .table-responsive .table th,

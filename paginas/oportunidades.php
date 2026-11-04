@@ -14,9 +14,9 @@ require __DIR__ . '/../construct/header.php';
         <div class="factura-resumen-item factura-resumen-total"><span class="factura-resumen-label">Subtotal sin IVA · MXN</span><strong id="op-subtotal">$0.00</strong></div>
     </div>
     <p class="contactos-muted">El subtotal incluye todas las páginas que coincidan con los filtros.</p>
-    <div class="data-table-shell table-wide mt-4 oportunidades-table-shell">
+    <div class="data-table-shell data-table-managed table-wide mt-4 oportunidades-table-shell">
         <table id="tabla-oportunidades" class="table table-secondary table-striped align-middle mb-0 w-100">
-            <thead><tr><th>Fecha</th><th>Número</th><th>Razón social</th><th>Contacto</th><th>Proyecto</th><th>Importe sin IVA</th><th>Colaborador</th><th>Estatus</th><th>Registro</th></tr></thead>
+            <thead><tr><th>Fecha</th><th>Número</th><th class="table-razon-social-column">Razón social</th><th>Contacto</th><th>Proyecto</th><th>Importe sin IVA</th><th>Colaborador</th><th>Estatus</th><th>Registro</th></tr></thead>
             <tbody></tbody>
         </table>
     </div>
@@ -25,7 +25,7 @@ require __DIR__ . '/../construct/header.php';
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="../js/datatable-filters.js?v=20261008-2"></script>
-<script src="../js/datatable-config.js"></script>
+<script src="../js/datatable-config.js?v=20261104-2"></script>
 <script src="../js/oportunidades-common.js?v=20261009-1"></script>
-<script src="../js/tablaOportunidades.js?v=20261101-1"></script>
+<script src="../js/tablaOportunidades.js?v=20261104-3"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

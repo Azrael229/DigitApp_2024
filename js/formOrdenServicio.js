@@ -35,8 +35,9 @@ async function osRequest(action, values = {}, write = false) {
 }
 
 // Crea una celda de la tabla de equipos sin interpretar HTML externo.
-function osEquipmentCell(row, value) {
+function osEquipmentCell(row, value, className = '') {
     const cell = document.createElement('td');
+    if (className) { cell.className = className; }
     cell.textContent = value || '—';
     row.appendChild(cell);
 }
@@ -71,12 +72,12 @@ function osRenderEquipment() {
         osEquipmentCell(row, equipment.ubicacion);
         osEquipmentCell(row, equipment.marca);
         osEquipmentCell(row, equipment.modelo);
-        osEquipmentCell(row, equipment.identificacion);
-        osEquipmentCell(row, equipment.numero_serie);
-        osEquipmentCell(row, osCapacity(equipment));
-        osEquipmentCell(row, osDecimal(equipment.division_real));
-        osEquipmentCell(row, osDecimal(equipment.division_verificacion));
-        osEquipmentCell(row, equipment.clase_exactitud);
+        osEquipmentCell(row, equipment.identificacion, 'table-nowrap');
+        osEquipmentCell(row, equipment.numero_serie, 'table-nowrap');
+        osEquipmentCell(row, osCapacity(equipment), 'table-nowrap');
+        osEquipmentCell(row, osDecimal(equipment.division_real), 'table-nowrap');
+        osEquipmentCell(row, osDecimal(equipment.division_verificacion), 'table-nowrap');
+        osEquipmentCell(row, equipment.clase_exactitud, 'table-nowrap');
         const action = document.createElement('td');
         const remove = document.createElement('button');
         remove.type = 'button';
@@ -85,7 +86,7 @@ function osRenderEquipment() {
         remove.addEventListener('click', () => { osSelectedEquipment.delete(id); osRenderEquipment(); });
         action.appendChild(remove);
         row.appendChild(action);
-        osEquipmentCell(row, equipment.estatus === 'fuera_servicio' ? 'Fuera de servicio' : equipment.estatus === 'inactivo' ? 'Inactivo' : 'Activo');
+        osEquipmentCell(row, equipment.estatus === 'fuera_servicio' ? 'Fuera de servicio' : equipment.estatus === 'inactivo' ? 'Inactivo' : 'Activo', 'table-nowrap');
         body.appendChild(row);
     });
     document.getElementById('os-equipment-empty').classList.toggle('d-none', osSelectedEquipment.size > 0);

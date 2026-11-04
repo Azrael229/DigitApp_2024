@@ -7,9 +7,9 @@
         columns: [
             {data: 'fecha', render: (value, type) => type === 'display' ? Op.date(value) : value},
             {data: 'numero_oportunidad', render: (value, type, row) => type === 'display' ? `<a class="entity-link fw-semibold" href="ver_oportunidad.php?id=${Number(row.id)}">${Op.escape(value || '#' + row.id)}</a>` : (value || '')},
-            {data: 'empresa', render: (value, type, row) => type === 'display' ? `<a class="entity-link" href="ver_empresa.php?id=${Number(row.empresa_id)}">${Op.escape(value)}</a>` : value},
+            {data: 'empresa', className: 'table-razon-social-column', render: (value, type, row) => type === 'display' ? `<a class="entity-link" href="ver_empresa.php?id=${Number(row.empresa_id)}">${Op.escape(value)}</a>` : value},
             {data: 'contacto', defaultContent: '', render: (value, type, row) => type === 'display' ? (row.contacto_id ? `<a class="entity-link" href="ver_contacto.php?id=${Number(row.contacto_id)}">${Op.escape(value)}</a>` : '—') : (value || '')},
-            {data: 'descripcion_corta', render: DataTable.render.text()},
+            {data: 'descripcion_corta', render: (value, type) => type === 'display' ? `<span class="op-multiline">${Op.escape(value || '')}</span>` : (value || '')},
             {data: 'importe_vigente', render: (value, type) => type === 'display' ? Op.money(value) : Number(value || 0)},
             {data: 'colaborador', defaultContent: '', render: value => Op.escape(value || '—')},
             {data: 'estatus', render: (value, type) => type === 'display'

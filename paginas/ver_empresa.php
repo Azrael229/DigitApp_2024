@@ -144,7 +144,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                     </div>
                 </div>
 
-                <div class="table-responsive data-table-shell empresa-table-wrap table-wide">
+                <div class="table-responsive data-table-shell data-table-managed empresa-table-wrap table-wide">
                     <table id="tabla_equipos_empresa" class="table table-secondary table-striped align-middle mb-0 w-100">
                         <caption class="visually-hidden">Equipos registrados en la empresa</caption>
                         <thead>
@@ -189,7 +189,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                 </ul>
                 <div class="tab-content" id="empresa-historial-contenido">
                     <div class="tab-pane fade show active empresa-history-pane" id="empresa-oportunidades-pane" role="tabpanel" aria-labelledby="empresa-oportunidades-tab" tabindex="0">
-                        <div class="table-responsive data-table-shell empresa-table-wrap table-wide">
+                        <div class="table-responsive data-table-shell data-table-managed empresa-table-wrap table-wide">
                             <table id="tabla_oportunidades_empresa" class="table table-secondary table-striped align-middle mb-0 w-100">
                                 <caption class="visually-hidden">Oportunidades comerciales relacionadas con la empresa</caption>
                                 <thead>
@@ -208,7 +208,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                         </div>
                     </div>
                     <div class="tab-pane fade empresa-history-pane" id="empresa-cotizaciones-pane" role="tabpanel" aria-labelledby="empresa-cotizaciones-tab" tabindex="0">
-                        <div class="table-responsive data-table-shell empresa-table-wrap table-wide">
+                        <div class="table-responsive data-table-shell data-table-managed empresa-table-wrap table-wide">
                             <table id="tabla_cotizaciones_empresa" class="table table-secondary table-striped align-middle mb-0 w-100">
                                 <caption class="visually-hidden">Cotizaciones relacionadas con la empresa</caption>
                                 <thead>
@@ -235,7 +235,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js?v=20261008-2"></script>
-<script src="<?= $prefijoRuta ?>js/datatable-config.js"></script>
+<script src="<?= $prefijoRuta ?>js/datatable-config.js?v=20261104-2"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
 <script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261101-1"></script>

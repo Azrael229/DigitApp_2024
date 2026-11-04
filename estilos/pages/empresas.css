@@ -207,7 +207,7 @@
     border-radius: 12px;
     color: var(--text-main);
     font-size: 0.98rem;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
 .empresa-table-wrap {

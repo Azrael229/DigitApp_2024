@@ -5,8 +5,9 @@ let osDetailVersion = '';
 let osDetailAvailableEquipment = [];
 
 // Crea una celda segura para la tabla de equipos del detalle.
-function osDetailCell(row, value) {
+function osDetailCell(row, value, className = '') {
     const cell = document.createElement('td');
+    if (className) { cell.className = className; }
     cell.textContent = value || '—';
     row.appendChild(cell);
 }
@@ -22,12 +23,12 @@ function osRenderDetailEquipment(items) {
         osDetailCell(row, item.ubicacion);
         osDetailCell(row, item.marca);
         osDetailCell(row, item.modelo);
-        osDetailCell(row, item.identificacion);
-        osDetailCell(row, item.numero_serie);
-        osDetailCell(row, Number(item.capacidad_maxima || 0) ? `${Number(item.capacidad_maxima).toLocaleString('es-MX')} ${item.unidad || ''}` : '—');
-        osDetailCell(row, Number(item.division_real || 0) ? Number(item.division_real).toLocaleString('es-MX', {maximumFractionDigits: 9}) : '—');
-        osDetailCell(row, Number(item.division_verificacion || 0) ? Number(item.division_verificacion).toLocaleString('es-MX', {maximumFractionDigits: 9}) : '—');
-        osDetailCell(row, item.clase_exactitud);
+        osDetailCell(row, item.identificacion, 'table-nowrap');
+        osDetailCell(row, item.numero_serie, 'table-nowrap');
+        osDetailCell(row, Number(item.capacidad_maxima || 0) ? `${Number(item.capacidad_maxima).toLocaleString('es-MX')} ${item.unidad || ''}` : '—', 'table-nowrap');
+        osDetailCell(row, Number(item.division_real || 0) ? Number(item.division_real).toLocaleString('es-MX', {maximumFractionDigits: 9}) : '—', 'table-nowrap');
+        osDetailCell(row, Number(item.division_verificacion || 0) ? Number(item.division_verificacion).toLocaleString('es-MX', {maximumFractionDigits: 9}) : '—', 'table-nowrap');
+        osDetailCell(row, item.clase_exactitud, 'table-nowrap');
         body.appendChild(row);
     });
 }

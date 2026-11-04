@@ -26,6 +26,15 @@
     padding: clamp(1rem, 3vw, 2.5rem);
 }
 
+.auth-users-table .auth-user-actions {
+    min-width: 340px;
+    white-space: nowrap;
+}
+
+.auth-audit-table .auth-audit-detail {
+    min-width: 260px;
+}
+
 .auth-session-item {
     display: flex;
     justify-content: space-between;

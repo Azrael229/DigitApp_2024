@@ -259,7 +259,7 @@ require __DIR__ . '/../construct/header.php';
     <section class="card mb-4 empresa-form-card empresa-detail-section">
       <div class="card-body empresa-card-body">
         <div class="empresa-section-heading mb-3"><p class="empresa-section-kicker mb-1">Conceptos cotizados</p><h2 class="h5 card-title mb-1">Partidas</h2><p class="empresa-notes-help mb-0"><?= count($cotizacion['partidas']) ?> concepto<?= count($cotizacion['partidas']) === 1 ? '' : 's' ?> registrado<?= count($cotizacion['partidas']) === 1 ? '' : 's' ?>.</p></div>
-        <div class="table-responsive data-table-shell empresa-table-wrap">
+        <div class="table-responsive data-table-shell data-table-managed empresa-table-wrap">
             <table id="tabla-partidas-cotizacion" class="table table-secondary table-striped align-middle mb-0 w-100">
                 <thead><tr><th>Posición</th><th>Código</th><th>Cantidad</th><th>Unidad</th><th>Descripción</th><th class="text-end">Valor unitario</th><th class="text-end">Descuento</th><th class="text-end">Subtotal</th></tr></thead>
                 <tbody>
@@ -317,7 +317,7 @@ require __DIR__ . '/../construct/header.php';
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="../js/datatable-filters.js?v=20261008-2"></script>
-<script src="../js/datatable-config.js"></script>
+<script src="../js/datatable-config.js?v=20261104-2"></script>
 <script src="../js/cotizaciones-status.js?v=20261003-1"></script>
 <script src="../js/ver_cotizacion.js?v=20261101-1"></script>
 

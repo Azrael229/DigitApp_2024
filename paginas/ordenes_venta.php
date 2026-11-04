@@ -13,9 +13,9 @@ require __DIR__ . '/../construct/header.php';
         <div class="factura-resumen-item"><span class="factura-resumen-label">Órdenes filtradas</span><strong id="ov-registros">0</strong></div>
         <div class="factura-resumen-item factura-resumen-total"><span class="factura-resumen-label">Importe sin IVA · MXN</span><strong id="ov-subtotal">$0.00</strong></div>
     </div>
-    <div class="table-responsive data-table-shell table-wide mt-4">
+    <div class="table-responsive data-table-shell data-table-managed table-wide mt-4">
         <table id="tabla-ordenes-venta" class="table table-striped align-middle mb-0 w-100">
-            <thead><tr><th>Fecha</th><th>Orden</th><th>Razón social</th><th>Contacto</th><th>Correo</th><th>Teléfono</th><th>Importe sin IVA</th><th>Estatus</th><th>Registro</th></tr></thead>
+            <thead><tr><th>Fecha</th><th>Orden</th><th class="table-razon-social-column">Razón social</th><th>Contacto</th><th>Correo</th><th>Teléfono</th><th>Importe sin IVA</th><th>Estatus</th><th>Registro</th></tr></thead>
             <tbody></tbody>
         </table>
     </div>
@@ -24,7 +24,7 @@ require __DIR__ . '/../construct/header.php';
 <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
 <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 <script src="../js/datatable-filters.js?v=20261008-2"></script>
-<script src="../js/datatable-config.js"></script>
+<script src="../js/datatable-config.js?v=20261104-2"></script>
 <script src="../js/ordenes-venta-common.js?v=20261009-1"></script>
-<script src="../js/tablaOrdenesVenta.js?v=20261101-1"></script>
+<script src="../js/tablaOrdenesVenta.js?v=20261104-2"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>

@@ -4,7 +4,7 @@
 $(function () {
     const hasAction = Boolean(document.querySelector('#catalogo-table thead .table-action-column'));
     const table = $('#catalogo-table').DataTable(getDataTableOptions({
-        pageLength: 25,
+        pageLength: 10,
         order: [[0, 'desc']],
         orderCellsTop: true,
         responsive: false,
