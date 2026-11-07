@@ -312,7 +312,14 @@ function actualizarEstadoPartidas() {
      }
 }
 
-// Carga los productos y servicios activos disponibles para seleccionar por código.
+// Garantiza una fila de captura disponible cuando la cotización todavía no tiene conceptos.
+function asegurarPartidaCaptura() {
+     if (!contenedorPartidas.querySelector('.partida-cotizacion')) {
+          agregarPartida({});
+     }
+}
+
+// Carga los productos y servicios activos disponibles en la lista nativa de códigos.
 async function cargarCatalogoComercial() {
      var response = await fetch('../backend/catalogo/api.php?action=quote_items');
      var result = await response.json().catch(function () { return {}; });
@@ -323,15 +330,15 @@ async function cargarCatalogoComercial() {
      datalist.replaceChildren();
      catalogoComercial.clear();
      (result.items || []).forEach(function (item) {
-          catalogoComercial.set(String(item.codigo).toUpperCase(), item);
-          var option = document.createElement('option');
-          option.value = item.codigo;
-          option.label = item.descripcion;
-          datalist.appendChild(option);
+           catalogoComercial.set(String(item.codigo).toUpperCase(), item);
+           var option = document.createElement('option');
+           option.value = item.codigo;
+           option.label = item.descripcion;
+           datalist.appendChild(option);
      });
 }
 
-// Precarga la fotografía comercial del código elegido sin bloquear la edición manual de la partida.
+// Precarga datos comerciales cuando el código seleccionado pertenece al catálogo.
 function aplicarCatalogoPartida(fila) {
      var input = fila.querySelector('.partida-codigo');
      var code = input.value.trim().toUpperCase();
@@ -371,9 +378,8 @@ function formatearSubtotalPartida(importe) {
 }
 
 // Agrega una fila de captura independiente y sin límite de longitud en la descripción.
-function agregarPartida(datos, enfocar) {
+function agregarPartida(datos) {
      datos = datos || {};
-     enfocar = enfocar !== false;
      consecutivoPartida += 1;
      var indice = consecutivoPartida;
      contenedorPartidas.insertAdjacentHTML('beforeend', `
@@ -413,9 +419,6 @@ function agregarPartida(datos, enfocar) {
      fila.querySelector('.partida-descuento').value = datos.descuento_valor || '0';
      fila.querySelector('.partida-descuento').readOnly = fila.querySelector('.partida-descuento-tipo').value === 'ninguno';
      actualizarPartidaSecundaria(fila);
-     if (enfocar) {
-          document.getElementById('partida_cantidad_' + indice).focus();
-     }
 }
 
 // Convierte notas históricas conocidas y conserva el resto como una sola nota adicional.
@@ -465,7 +468,7 @@ function cargarNotas(notas) {
 function cargarContenidoCotizacion(cotizacion) {
      contenedorPartidas.innerHTML = '';
      (cotizacion.partidas || []).forEach(function (partida) {
-          agregarPartida(partida, false);
+          agregarPartida(partida);
      });
      actualizarEstadoPartidas();
 
@@ -583,10 +586,12 @@ async function inicializarFormulario() {
      actualizarGarantia();
      if (cotizacionEditarId) {
           await cargarCotizacionBase(cotizacionEditarId, false);
+          asegurarPartidaCaptura();
           return;
      }
      if (cotizacionDuplicarId) {
           await cargarCotizacionBase(cotizacionDuplicarId, true);
+          asegurarPartidaCaptura();
           return;
      }
      try {
@@ -601,6 +606,7 @@ async function inicializarFormulario() {
      } catch (error) {
           alert(error.message);
      }
+     asegurarPartidaCaptura();
 }
 
 // Recalcula cada importe y el resumen visual; el servidor confirma los montos al guardar.
@@ -628,7 +634,7 @@ function totalizar() {
      inputTotal.value = (subtotal + iva).toFixed(2);
 }
 
-btnAgregarPartida.addEventListener('click', agregarPartida);
+btnAgregarPartida.addEventListener('click', function () { agregarPartida({}); });
 selectTiempoEntrega.addEventListener('change', actualizarTiempoEntrega);
 selectCondicionPago.addEventListener('change', actualizarCondicionPago);
 inputPagoAnticipo.addEventListener('input', actualizarCondicionPago);
@@ -654,14 +660,41 @@ contenedorPartidas.addEventListener('change', function (event) {
      }
      if (event.target.matches('.partida-codigo')) {
           aplicarCatalogoPartida(event.target.closest('.partida-cotizacion'));
+          formularioModificado = true;
      }
 });
+// Borra una partida o limpia la última fila sin mover el foco a datos del cliente.
 contenedorPartidas.addEventListener('click', function (event) {
-     var boton = event.target.closest('.btn-eliminar-partida');
+     var boton = event.target instanceof Element
+          ? event.target.closest('.btn-eliminar-partida') : null;
      if (!boton) {
           return;
      }
-     boton.closest('.partida-cotizacion').remove();
+     var fila = boton.closest('.partida-cotizacion');
+     if (!fila || !contenedorPartidas.contains(fila)) {
+          return;
+     }
+     var partidas = Array.from(contenedorPartidas.querySelectorAll('.partida-cotizacion'));
+     if (partidas.length === 1) {
+          fila.querySelector('.partida-codigo').value = '';
+          fila.querySelector('.partida-catalogo-id').value = '';
+          fila.querySelector('.partida-catalogo-tipo').value = '';
+          fila.querySelector('.partida-cantidad').value = '';
+          fila.querySelector('.partida-cantidad-secundaria').value = '';
+          fila.querySelector('.partida-unidad').value = '';
+          fila.querySelector('.partida-unidad-secundaria').value = '';
+          fila.querySelector('.partida-descripcion').value = '';
+          fila.querySelector('.partida-valor').value = '';
+          fila.querySelector('.partida-descuento-tipo').value = 'ninguno';
+          fila.querySelector('.partida-descuento').value = '0';
+          fila.querySelector('.partida-descuento').readOnly = true;
+          fila.querySelector('.partida-subtotal').value = formatearSubtotalPartida(0);
+          fila.querySelector('.partida-total').value = '0.00';
+          actualizarPartidaSecundaria(fila);
+     } else {
+          fila.remove();
+     }
+     formularioModificado = true;
      actualizarEstadoPartidas();
      totalizar();
 });
@@ -702,7 +735,6 @@ formulario.addEventListener('submit', async function (event) {
           cotizacionDuplicarId = '';
           formulario.dataset.cotizacionId = cotizacionEditarId;
           formularioModificado = false;
-          formulario.dispatchEvent(new CustomEvent('digitapp:draft-saved', {bubbles: true}));
           window.DigitAppMasterSync?.publish('cotizacion', resultado.id);
           btnGuardar.innerHTML = '<i class="bi bi-save" aria-hidden="true"></i> Guardar cambios';
           window.history.replaceState(null, '', 'nuevaCotizacion.php?id=' + encodeURIComponent(resultado.id));

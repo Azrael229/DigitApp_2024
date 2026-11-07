@@ -206,7 +206,6 @@ function validarNumerosEquipo(evento) {
 });
 formularioEquipo.addEventListener('input', detectarCambioEquipo);
 formularioEquipo.addEventListener('change', detectarCambioEquipo);
-formularioEquipo.addEventListener('digitapp:draft-restored', marcarFormularioEquipoModificado);
 formularioEquipo.addEventListener('submit', validarNumerosEquipo);
 DigitAppDuplicateWarning.protegerFormulario({
     formulario: formularioEquipo,

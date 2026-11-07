@@ -41,7 +41,7 @@ require(__DIR__ . "/../construct/header.php");
     <?php endif; ?>
     <!-- row de titulo -->
 
-    <form id="formEmpresa" data-local-draft="1" action="<?= $prefijoRuta ?>backend/empresas/guardar_empresa_completa.php" method="POST">
+    <form id="formEmpresa" action="<?= $prefijoRuta ?>backend/empresas/guardar_empresa_completa.php" method="POST">
     <input type="hidden" name="empresa_id" id="empresa_id" value="<?= htmlspecialchars((string) ($empresaId ?: '')) ?>">
     <input type="hidden" name="version" id="empresa_version" value="">
     <input type="hidden" name="contacto_retorno_id" id="contacto_retorno_id" value="<?= $contactoRetornoId ? (int) $contactoRetornoId : '' ?>">

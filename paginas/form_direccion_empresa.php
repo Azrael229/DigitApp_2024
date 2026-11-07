@@ -22,7 +22,7 @@ if ($returnUrl !== '' && !preg_match('/^informe\.php(?:\?.*)?$/', $returnUrl)) {
     <?php if ($empresaId === false || $empresaId === null): ?>
         <div class="alert alert-danger">No se indicó una empresa válida.</div>
     <?php else: ?>
-        <form id="form_direccion_empresa" data-local-draft="1" action="<?= $prefijoRuta ?>backend/empresas/guardar_direccion_empresa.php" method="POST">
+        <form id="form_direccion_empresa" action="<?= $prefijoRuta ?>backend/empresas/guardar_direccion_empresa.php" method="POST">
             <input type="hidden" name="empresa_id" value="<?= htmlspecialchars((string) $empresaId) ?>">
             <input type="hidden" name="direccion_id" id="direccion_id" value="<?= htmlspecialchars((string) ($direccionId ?: '')) ?>">
             <input type="hidden" name="version" id="direccion_version" value="">

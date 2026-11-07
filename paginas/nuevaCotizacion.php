@@ -32,7 +32,7 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
     </div>
     <!-- titulo  -->
 
-    <form action="<?= $prefijoRuta ?>fpdf/cotizacionPDF.php" method="POST" target="cotizacion_pdf" id="form_cotizacion" class="cotizacion-form" novalidate data-local-draft="1" data-oportunidad-id="<?= $oportunidadId ? (int) $oportunidadId : '' ?>" data-cotizacion-id="<?= $editandoCotizacion ? (int) $cotizacionId : '' ?>" data-duplicate-id="<?= $duplicandoCotizacion ? (int) $cotizacionDuplicarId : '' ?>" data-return-url="<?= htmlspecialchars($paginaRegreso, ENT_QUOTES, 'UTF-8') ?>">
+    <form action="<?= $prefijoRuta ?>fpdf/cotizacionPDF.php" method="POST" target="cotizacion_pdf" id="form_cotizacion" class="cotizacion-form" novalidate data-oportunidad-id="<?= $oportunidadId ? (int) $oportunidadId : '' ?>" data-cotizacion-id="<?= $editandoCotizacion ? (int) $cotizacionId : '' ?>" data-duplicate-id="<?= $duplicandoCotizacion ? (int) $cotizacionDuplicarId : '' ?>" data-return-url="<?= htmlspecialchars($paginaRegreso, ENT_QUOTES, 'UTF-8') ?>">
     <input type="hidden" name="oportunidad_id" id="oportunidad_id" value="<?= $oportunidadId ? (int) $oportunidadId : '' ?>">
     <input type="hidden" name="empresa_id" id="cot_empresa_id">
     <input type="hidden" name="contacto_id" id="cot_contacto_id">
@@ -317,7 +317,7 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
         <div class="cotizacion-section-heading d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
             <div>
                 <h2 class="h4 mb-1">Conceptos de la cotización</h2>
-                <p class="contactos-muted mb-0">Agrega las partidas que necesites; el PDF ajustará automáticamente sus páginas.</p>
+                <p class="contactos-muted mb-0">Agrega las partidas que necesites; el PDF ajustará automáticamente sus páginas. La cotización conserva al menos una fila de captura.</p>
             </div>
             <button type="button" id="btn_agregar_partida" class="btn btn-success flex-shrink-0">
                 <i class="bi bi-plus-lg" aria-hidden="true"></i> Agregar partida
@@ -346,7 +346,6 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
             </table>
         </div>
         <datalist id="catalogo_comercial_codigos"></datalist>
-
         <!-- Totales -->
         <div class="row justify-content-end mt-4">
             <!-- Tabla de Totales -->
@@ -386,8 +385,6 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
 
     </form>                   
 
-
-
 </div>
 
 
@@ -401,6 +398,6 @@ require_once __DIR__ . '/../backend/cotizaciones/common.php';
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
-<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261101-1"></script>
+<script src="<?= $prefijoRuta ?>js/cotizacion.js?v=20261107-13"></script>
 
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>

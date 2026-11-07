@@ -27,8 +27,6 @@ const botonEditarCliente = document.getElementById('btn_editar_cliente_informe')
 const botonEditarEquipo = document.getElementById('btn_editar_equipo_informe');
 const botonRestablecerInforme = document.getElementById('btn_restablecer_informe');
 const botonesGenerarInforme = Array.from(formularioInforme.querySelectorAll('[data-informe-accion]'));
-const claveFlujoInforme = `digitapp:draft:${document.body.dataset.userId || 'usuario'}:informe-flujo`;
-const vigenciaFlujoInforme = 5 * 24 * 60 * 60 * 1000;
 let empresaEnCarga = '';
 let equiposEmpresa = [];
 let decimalesInstrumento = 0;
@@ -375,86 +373,8 @@ async function seleccionarEmpresa() {
     }
 }
 
-// Conserva por un máximo de cinco días el avance del informe cuando se edita un dato maestro.
-function guardarFlujoInforme() {
-    const controles = Array.from(formularioInforme.elements)
-        .filter((control) => control.name && !['submit', 'button'].includes(control.type))
-        .map((control) => ({
-            name: control.name,
-            value: control.value,
-            checked: ['checkbox', 'radio'].includes(control.type) ? control.checked : null,
-        }));
-    localStorage.setItem(claveFlujoInforme, JSON.stringify({ actualizado: Date.now(), controles }));
-}
-
-function leerFlujoInforme() {
-    try {
-        const flujo = JSON.parse(localStorage.getItem(claveFlujoInforme) || 'null');
-        if (!flujo || !Array.isArray(flujo.controles) || Date.now() - Number(flujo.actualizado) > vigenciaFlujoInforme) {
-            localStorage.removeItem(claveFlujoInforme);
-            return null;
-        }
-        return flujo;
-    } catch (error) {
-        localStorage.removeItem(claveFlujoInforme);
-        return null;
-    }
-}
-
-function valorGuardado(flujo, nombre) {
-    return flujo?.controles.find((control) => control.name === nombre)?.value || '';
-}
-
-function restaurarControlesInforme(flujo, omitidos = []) {
-    const indices = {};
-    flujo.controles.forEach((guardado) => {
-        if (omitidos.includes(guardado.name)) return;
-        const coincidencias = Array.from(formularioInforme.elements).filter((control) => control.name === guardado.name);
-        const indice = indices[guardado.name] || 0;
-        const control = coincidencias[indice];
-        indices[guardado.name] = indice + 1;
-        if (!control) return;
-        if (['checkbox', 'radio'].includes(control.type)) control.checked = Boolean(guardado.checked);
-        else control.value = guardado.value;
-    });
-}
-
-async function restaurarFlujoInforme() {
-    const parametros = new URLSearchParams(window.location.search);
-    if (parametros.get('retorno') !== '1') return;
-    const flujo = leerFlujoInforme();
-    if (!flujo) return;
-
-    restaurarControlesInforme(flujo, ['select_empresa', 'select_contacto', 'dir_empresa', 'direccion_id', 'equipo_id', 'ubicacion_inst']);
-    const empresaId = valorGuardado(flujo, 'select_empresa');
-    if (!empresaId || !selectEmpresa.querySelector(`option[value="${empresaId}"]`)) return;
-    selectEmpresa.value = empresaId;
-    if (window.jQuery && jQuery.fn.select2) jQuery(selectEmpresa).trigger('change.select2');
-    await seleccionarEmpresa();
-
-    const contactoId = valorGuardado(flujo, 'select_contacto');
-    if (contactoId && selectContacto.querySelector(`option[value="${contactoId}"]`)) selectContacto.value = contactoId;
-    actualizarContactoSeleccionado();
-
-    const direccionId = valorGuardado(flujo, 'dir_empresa');
-    if (direccionId && selectDireccion.querySelector(`option[value="${direccionId}"]`)) selectDireccion.value = direccionId;
-    inputDireccionIdInforme.value = selectDireccion.value;
-    cargarEquiposDireccion();
-
-    const equipoId = valorGuardado(flujo, 'equipo_id');
-    if (equipoId && selectEquipo.querySelector(`option[value="${equipoId}"]`)) selectEquipo.value = equipoId;
-    cargarEquipoSeleccionado();
-    restaurarControlesInforme(flujo, ['select_empresa', 'select_contacto', 'dir_empresa', 'direccion_id', 'equipo_id', 'ubicacion_inst']);
-    actualizarPasoIndicaciones();
-    evaluarInspeccion(false);
-    evaluarTodasLasPruebas(false);
-    localStorage.removeItem(claveFlujoInforme);
-    history.replaceState({}, '', window.location.pathname);
-}
-
 function abrirEdicionDesdeInforme(destino) {
-    guardarFlujoInforme();
-    const retorno = encodeURIComponent('informe.php?retorno=1');
+    const retorno = encodeURIComponent('informe.php');
     window.location.href = `${destino}${destino.includes('?') ? '&' : '?'}return_url=${retorno}`;
 }
 
@@ -872,7 +792,7 @@ async function prepararOtroEquipo() {
     selectEquipo.focus();
 }
 
-// Vacía por completo el informe y elimina sus borradores locales para iniciar otro registro.
+// Vacía por completo el informe actual para iniciar otro registro.
 async function restablecerInforme() {
     formularioInforme.reset();
     empresaEnCarga = '';
@@ -887,8 +807,6 @@ async function restablecerInforme() {
     evaluarInspeccion(false);
     evaluarTodasLasPruebas(false);
     mostrarErrores([]);
-    localStorage.removeItem(claveFlujoInforme);
-    formularioInforme.dispatchEvent(new CustomEvent('digitapp:draft-saved', { bubbles: true }));
     selectEmpresa.focus();
 }
 
@@ -911,8 +829,6 @@ async function generarInforme(evento) {
         }
         descargarPdf(await respuesta.blob(), nombreArchivoInforme(respuesta));
         if (!esFormatoTomaDatos) {
-            localStorage.removeItem(claveFlujoInforme);
-            formularioInforme.dispatchEvent(new CustomEvent('digitapp:draft-saved', { bubbles: true }));
             if (accion === 'continuar') await prepararOtroEquipo();
         }
     } catch (error) {
@@ -980,4 +896,3 @@ formularioInforme.addEventListener('keydown', (evento) => {
     evento.preventDefault();
 });
 botonRestablecerInforme.addEventListener('click', restablecerInforme);
-restaurarFlujoInforme();

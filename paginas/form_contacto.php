@@ -62,7 +62,7 @@ require __DIR__ . '/../construct/header.php';
     <?php endif; ?>
     <div id="mensaje_form_contacto" class="alert d-none mt-4" role="status" aria-live="polite"></div>
 
-    <form id="form_contacto" data-local-draft="1" action="<?= $prefijoRuta ?>backend/contactos/add_contacto.php" method="POST" novalidate>
+    <form id="form_contacto" action="<?= $prefijoRuta ?>backend/contactos/add_contacto.php" method="POST" novalidate>
         <input type="hidden" id="contacto_id" name="contacto_id" value="<?= $idContacto && $idContacto > 0 ? (int) $idContacto : '' ?>">
         <input type="hidden" id="contacto_version" name="version" value="">
         <input type="hidden" id="contacto_csrf" name="csrf" value="<?= htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') ?>">

@@ -33,7 +33,7 @@ $versionFormEquipoJs = (string) filemtime(__DIR__ . '/../js/form_equipo_empresa.
     <?php else: ?>
         <div id="mensaje_form_equipo" class="alert alert-info" role="status" aria-live="polite">Preparando el formulario...</div>
 
-        <form id="form_equipo_empresa" data-local-draft="1" class="d-none" action="<?= $prefijoRuta ?>backend/empresas/guardar_equipo_empresa.php" method="POST" novalidate>
+        <form id="form_equipo_empresa" class="d-none" action="<?= $prefijoRuta ?>backend/empresas/guardar_equipo_empresa.php" method="POST" novalidate>
             <input type="hidden" name="empresa_id" id="empresa_id" value="<?= htmlspecialchars((string) $empresaId) ?>">
             <input type="hidden" name="equipo_id" id="equipo_id" value="<?= htmlspecialchars((string) ($equipoId ?: '')) ?>">
             <input type="hidden" name="version" id="equipo_version" value="">
