@@ -44,7 +44,7 @@ function escaparContacto($valor): string
                     <caption class="visually-hidden">Directorio de contactos</caption>
                     <thead>
                         <tr>
-                            <th scope="col">Nombre</th>
+                            <th scope="col" class="table-contacto-column">Nombre</th>
                             <th scope="col">Teléfono</th>
                             <th scope="col">Correo</th>
                             <th scope="col">Departamento</th>
@@ -66,7 +66,7 @@ function escaparContacto($valor): string
                             $activo = (int) ($contacto['activo'] ?? 0) === 1;
                             ?>
                             <tr data-company-count="<?= $totalEmpresas ?>">
-                                <td>
+                                <td class="table-contacto-column">
                                     <?= renderizarEnlaceEntidad('contacto', $id, (string) $contacto['nombre']) ?>
                                 </td>
                                 <td class="table-nowrap"><?= escaparContacto($contacto['celular'] ?: '—') ?></td>

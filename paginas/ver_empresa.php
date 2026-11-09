@@ -112,7 +112,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                 <div class="table-responsive empresa-table-wrap">
                     <table class="table table-secondary align-middle empresa-detail-table empresa-contacts-table mb-0">
                         <caption class="visually-hidden">Contactos registrados de la empresa</caption>
-                        <thead><tr><th scope="col">Nombre</th><th scope="col">Teléfono</th><th scope="col">Correo</th><th scope="col">Departamento</th><th scope="col">Puesto</th><th scope="col">Estado</th><th scope="col">Editar</th></tr></thead>
+                        <thead><tr><th scope="col" class="table-contacto-column">Nombre</th><th scope="col">Teléfono</th><th scope="col">Correo</th><th scope="col">Departamento</th><th scope="col">Puesto</th><th scope="col">Estado</th><th scope="col">Editar</th></tr></thead>
                         <tbody id="tabla_contactos"></tbody>
                     </table>
                 </div>
@@ -196,7 +196,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                                     <tr>
                                         <th scope="col">Fecha</th>
                                         <th scope="col">Número</th>
-                                        <th scope="col">Contacto</th>
+                                        <th scope="col" class="table-contacto-column">Contacto</th>
                                         <th scope="col">Proyecto</th>
                                         <th scope="col">Importe sin IVA</th>
                                         <th scope="col">Estatus</th>
@@ -215,7 +215,7 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
                                     <tr>
                                         <th scope="col">Fecha</th>
                                         <th scope="col">Número</th>
-                                        <th scope="col">Contacto</th>
+                                        <th scope="col" class="table-contacto-column">Contacto</th>
                                         <th scope="col">Importe</th>
                                         <th scope="col">Estatus</th>
                                         <th scope="col">Registro</th>
@@ -238,6 +238,6 @@ if (empty($_SESSION['empresa_notas_csrf'])) {
 <script src="<?= $prefijoRuta ?>js/datatable-config.js?v=20261104-2"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
-<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261101-1"></script>
+<script src="<?= $prefijoRuta ?>js/ver_empresa.js?v=20261109-1"></script>
 
 <?php require (__DIR__ . "/../construct/footer.html"); ?>

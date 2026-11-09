@@ -9,7 +9,7 @@
             {data: 'numero_servicio', render: (value, type, row) => type === 'display' ? `<a class="entity-link fw-semibold" href="ver_orden_servicio.php?id=${Number(row.id)}">${OS.escape(value)}</a>` : value},
             {data: 'numero_venta', render: (value, type, row) => type === 'display' ? `<a class="entity-link" href="ver_orden_venta.php?id=${Number(row.orden_venta_id)}">${OS.escape(value)}</a>` : value},
             {data: 'empresa_nombre', className: 'table-razon-social-column', render: (value, type, row) => type === 'display' ? `<a class="entity-link" href="ver_empresa.php?id=${Number(row.empresa_id)}">${OS.escape(value)}</a>` : value},
-            {data: 'entrega_contacto', defaultContent: '', render: DataTable.render.text()},
+            {data: 'entrega_contacto', className: 'table-contacto-column', defaultContent: '', render: DataTable.render.text()},
             {data: 'tipo', render: (value, type) => type === 'display' ? OS.escape(OS.types[value] || value) : (OS.types[value] || value)},
             {data: 'estatus', render: (value, type, row) => type === 'display'
                 ? `<select class="form-select form-select-sm os-status-select" aria-label="Estatus de ${OS.escape(row.numero_servicio)}">${Object.entries(OS.statuses).map(([key, label]) => `<option value="${key}"${key === value ? ' selected' : ''}>${OS.escape(label)}</option>`).join('')}</select>`

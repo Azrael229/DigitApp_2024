@@ -136,16 +136,17 @@ require __DIR__ . '/../construct/header.php';
         <div class="col empresa-header-copy">
             <p class="empresa-header-kicker mb-1">Gestión comercial</p>
             <h1 class="h2 mb-1 d-flex flex-wrap align-items-baseline gap-2">
-                <span>Cotización <?= cotEscapar($cotizacion['cot_numero'] ?: '#' . $cotizacion['id_coti']) ?></span>
+                <span>Cotización</span>
+                <span class="app-page-header-number" data-preserve-title-fragment><?= cotEscapar($cotizacion['cot_numero'] ?: '#' . $cotizacion['id_coti']) ?></span>
                 <span class="badge cot-status cot-title-status cot-status-<?= cotEscapar(cotizacionEstatusClave($cotizacion['cot_status'] ?? '')) ?>"><?= cotEscapar(cotizacionEstatusEtiqueta($cotizacion['cot_status'] ?? '')) ?></span>
             </h1>
             <p class="empresa-header-subtitle mb-0">Consulta el documento registrado, sus partidas y condiciones comerciales</p>
         </div>
         <div class="col-12 col-md-auto mt-3 mt-md-0 d-flex flex-column flex-sm-row gap-2 empresa-header-actions">
             <a href="nuevaCotizacion.php?id=<?= (int) $cotizacion['id_coti'] ?>" class="btn btn-secondary text-nowrap"><i class="bi bi-pencil" aria-hidden="true"></i> Editar cotización</a>
-            <form action="../fpdf/cotizacionPDF.php" method="post" target="_blank" class="m-0">
+            <form id="form-imprimir-cotizacion" action="../fpdf/cotizacionPDF.php" method="post" target="_blank" class="m-0">
                 <input type="hidden" name="cotizacion_id" value="<?= (int) $cotizacion['id_coti'] ?>">
-                <button type="submit" class="btn btn-secondary w-100 text-nowrap"><i class="bi bi-printer" aria-hidden="true"></i> Imprimir</button>
+                <button type="submit" form="form-imprimir-cotizacion" class="btn btn-secondary w-100 text-nowrap"><i class="bi bi-printer" aria-hidden="true"></i> Imprimir</button>
             </form>
             <a href="tablaCotizaciones.php" class="btn btn-secondary text-nowrap"><i class="bi bi-arrow-left" aria-hidden="true"></i> Cotizaciones</a>
         </div>

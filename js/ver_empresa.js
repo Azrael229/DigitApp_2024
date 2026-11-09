@@ -165,6 +165,7 @@ var oportunidadesEmpresa = new DataTable('#tabla_oportunidades_empresa', getData
         },
         {
             data: 'contacto',
+            className: 'table-contacto-column',
             defaultContent: '',
             render: function (valor, tipo, fila) {
                 if (tipo !== 'display') {
@@ -220,7 +221,7 @@ var cotizacionesEmpresa = new DataTable('#tabla_cotizaciones_empresa', getDataTa
                     : (valor || '');
             }
         },
-        { data: 'cot_contacto', defaultContent: '', render: DataTable.render.text() },
+        { data: 'cot_contacto', className: 'table-contacto-column', defaultContent: '', render: DataTable.render.text() },
         {
             data: 'cot_total',
             defaultContent: '',
@@ -256,7 +257,7 @@ function agregarContactoEnlazado(fila, contacto) {
     var celda = document.createElement('td');
     var enlace = document.createElement('a');
 
-    celda.className = 'empresa-detail-cell';
+    celda.className = 'empresa-detail-cell table-contacto-column';
     enlace.className = 'entity-link';
     enlace.href = 'ver_contacto.php?id=' + encodeURIComponent(contacto.id)
         + '&from=empresa&empresa_id=' + encodeURIComponent(empresaId);

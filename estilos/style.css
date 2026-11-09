@@ -9,7 +9,7 @@
 
 @import url("./main/buttons.css?v=20261007-2");
 
-@import url("./tables/base.css?v=20261104-3");
+@import url("./tables/base.css?v=20261109-2");
 @import url("./tables/datatables.css?v=20261007-2");
 @import url("./tables/facturacion.css?v=20261007-1");
 @import url("./tables/cotizacion.css?v=20261104-2");
@@ -24,12 +24,12 @@
 
 @import url("./pages/cotizaciones.css?v=20261107-3");
 @import url("./pages/contactos.css");
-@import url("./pages/oportunidades.css?v=20261003-4");
+@import url("./pages/oportunidades.css?v=20261109-1");
 @import url("./pages/empresas.css?v=20261009-1");
 @import url("./pages/informe.css?v=20260929-1");
 @import url("./pages/ordenes-venta.css?v=20261009-1");
 @import url("./pages/auth.css?v=20261104-1");
 
 @import url("./main/navbar.css?v=20261031-6");
-@import url("./components/page-header.css?v=20261031-6");
+@import url("./components/page-header.css?v=20261109-1");
 @import url("./components/minimal-content.css?v=20261031-3");

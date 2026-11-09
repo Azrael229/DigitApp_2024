@@ -37,7 +37,7 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
                             <th scope="col" class="table-date-column">FECHA</th>
                             <th scope="col" class="cot-col-number">NÚMERO</th>
                             <th scope="col" class="cot-col-company table-razon-social-column">RAZÓN SOCIAL</th>
-                            <th scope="col" class="cot-col-contact">CONTACTO</th>
+                            <th scope="col" class="cot-col-contact table-contacto-column">CONTACTO</th>
                             <th scope="col" class="cot-col-email">CORREO ELECTRÓNICO</th>
                             <th scope="col" class="cot-col-amount">IMPORTE SIN IVA</th>
                             <th scope="col" class="cot-col-status">ESTATUS</th>
@@ -55,7 +55,7 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
                                 </a>
                             </td>
                             <td class="cot-col-company table-razon-social-column"><div class="table-text-wrap"><?= htmlspecialchars((string) ($row_coti['cot_empresa'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div></td>
-                            <td class="cot-col-contact"><div class="table-text-wrap"><?= htmlspecialchars((string) ($row_coti['cot_contacto'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div></td>
+                            <td class="cot-col-contact table-contacto-column"><div class="table-text-wrap"><?= htmlspecialchars((string) ($row_coti['cot_contacto'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div></td>
                             <td class="cot-col-email table-nowrap"><?= htmlspecialchars((string) (($row_coti['cot_correo'] ?? '') ?: 'Sin correo'), ENT_QUOTES, 'UTF-8') ?></td>
                             <td class="cot-col-amount" data-cot-total="<?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" data-order="<?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>">$ <?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ' '), ENT_QUOTES, 'UTF-8') ?></td>
                             <?php $estatusClave = cotizacionEstatusClave($row_coti['cot_status'] ?? ''); ?>

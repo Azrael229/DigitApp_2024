@@ -19,7 +19,7 @@
         columns: [
             {data: 'cot_fecha', render: (value, type) => type === 'display' ? Op.date(value) : value},
             {data: 'cot_numero', render: (value, type, row) => type === 'display' ? `<a class="entity-link fw-semibold" href="ver_cotizacion.php?id=${Number(row.id_coti)}">${Op.escape(value || '#' + row.id_coti)}</a>` : (value || '')},
-            {data: 'cot_contacto', defaultContent: '', render: DataTable.render.text()},
+            {data: 'cot_contacto', className: 'table-contacto-column', defaultContent: '', render: DataTable.render.text()},
             {data: 'cot_subtotal', render: (value, type) => type === 'display' ? Op.money(value) : Number(value || 0)},
             {data: 'id_coti', orderable: false, searchable: false, render: value => `<button type="button" class="btn btn-outline-secondary btn-sm" data-quote="${Number(value)}">Desvincular</button>`},
             {data: 'cot_status', defaultContent: '', render: (value, type, row) => {

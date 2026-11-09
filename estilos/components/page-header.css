@@ -92,6 +92,13 @@
     display: none;
 }
 
+.app-page-header-number {
+    color: var(--accent-mint);
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
 .app-page-header img,
 .app-page-header picture,
 .app-page-header svg,

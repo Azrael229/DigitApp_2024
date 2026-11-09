@@ -8,7 +8,7 @@
             {data: 'fecha_generacion', render: (value, type) => type === 'display' ? OV.date(value) : value},
             {data: 'numero_venta', render: (value, type, row) => type === 'display' ? `<a class="entity-link fw-semibold" href="ver_orden_venta.php?id=${Number(row.id)}">${OV.escape(value)}</a>` : value},
             {data: 'empresa_nombre', className: 'table-razon-social-column', render: (value, type, row) => type === 'display' ? `<a class="entity-link" href="ver_empresa.php?id=${Number(row.empresa_id)}">${OV.escape(value)}</a>` : value},
-            {data: 'contacto_nombre', defaultContent: '', render: (value, type, row) => type === 'display' ? (row.contacto_id ? `<a class="entity-link" href="ver_contacto.php?id=${Number(row.contacto_id)}">${OV.escape(value || 'Sin contacto')}</a>` : OV.escape(value || 'Sin contacto')) : (value || '')},
+            {data: 'contacto_nombre', className: 'table-contacto-column', defaultContent: '', render: (value, type, row) => type === 'display' ? (row.contacto_id ? `<a class="entity-link" href="ver_contacto.php?id=${Number(row.contacto_id)}">${OV.escape(value || 'Sin contacto')}</a>` : OV.escape(value || 'Sin contacto')) : (value || '')},
             {data: 'contacto_correo', defaultContent: '', render: DataTable.render.text()},
             {data: 'contacto_telefono', defaultContent: '', render: DataTable.render.text()},
             {data: 'importe_sin_iva', render: (value, type) => type === 'display' ? OV.money(value) : Number(value || 0)},
