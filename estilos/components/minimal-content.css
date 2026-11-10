@@ -3,7 +3,8 @@ body.app-sidebar-layout .contain {
     max-height: none !important;
     margin-top: calc(var(--app-navbar-offset, 78px) + 96px) !important;
     margin-bottom: 24px !important;
-    overflow: visible !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     background: transparent !important;
     border: 0 !important;
     border-radius: 0 !important;

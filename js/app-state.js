@@ -42,37 +42,31 @@ document.addEventListener('DOMContentLoaded', () => {
         history.replaceState(null, '', location.pathname + (query ? '?' + query : '') + location.hash);
     }
 
-    // Mantiene abierto el grupo de la página actual sin cerrar otros grupos desplegados.
+    // Maneja los submenús laterales solo por clic y conserva abierta la sección actual al iniciar.
     function initializeSidebarDropdownPersistence() {
         const groups = Array.from(document.querySelectorAll('#navbarDigitApp .navbar-nav > .nav-item.dropdown'));
-        if (!groups.length || !window.bootstrap?.Dropdown) return;
+        if (!groups.length) return;
 
         groups.forEach((group) => {
             const toggle = group.querySelector('[data-bs-toggle="dropdown"]');
-            toggle?.addEventListener('click', (event) => {
-                if (mobileNavigationEnabled && window.matchMedia('(max-width: 767.98px)').matches) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    if (group.classList.contains('active') && group.classList.contains('show')) return;
-
-                    const open = !group.classList.contains('show');
-                    group.classList.toggle('show', open);
-                    group.querySelector(':scope > .dropdown-menu')?.classList.toggle('show', open);
-                    toggle.setAttribute('aria-expanded', String(open));
-                    return;
-                }
-                if (group.classList.contains('active') && group.classList.contains('show')) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
+            if (!toggle) return;
+            toggle.setAttribute('data-bs-auto-close', 'false');
+            toggle.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const open = !group.classList.contains('show');
+                group.classList.toggle('show', open);
+                group.querySelector(':scope > .dropdown-menu')?.classList.toggle('show', open);
+                toggle.setAttribute('aria-expanded', String(open));
             });
         });
 
         const currentGroup = groups.find((group) => group.classList.contains('active'));
         if (currentGroup) {
-            // Bootstrap cierra desplegables al abrir el menú del usuario; conserva visible la sección actual.
-            currentGroup.addEventListener('hide.bs.dropdown', (event) => event.preventDefault());
-            bootstrap.Dropdown.getOrCreateInstance(currentGroup.querySelector('[data-bs-toggle="dropdown"]')).show();
+            const currentToggle = currentGroup.querySelector('[data-bs-toggle="dropdown"]');
+            currentGroup.classList.add('show');
+            currentGroup.querySelector(':scope > .dropdown-menu')?.classList.add('show');
+            currentToggle?.setAttribute('aria-expanded', 'true');
         }
     }
 
