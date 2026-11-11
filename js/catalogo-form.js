@@ -85,10 +85,22 @@ function catalogUpdateThirdParty() {
 // Habilita el tipo de cambio exclusivamente cuando el proveedor cotiza en USD.
 function catalogUpdateCurrency() {
     const exchange = document.getElementById('catalog-exchange-rate');
+    const help = document.getElementById('catalog-exchange-rate-help');
     const usesDollars = document.getElementById('catalog-currency').value === 'USD';
+    const centralRate = catalogPage.dataset.catalogExchangeRate || '';
     exchange.disabled = !usesDollars;
+    exchange.readOnly = usesDollars && centralRate !== '';
     exchange.required = usesDollars;
-    if (!usesDollars) exchange.value = '';
+    if (!usesDollars) {
+        exchange.value = '';
+    } else if (centralRate !== '') {
+        exchange.value = centralRate;
+    }
+    if (help) {
+        help.textContent = centralRate !== ''
+            ? 'Tasa central vigente; solo puede cambiarse desde Catálogo comercial > Tipo de cambio.'
+            : 'Aún no hay una tasa central. Puedes capturar una tasa para este producto.';
+    }
     catalogUpdatePrices();
 }
 
@@ -108,6 +120,7 @@ function catalogAddOperationCost(concept = '', amount = '', fixed = false) {
 async function catalogLoadForm() {
     const result = await catalogRequest('form', {type: catalogType, id: catalogId});
     const item = result.item || {};
+    catalogPage.dataset.catalogExchangeRate = result.exchange_rate || '';
     catalogFillSelect(document.getElementById('catalog-category'), result.categories || [], 'Selecciona una categoría', item.categoria_id);
     catalogFillSelect(document.getElementById('catalog-unit'), result.units || [], 'Selecciona una unidad', item.unidad);
     catalogFillSelect(document.getElementById('catalog-provider'), result.providers || [], 'Sin proveedor relacionado', item.proveedor_id);
@@ -115,7 +128,7 @@ async function catalogLoadForm() {
     document.getElementById('catalog-version').value = item.version || '';
     document.getElementById('catalog-description').value = item.descripcion || '';
     document.getElementById('catalog-currency').value = item.moneda_costo || 'MXN';
-    document.getElementById('catalog-exchange-rate').value = item.tipo_cambio || '';
+    document.getElementById('catalog-exchange-rate').value = result.exchange_rate || item.tipo_cambio || '';
     document.getElementById('catalog-base-cost').value = item.costo_base || '';
     document.getElementById('catalog-public-price').value = item.precio_publico || '';
     document.getElementById('catalog-discount-type').value = item.descuento_costo_tipo || 'porcentaje';

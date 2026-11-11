@@ -96,8 +96,66 @@ try {
         if ($id && (!$item || $item['tipo'] !== $type)) {
             throw new OutOfBoundsException('El registro solicitado no existe.');
         }
+        $exchangeSetting = catalogo_rows($conexion, 'SELECT tipo_cambio_usd_mxn FROM catalogo_configuracion_costos WHERE id = 1');
         $result = ['item' => $item, 'categories' => catalogo_categories($conexion, $type),
-            'providers' => catalogo_providers($conexion), 'units' => CATALOGO_UNIDADES];
+            'providers' => catalogo_providers($conexion), 'units' => CATALOGO_UNIDADES,
+            'exchange_rate' => $exchangeSetting[0]['tipo_cambio_usd_mxn'] ?? null];
+    } elseif ($method === 'GET' && $action === 'exchange_rate') {
+        $settings = catalogo_rows($conexion, 'SELECT tipo_cambio_usd_mxn, fuente, fecha_vigencia, updated_by, version
+            FROM catalogo_configuracion_costos WHERE id = 1');
+        if (!$settings) {
+            throw new RuntimeException('No existe la configuración central del tipo de cambio.');
+        }
+        $count = catalogo_rows($conexion, 'SELECT COUNT(*) AS total FROM catalogo_items_comerciales
+            WHERE tipo = \'producto\' AND moneda_costo = \'USD\'');
+        $result = ['setting' => $settings[0], 'product_count' => (int) $count[0]['total']];
+    } elseif ($method === 'POST' && $action === 'apply_exchange_rate') {
+        $rate = catalogo_exchange_rate($input['rate'] ?? '', true);
+        $expectedVersion = catalogo_id($input['version'] ?? '');
+        $expectedCount = filter_var($input['product_count'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        if ($expectedCount === false) {
+            throw new InvalidArgumentException('No se pudo validar la cantidad de productos que se actualizarán.');
+        }
+        $conexion->begin_transaction();
+        $transaction = true;
+        $settings = catalogo_rows($conexion, 'SELECT version FROM catalogo_configuracion_costos WHERE id = 1 FOR UPDATE');
+        if (!$settings) {
+            throw new RuntimeException('No existe la configuración central del tipo de cambio.');
+        }
+        if ((int) $settings[0]['version'] !== $expectedVersion) {
+            throw new RuntimeException('La tasa central cambió desde que abriste esta pantalla. Recarga y confirma nuevamente.');
+        }
+        $items = catalogo_rows($conexion, 'SELECT id, codigo, costo_base, descuento_costo_tipo, descuento_costo,
+                costo_envio, utilidad_tipo, utilidad_valor
+            FROM catalogo_items_comerciales
+            WHERE tipo = \'producto\' AND moneda_costo = \'USD\'
+            ORDER BY id FOR UPDATE');
+        if (count($items) !== (int) $expectedCount) {
+            throw new RuntimeException('Cambió la cantidad de productos en USD desde que abriste esta pantalla. Recarga y confirma nuevamente.');
+        }
+        foreach ($items as $item) {
+            if ($item['costo_base'] === null) {
+                throw new InvalidArgumentException('El producto ' . $item['codigo'] . ' no tiene un costo base y no se actualizó ningún producto.');
+            }
+            $discountedCost = catalogo_discounted_cost(
+                (float) $item['costo_base'],
+                (string) $item['descuento_costo_tipo'],
+                (float) $item['descuento_costo']
+            );
+            $realCost = round($discountedCost * (float) $rate + (float) $item['costo_envio'], 2);
+            $calculatedPrice = catalogo_sale_price($realCost, (string) $item['utilidad_tipo'], (float) $item['utilidad_valor']);
+            catalogo_query($conexion, 'UPDATE catalogo_items_comerciales
+                SET tipo_cambio = ?, costo_real = ?, precio_calculado = ?, precio_actualizado_at = CURRENT_TIMESTAMP,
+                    version = version + 1
+                WHERE id = ?', 'sddi', [$rate, $realCost, $calculatedPrice, (int) $item['id']])->close();
+        }
+        catalogo_query($conexion, 'UPDATE catalogo_configuracion_costos
+            SET tipo_cambio_usd_mxn = ?, fuente = \'Manual\', fecha_vigencia = CURRENT_TIMESTAMP,
+                updated_by = ?, version = version + 1
+            WHERE id = 1', 'si', [$rate, (int) $user['id']])->close();
+        $conexion->commit();
+        $transaction = false;
+        $result = ['rate' => $rate, 'product_count' => count($items)];
     } elseif ($method === 'POST' && $action === 'category_add') {
         $type = (string) ($input['type'] ?? '');
         if (!in_array($type, CATALOGO_TIPOS, true)) {
@@ -167,7 +225,12 @@ try {
             if (!in_array($currency, ['MXN', 'USD'], true)) {
                 throw new InvalidArgumentException('Selecciona una moneda válida.');
             }
-            $exchangeRate = catalogo_exchange_rate($input['exchange_rate'] ?? '', $currency === 'USD');
+            $centralRate = $currency === 'USD'
+                ? catalogo_rows($conexion, 'SELECT tipo_cambio_usd_mxn FROM catalogo_configuracion_costos WHERE id = 1')
+                : [];
+            $exchangeRate = $currency === 'USD' && !empty($centralRate[0]['tipo_cambio_usd_mxn'])
+                ? catalogo_exchange_rate($centralRate[0]['tipo_cambio_usd_mxn'], true)
+                : catalogo_exchange_rate($input['exchange_rate'] ?? '', $currency === 'USD');
             $baseCost = (float) catalogo_money($input['base_cost'] ?? '', 'El costo de compra', true);
             $shippingCost = (float) catalogo_money($input['shipping_cost'] ?? '0', 'El costo de envío', true);
             $thirdPartyCost = null;
