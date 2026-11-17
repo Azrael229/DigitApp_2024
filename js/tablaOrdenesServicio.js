@@ -18,7 +18,6 @@
         ]
     }));
     applyColumnFilters(table);
-    table.on('draw', () => { document.getElementById('os-records').textContent = table.rows({search: 'applied'}).count(); });
     document.querySelector('#tabla-ordenes-servicio tbody').addEventListener('change', async event => {
         const select = event.target.closest('.os-status-select');
         if (!select) { return; }

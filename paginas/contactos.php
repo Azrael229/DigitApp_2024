@@ -13,7 +13,7 @@ function escaparContacto($valor): string
 }
 ?>
 
-<div class="container mt-5 mb-5 contain shadow-lg contactos-directorio"<?= $esAdministrador ? ' data-admin-delete-csrf="' . htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
+<div class="container mt-5 mb-5 contain shadow-lg contactos-directorio table-list-page"<?= $esAdministrador ? ' data-admin-delete-csrf="' . htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
     <div class="row align-items-center contactos-header">
         <div class="col p-2 text-center text-md-start">
             <p class="contactos-kicker mb-1">Directorio</p>
@@ -26,20 +26,7 @@ function escaparContacto($valor): string
         </div>
     </div>
 
-    <div class="row mt-3">
-        <div class="col-12 col-md-4 col-xl-3">
-            <label for="filtro_empresa_contactos" class="form-label">Relación empresarial</label>
-            <select id="filtro_empresa_contactos" class="form-select">
-                <option value="todos">Todos los contactos</option>
-                <option value="con_empresa">Con empresa</option>
-                <option value="sin_empresa">Sin empresa</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col">
-            <div class="table-responsive data-table-shell data-table-managed table-wide contactos-table-wrap">
+    <div class="table-responsive data-table-shell data-table-managed table-wide contactos-table-wrap">
                 <table id="example" class="table table-secondary table-striped align-middle contactos-table mb-0">
                     <caption class="visually-hidden">Directorio de contactos</caption>
                     <thead>
@@ -65,7 +52,7 @@ function escaparContacto($valor): string
                             }
                             $activo = (int) ($contacto['activo'] ?? 0) === 1;
                             ?>
-                            <tr data-company-count="<?= $totalEmpresas ?>">
+                            <tr>
                                 <td class="table-contacto-column">
                                     <?= renderizarEnlaceEntidad('contacto', $id, (string) $contacto['nombre']) ?>
                                 </td>
@@ -89,8 +76,6 @@ function escaparContacto($valor): string
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -100,6 +85,6 @@ function escaparContacto($valor): string
 <script src="<?= $prefijoRuta ?>js/datatable-filters.js?v=20261008-2"></script>
 <script src="<?= $prefijoRuta ?>js/datatable-config.js?v=20261104-2"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
-<script src="<?= $prefijoRuta ?>js/tablaContactos.js?v=20261101-1"></script>
+<script src="<?= $prefijoRuta ?>js/tablaContactos.js?v=20261117-1"></script>
 
 <?php require __DIR__ . '/../construct/footer.html'; ?>

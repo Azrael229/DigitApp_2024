@@ -56,3 +56,71 @@ body.app-sidebar-layout .contain.detail-page .data-table-shell {
 }
 
 /* FIN BLOQUE REVERSIBLE: contenido minimalista y desplazamiento global 2026-10-31. */
+
+/* Mantiene los directorios dentro del área visible y reserva el desplazamiento para la tabla. */
+body.app-sidebar-layout .contain.table-list-page {
+    display: flex;
+    position: fixed;
+    top: calc(var(--app-navbar-offset, 78px) + 96px);
+    right: 16px;
+    bottom: 12px;
+    left: 16px;
+    width: auto !important;
+    max-width: none !important;
+    height: auto;
+    min-height: 0;
+    flex-direction: column;
+    overflow: hidden !important;
+    margin: 0 !important;
+}
+
+body.app-sidebar-layout .contain.table-list-page > :not(.data-table-shell) {
+    flex: 0 0 auto;
+}
+
+body.app-sidebar-layout .contain.table-list-page .data-table-shell {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+body.app-sidebar-layout .contain.table-list-page .dataTables_wrapper,
+body.app-sidebar-layout .contain.table-list-page .dataTables_scroll {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
+body.app-sidebar-layout .contain.table-list-page .dataTables_scrollBody {
+    flex: 1 1 auto;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+}
+
+@media (min-width: 1200px) {
+    body.app-sidebar-layout .contain.table-list-page {
+        right: 16px;
+        left: 276px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    body.app-sidebar-layout.app-mobile-crm-layout .contain.table-list-page {
+        top: 68px;
+        right: 8px;
+        bottom: 12px;
+        left: 8px;
+    }
+
+    body.app-sidebar-layout .contain.table-list-page .data-table-shell {
+        min-height: 0;
+    }
+}

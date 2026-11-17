@@ -34,13 +34,6 @@
         if (settings.nTable.id !== 'tabla-oportunidades') { return true; }
         return Op.inDateRange(data[0], from.value, to.value);
     });
-    // Actualiza el número de coincidencias y el subtotal de los importes vigentes filtrados.
-    function subtotal() {
-        const rows = table.rows({search: 'applied'}).data().toArray();
-        document.getElementById('op-registros').textContent = rows.length;
-        document.getElementById('op-subtotal').textContent = Op.total(rows, 'importe_vigente');
-    }
-    table.on('draw', subtotal);
     // Actualiza empresa, contacto e importe calculado sin reconstruir la página.
     async function refreshOpportunities() {
         const result = await Op.request('list');

@@ -1,6 +1,6 @@
 'use strict';
 
-// Inicializa los directorios con filtros ordinarios por columna y resumen filtrado.
+// Inicializa los directorios con filtros ordinarios por columna.
 $(function () {
     const hasAction = Boolean(document.querySelector('#catalogo-table thead .table-action-column'));
     const table = $('#catalogo-table').DataTable(getDataTableOptions({
@@ -11,12 +11,4 @@ $(function () {
         columnDefs: hasAction ? [{targets: [-1], orderable: false, searchable: false}] : []
     }));
     applyColumnFilters(table);
-
-    // Refleja todas las filas coincidentes, incluso cuando ocupan varias páginas.
-    function updateCatalogSummary() {
-        document.getElementById('catalog-records').textContent = table.rows({search: 'applied'}).count();
-    }
-
-    table.on('draw', updateCatalogSummary);
-    updateCatalogSummary();
 });

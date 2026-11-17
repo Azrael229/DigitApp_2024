@@ -44,23 +44,6 @@ jQuery.fn.dataTable.ext.search.push(function (settings, data) {
         && (!cotizacionesHasta.value || fecha <= cotizacionesHasta.value);
 });
 
-// Actualiza el conteo y la suma de importes de todas las filas filtradas.
-function actualizarResumenCotizaciones() {
-    const filas = cotizacionesTable.rows({search: 'applied'}).nodes().toArray();
-    const total = filas.reduce((acumulado, fila) => {
-        const celda = fila.querySelector('[data-cot-total]');
-        return acumulado + Number(celda ? celda.dataset.cotTotal : 0);
-    }, 0);
-    document.getElementById('cot-registros').textContent = filas.length;
-    document.getElementById('cot-total-filtrado').textContent = new Intl.NumberFormat('es-MX', {
-        style: 'currency',
-        currency: 'MXN'
-    }).format(total);
-}
-
-cotizacionesTable.on('draw', actualizarResumenCotizaciones);
-actualizarResumenCotizaciones();
-
 // Recarga las filas renderizadas por PHP para reflejar nombres y correos maestros sin recargar la página.
 async function actualizarDatosMaestrosCotizaciones() {
     const response = await fetch(location.href, {cache: 'no-store', credentials: 'same-origin'});

@@ -9,7 +9,7 @@
 
 @import url("./main/buttons.css?v=20261007-2");
 
-@import url("./tables/base.css?v=20261109-2");
+@import url("./tables/base.css?v=20261117-1");
 @import url("./tables/datatables.css?v=20261007-2");
 @import url("./tables/facturacion.css?v=20261007-1");
 @import url("./tables/cotizacion.css?v=20261104-2");
@@ -32,4 +32,4 @@
 
 @import url("./main/navbar.css?v=20261110-1");
 @import url("./components/page-header.css?v=20261109-1");
-@import url("./components/minimal-content.css?v=20261110-1");
+@import url("./components/minimal-content.css?v=20261117-1");

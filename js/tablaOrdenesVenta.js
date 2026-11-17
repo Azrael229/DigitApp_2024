@@ -1,6 +1,6 @@
 'use strict';
 
-// Inicializa el listado de órdenes, filtros y resumen monetario global.
+// Inicializa el listado de órdenes, filtros y acciones.
 (async function () {
     const table = new DataTable('#tabla-ordenes-venta', getDataTableOptions({
         data: [], order: [[8, 'desc']], orderCellsTop: true,
@@ -20,13 +20,6 @@
     }));
     applyColumnFilters(table);
 
-    // Actualiza el total de órdenes y el importe de todas las filas filtradas.
-    function refreshSummary() {
-        const rows = table.rows({search: 'applied'}).data().toArray();
-        document.getElementById('ov-registros').textContent = rows.length;
-        document.getElementById('ov-subtotal').textContent = OV.money(rows.reduce((sum, row) => sum + Number(row.importe_sin_iva || 0), 0));
-    }
-    table.on('draw', refreshSummary);
     document.querySelector('#tabla-ordenes-venta tbody').addEventListener('change', async event => {
         const select = event.target.closest('.ov-status-select');
         if (!select) { return; }
@@ -40,7 +33,7 @@
             OV.message('mensaje_ordenes', 'Estatus actualizado.', true);
         } catch (error) { OV.message('mensaje_ordenes', error.message); row.data(data).draw(false); }
     });
-    // Vuelve a consultar los datos maestros y el subtotal vigente sin recargar la página.
+    // Vuelve a consultar los datos maestros y los importes vigentes sin recargar la página.
     async function refreshSalesOrders() {
         const result = await OV.request('list');
         table.clear().rows.add(result.data).draw();

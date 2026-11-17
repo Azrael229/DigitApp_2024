@@ -13,7 +13,7 @@ if (empty($_SESSION['empresas_tabla_csrf'])) {
 
 
 <!-- container -->
-<div class="container mt-5 mb-5 contain shadow-lg oportunidades-page" data-empresas-csrf="<?= htmlspecialchars($_SESSION['empresas_tabla_csrf'], ENT_QUOTES, 'UTF-8') ?>"<?= $esAdministrador ? ' data-admin-delete-csrf="' . htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
+<div class="container mt-5 mb-5 contain shadow-lg oportunidades-page table-list-page" data-empresas-csrf="<?= htmlspecialchars($_SESSION['empresas_tabla_csrf'], ENT_QUOTES, 'UTF-8') ?>"<?= $esAdministrador ? ' data-admin-delete-csrf="' . htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
           <!-- titulo container -->
           <div class="row align-items-center contacto-form-header g-3">
                     <div class="col">
@@ -27,11 +27,8 @@ if (empty($_SESSION['empresas_tabla_csrf'])) {
                     </div>
           </div>
 
-          <!--Fila Tabla Empresas Data Table -->
-          <div class="row">
-               <div class="col">
-                    <!-- col Tabla -->
-                    <div class="col table-responsive table-wide data-table-shell data-table-managed empresa-directory-table-wrap" >
+          <!-- Tabla de empresas -->
+                    <div class="table-responsive table-wide data-table-shell data-table-managed empresa-directory-table-wrap">
                          <!-- tabla -->
                          <table id="example" class="table table-secondary table-striped empresa-directory-table">
                               <thead>
@@ -70,11 +67,6 @@ if (empty($_SESSION['empresas_tabla_csrf'])) {
                          </table>
                          <!-- tabla -->
                     </div>
-                    <!-- col Tabla -->
-               </div>
-          </div>
-          <!-- Fila Tabla Data TAble -->
-          
 </div>
 <!-- container -->
 

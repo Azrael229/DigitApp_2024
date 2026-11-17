@@ -7,7 +7,7 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
 ?>
 <?php  require (__DIR__ . "/../construct/header.php")   ?>
 <?php  require (__DIR__ . "/../backend/cotizaciones/query_all_cotizaciones.php")   ?>
-<div class="container mt-5 mb-5 contain shadow-lg oportunidades-page" data-cot-status-csrf="<?= htmlspecialchars($_SESSION['cotizacion_status_csrf'], ENT_QUOTES, 'UTF-8') ?>"<?= $esAdministrador ? ' data-admin-delete-csrf="' . htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
+<div class="container mt-5 mb-5 contain shadow-lg oportunidades-page table-list-page" data-cot-status-csrf="<?= htmlspecialchars($_SESSION['cotizacion_status_csrf'], ENT_QUOTES, 'UTF-8') ?>"<?= $esAdministrador ? ' data-admin-delete-csrf="' . htmlspecialchars(auth_csrf(), ENT_QUOTES, 'UTF-8') . '"' : '' ?>>
     <div class="row align-items-center contacto-form-header g-3">
             <div class="col">
                 <p class="contactos-kicker mb-1">Gestión comercial</p>
@@ -19,17 +19,6 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
                 </a>
             </div>
     </div>
-    <div class="factura-resumen mt-4 mb-4">
-        <div class="factura-resumen-item">
-            <span class="factura-resumen-label">Cotizaciones filtradas</span>
-            <strong id="cot-registros">0</strong>
-        </div>
-        <div class="factura-resumen-item factura-resumen-total">
-            <span class="factura-resumen-label">Importe sin IVA filtrado · MXN</span>
-            <strong id="cot-total-filtrado">$0.00</strong>
-        </div>
-    </div>
-    <p class="contactos-muted">El importe incluye todas las páginas que coincidan con los filtros.</p>
     <div class="table-responsive data-table-shell data-table-managed table-wide mt-4 empresa-table-wrap">
                 <table id="example" class="table table-secondary table-striped align-middle mb-0 w-100 cotizaciones-directory-table">
                     <thead>
@@ -57,7 +46,7 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
                             <td class="cot-col-company table-razon-social-column"><div class="table-text-wrap"><?= htmlspecialchars((string) ($row_coti['cot_empresa'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div></td>
                             <td class="cot-col-contact table-contacto-column"><div class="table-text-wrap"><?= htmlspecialchars((string) ($row_coti['cot_contacto'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div></td>
                             <td class="cot-col-email table-nowrap"><?= htmlspecialchars((string) (($row_coti['cot_correo'] ?? '') ?: 'Sin correo'), ENT_QUOTES, 'UTF-8') ?></td>
-                            <td class="cot-col-amount" data-cot-total="<?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>" data-order="<?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>">$ <?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ' '), ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="cot-col-amount" data-order="<?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>">$ <?= htmlspecialchars(number_format((float) $row_coti['cot_subtotal'], 2, '.', ' '), ENT_QUOTES, 'UTF-8') ?></td>
                             <?php $estatusClave = cotizacionEstatusClave($row_coti['cot_status'] ?? ''); ?>
                             <td class="cot-col-status"><select class="form-select form-select-sm cot-status-select" data-id="<?= (int) $row_coti['id_coti'] ?>" aria-label="Estatus de cotización <?= htmlspecialchars((string) ($row_coti['cot_numero'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"><?php foreach (COTIZACION_ESTATUS as $clave => $etiqueta): ?><option value="<?= $clave ?>"<?= $estatusClave === $clave ? ' selected' : '' ?>><?= htmlspecialchars($etiqueta, ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select></td>
                             <td class="table-action-column"><a class="btn btn-outline-secondary btn-sm text-nowrap" href="nuevaCotizacion.php?duplicar_id=<?= (int) $row_coti['id_coti'] ?>"><i class="bi bi-copy" aria-hidden="true"></i> Duplicar</a></td>
@@ -92,5 +81,5 @@ $esAdministrador = ($authUser['rol'] ?? '') === 'administrador';
 <script src="<?= $prefijoRuta ?>js/datatable-config.js?v=20261104-2"></script>
 <script src="<?= $prefijoRuta ?>js/cotizaciones-status.js?v=20261003-1"></script>
 <?php if ($esAdministrador): ?><script src="<?= $prefijoRuta ?>js/admin-delete.js?v=20261009-1"></script><?php endif; ?>
-<script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261101-2"></script>
+<script src="<?= $prefijoRuta ?>js/tablaCotizacion.js?v=20261117-1"></script>
 <?php  require (__DIR__ . "/../construct/footer.html")   ?>

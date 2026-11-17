@@ -51,6 +51,16 @@
     width: 100% !important;
 }
 
+/* Reserva altura para los filtros clonados y evita que flex los recorte del encabezado visible. */
+.data-table-shell.data-table-managed .dataTables_scrollHead {
+    flex: 0 0 auto;
+    height: auto !important;
+}
+
+.data-table-shell.data-table-managed .dataTables_scrollHeadInner {
+    height: auto !important;
+}
+
 .data-table-shell.data-table-managed .dataTables_length label {
     display: flex;
     flex-wrap: wrap;
