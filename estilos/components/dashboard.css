@@ -79,6 +79,22 @@
     height: 360px;
 }
 
+.dashboard-batting-average {
+    display: inline-block;
+    min-width: 4.25rem;
+    margin-left: 0.35rem;
+    padding: 0.2rem 0.65rem;
+    border: 2px solid var(--app-border-vivid);
+    border-radius: 999px;
+    background: var(--app-section-title);
+    color: var(--bg-deep);
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-align: center;
+    box-shadow: 0 0 0.75rem rgba(79, 248, 222, 0.3);
+}
+
 @media (max-width: 991px) {
     .dashboard-monthly-chart {
         height: 300px;

@@ -1,6 +1,7 @@
 const dashboardCharts = {};
 const dashboardCurrency = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
 const dashboardNumber = new Intl.NumberFormat('es-MX');
+const dashboardPercent = new Intl.NumberFormat('es-MX', { style: 'percent', maximumFractionDigits: 1 });
 
 document.addEventListener('DOMContentLoaded', function () {
     inicializarGraficasHistoricas();
@@ -247,6 +248,8 @@ function actualizarGraficaGlobalOportunidades(data) {
     chart.data.datasets[0].data = [totals.negotiation, totals.won, totals.closed];
     document.getElementById('dashboard-oportunidades-total-titulo').textContent =
         `Oportunidades comerciales · total global: ${dashboardNumber.format(totals.overall)}`;
+    document.getElementById('dashboard-oportunidades-tasa-bateo').textContent =
+        dashboardPercent.format(totals.overall ? totals.won / totals.overall : 0);
     chart.update();
 }
 

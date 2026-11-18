@@ -46,10 +46,10 @@ foreach ($remisionesDashboard as $remision) {
             <article class="dashboard-hero dashboard-admin-chart dashboard-daily-chart"><h3 id="dashboard-oportunidades-mes-actual-titulo" class="h5 text-white mb-3">Oportunidades creadas · mes actual</h3><canvas id="dashboard-oportunidades-mes-actual" aria-label="Cantidad de oportunidades creadas cada día del mes actual" role="img"></canvas></article>
         </div>
         <article class="dashboard-hero dashboard-admin-chart mt-4"><h3 class="h5 text-white mb-2">Oportunidades por mes y estado</h3><p class="text-white-50 mb-3">Cantidad creada durante los últimos 12 meses, agrupada por estado actual. El total mensual aparece al señalar una barra.</p><canvas id="dashboard-oportunidades-por-mes" aria-label="Cantidad mensual de oportunidades en negociación, ganadas y canceladas o perdidas" role="img"></canvas></article>
-        <article class="dashboard-hero dashboard-admin-chart dashboard-opportunity-global-chart mt-4"><h3 id="dashboard-oportunidades-total-titulo" class="h5 text-white mb-2">Oportunidades comerciales · total global</h3><p class="text-white-50 mb-3">Distribución global: negociación, ganadas y canceladas o perdidas.</p><canvas id="dashboard-oportunidades-globales" aria-label="Total global de oportunidades comerciales y cantidad en negociación, ganadas y canceladas o perdidas" role="img"></canvas></article>
+        <article class="dashboard-hero dashboard-admin-chart dashboard-opportunity-global-chart mt-4"><h3 id="dashboard-oportunidades-total-titulo" class="h5 text-white mb-2">Oportunidades comerciales · total global</h3><p class="text-white-50 mb-2">Tasa de bateo (ganadas ÷ total): <strong id="dashboard-oportunidades-tasa-bateo" class="dashboard-batting-average">0%</strong></p><p class="text-white-50 mb-3">Distribución global: negociación, ganadas y canceladas o perdidas.</p><canvas id="dashboard-oportunidades-globales" aria-label="Total global de oportunidades comerciales y cantidad en negociación, ganadas y canceladas o perdidas" role="img"></canvas></article>
     </section>
 </main>
 <script>window.dashboardInvoiceData = <?= json_encode($datosDashboardCfdi, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="../js/dashboard-charts.js?v=20261117-4"></script>
+<script src="../js/dashboard-charts.js?v=20261117-5"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>
