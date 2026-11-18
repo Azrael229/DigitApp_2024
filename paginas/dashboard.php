@@ -39,23 +39,16 @@ foreach ($remisionesDashboard as $remision) {
         <article class="dashboard-hero dashboard-admin-chart"><h2 class="h5 text-white mb-3">Top 10 meses por ventas netas</h2><canvas id="dashboard-top-meses" aria-label="Diez meses con mayores ventas netas, con posición, nombre de mes y año" role="img"></canvas></article>
     </section>
 
-    <section class="dashboard-period-section mt-4" aria-labelledby="dashboard-period-title">
-        <div class="dashboard-period-card card mb-4">
-            <div class="card-body">
-                <div class="row g-3 align-items-end">
-                    <div class="col-12 col-lg"><h2 id="dashboard-period-title" class="h5 mb-1">Análisis diario por mes</h2><p class="dashboard-chart-note mb-0">Elige mes y año; ambos gráficos mostrarán todos los días de ese mes.</p></div>
-                    <div class="col-12 col-sm-6 col-lg-3"><label for="dashboard-periodo" class="form-label">Mes y año</label><input id="dashboard-periodo" class="form-control" type="month" min="2026-09" required></div>
-                    <div class="col-12 col-sm-6 col-lg-3"><label for="dashboard-estatus-oportunidad" class="form-label">Estatus de oportunidad</label><select id="dashboard-estatus-oportunidad" class="form-select"><option value="todos">Todos los estatus</option><option value="preparacion">Preparación</option><option value="cotizada">Cotizada</option><option value="negociacion">Negociación</option><option value="ganada">Ganada</option><option value="perdida">Perdida</option><option value="cancelada">Cancelada</option></select></div>
-                </div>
-            </div>
+    <section class="dashboard-opportunity-section mt-5" aria-labelledby="dashboard-opportunity-title">
+        <h2 id="dashboard-opportunity-title" class="h4 mb-4">Actividad de oportunidades comerciales</h2>
+        <div class="dashboard-opportunity-daily" aria-label="Oportunidades comerciales creadas por día">
+            <article class="dashboard-hero dashboard-admin-chart dashboard-daily-chart"><h3 id="dashboard-oportunidades-mes-anterior-titulo" class="h5 text-white mb-3">Oportunidades creadas · mes anterior</h3><canvas id="dashboard-oportunidades-mes-anterior" aria-label="Cantidad de oportunidades creadas cada día del mes anterior" role="img"></canvas></article>
+            <article class="dashboard-hero dashboard-admin-chart dashboard-daily-chart"><h3 id="dashboard-oportunidades-mes-actual-titulo" class="h5 text-white mb-3">Oportunidades creadas · mes actual</h3><canvas id="dashboard-oportunidades-mes-actual" aria-label="Cantidad de oportunidades creadas cada día del mes actual" role="img"></canvas></article>
         </div>
-        <div class="dashboard-period-charts" aria-label="Importes por día">
-            <article class="dashboard-hero dashboard-admin-chart"><h2 class="h5 text-white mb-1">Importe de oportunidades comerciales</h2><p class="dashboard-chart-note">Importe por día; el filtro de estatus solo afecta esta gráfica.</p><canvas id="dashboard-oportunidades" aria-label="Importe diario de oportunidades comerciales en el mes seleccionado" role="img"></canvas></article>
-            <article class="dashboard-hero dashboard-admin-chart"><h2 class="h5 text-white mb-1">Órdenes de venta completadas</h2><p class="dashboard-chart-note">Importes sin IVA por día de finalización.</p><canvas id="dashboard-ordenes" aria-label="Importe diario de órdenes de venta completadas en el mes seleccionado" role="img"></canvas></article>
-        </div>
+        <article class="dashboard-hero dashboard-admin-chart mt-4"><h3 class="h5 text-white mb-2">Oportunidades por mes y estado</h3><p class="text-white-50 mb-3">Cantidad creada durante los últimos 12 meses, agrupada por estado actual. El total mensual aparece al señalar una barra.</p><canvas id="dashboard-oportunidades-por-mes" aria-label="Cantidad mensual de oportunidades en negociación, ganadas y canceladas o rechazadas. El total se muestra en el detalle del mes." role="img"></canvas></article>
     </section>
 </main>
 <script>window.dashboardInvoiceData = <?= json_encode($datosDashboardCfdi, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="../js/dashboard-charts.js?v=20261101-3"></script>
+<script src="../js/dashboard-charts.js?v=20261117-2"></script>
 <?php require __DIR__ . '/../construct/footer.html'; ?>
