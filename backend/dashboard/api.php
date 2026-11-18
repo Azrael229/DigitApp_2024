@@ -53,11 +53,17 @@ try {
         [$firstMonthlyMonth->format('Y-m-d 00:00:00'), $until]
     );
 
+    $globalStatusSql = 'SELECT estatus, COUNT(*) AS cantidad
+        FROM oportunidades_comerciales
+        GROUP BY estatus ORDER BY estatus';
+    $globalStatusCounts = dashboard_fetch($conexion, $globalStatusSql, '', []);
+
     echo json_encode([
         'mes_anterior' => $previousMonth->format('Y-m'),
         'mes_actual' => $currentMonth->format('Y-m'),
         'oportunidades_por_dia' => $dailyCounts,
         'oportunidades_por_mes' => $monthlyCounts,
+        'oportunidades_por_estado_global' => $globalStatusCounts,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 } catch (Throwable $error) {
     error_log('Dashboard de administración: ' . get_class($error) . ' en línea ' . $error->getLine());

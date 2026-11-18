@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     inicializarGraficasHistoricas();
     inicializarGraficasDiariasOportunidades();
     inicializarGraficaMensualOportunidades();
+    inicializarGraficaGlobalOportunidades();
     cargarGraficasDiariasOportunidades();
     window.DigitAppMasterSync?.subscribe(() => {
         cargarGraficasDiariasOportunidades();
@@ -102,12 +103,11 @@ function crearOpcionesConteoDiarioDashboard() {
     return options;
 }
 
-// Prepara las barras mensuales agrupadas por estado comercial.
+// Prepara el gráfico mensual de oportunidades agrupadas por estado.
 function inicializarGraficaMensualOportunidades() {
     const options = crearOpcionesGrafica({ grouped: true });
     options.scales.x.ticks.autoSkip = false;
     options.scales.x.ticks.maxRotation = 45;
-    options.scales.x.ticks.minRotation = 0;
     options.plugins.tooltip.callbacks.footer = items => {
         if (!items.length) { return ''; }
         const chart = items[0].chart;
@@ -119,9 +119,21 @@ function inicializarGraficaMensualOportunidades() {
         data: { labels: [], datasets: [
             { label: 'En negociación', data: [], backgroundColor: '#60a5fa', borderRadius: 4 },
             { label: 'Ganadas', data: [], backgroundColor: '#35c7b3', borderRadius: 4 },
-            { label: 'Canceladas / rechazadas', data: [], backgroundColor: '#ef4444', borderRadius: 4 }
+            { label: 'Canceladas / perdidas', data: [], backgroundColor: '#ef4444', borderRadius: 4 }
         ] },
         options
+    });
+}
+
+// Prepara las tres barras globales por estado comercial.
+function inicializarGraficaGlobalOportunidades() {
+    dashboardCharts.opportunitiesGlobal = new Chart(document.getElementById('dashboard-oportunidades-globales'), {
+        type: 'bar',
+        data: { labels: ['En negociación', 'Ganadas', 'Canceladas / perdidas'], datasets: [{
+            label: 'Oportunidades comerciales', data: [0, 0, 0],
+            backgroundColor: ['#60a5fa', '#35c7b3', '#ef4444'], borderRadius: 6
+        }] },
+        options: crearOpcionesGrafica()
     });
 }
 
@@ -165,6 +177,7 @@ async function cargarGraficasDiariasOportunidades() {
         }
         actualizarGraficasDiariasOportunidades(data);
         actualizarGraficaMensualOportunidades(data);
+        actualizarGraficaGlobalOportunidades(data);
     } catch (error) {
         errorBox.textContent = error.message || 'No se pudieron cargar los indicadores.';
         errorBox.classList.remove('d-none');
@@ -189,11 +202,10 @@ function actualizarGraficasDiariasOportunidades(data) {
     });
 }
 
-// Actualiza las tres series y rellena los meses sin registros con cero.
+// Completa los meses sin registros y actualiza las tres series mensuales y sus totales.
 function actualizarGraficaMensualOportunidades(data) {
     const monthlyCounts = new Map();
-    const currentMonth = data.mes_actual;
-    const [year, monthNumber] = currentMonth.split('-').map(Number);
+    const [year, monthNumber] = data.mes_actual.split('-').map(Number);
     const months = Array.from({ length: 12 }, (_, index) => {
         const date = new Date(year, monthNumber - 1 - (11 - index), 1);
         const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -217,6 +229,24 @@ function actualizarGraficaMensualOportunidades(data) {
     chart.data.datasets[0].data = months.map(month => monthlyCounts.get(month).negotiation);
     chart.data.datasets[1].data = months.map(month => monthlyCounts.get(month).won);
     chart.data.datasets[2].data = months.map(month => monthlyCounts.get(month).closed);
+    chart.update();
+}
+
+// Actualiza las tres barras globales y el total de oportunidades del título.
+function actualizarGraficaGlobalOportunidades(data) {
+    const totals = { negotiation: 0, won: 0, closed: 0, overall: 0 };
+    (data.oportunidades_por_estado_global || []).forEach(row => {
+        const count = Number(row.cantidad) || 0;
+        totals.overall += count;
+        if (row.estatus === 'negociacion') { totals.negotiation = count; }
+        if (row.estatus === 'ganada') { totals.won = count; }
+        if (['perdida', 'cancelada', 'rechazada'].includes(row.estatus)) { totals.closed += count; }
+    });
+
+    const chart = dashboardCharts.opportunitiesGlobal;
+    chart.data.datasets[0].data = [totals.negotiation, totals.won, totals.closed];
+    document.getElementById('dashboard-oportunidades-total-titulo').textContent =
+        `Oportunidades comerciales · total global: ${dashboardNumber.format(totals.overall)}`;
     chart.update();
 }
 

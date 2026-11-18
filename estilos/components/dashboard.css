@@ -48,6 +48,11 @@
     width: 100%;
 }
 
+.dashboard-admin .dashboard-opportunity-global-chart {
+    width: 50%;
+    height: 585px;
+}
+
 .dashboard-admin-chart {
     height: 390px;
 }
@@ -87,6 +92,10 @@
         height: 360px;
         padding: 28px 24px;
     }
+
+    .dashboard-admin .dashboard-opportunity-global-chart {
+        height: 540px;
+    }
 }
 
 @media (max-width: 575px) {
@@ -98,6 +107,11 @@
     .dashboard-daily-chart {
         height: 290px;
         padding: 18px 10px;
+    }
+
+    .dashboard-admin .dashboard-opportunity-global-chart {
+        height: 465px;
+        padding: 22px 18px;
     }
 }
 
