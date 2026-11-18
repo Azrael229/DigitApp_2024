@@ -100,7 +100,7 @@ function crearOpcionesConteoDiarioDashboard() {
     options.scales.x.ticks.maxRotation = 90;
     options.scales.x.ticks.minRotation = 0;
     options.scales.x.ticks.font = context => ({ size: context.chart.width < 360 ? 8 : 11 });
-    options.layout.padding.bottom = 54;
+    options.layout.padding = { top: 12, right: 4, bottom: 54, left: 4 };
     return options;
 }
 
@@ -108,7 +108,9 @@ function crearOpcionesConteoDiarioDashboard() {
 function inicializarGraficaMensualOportunidades() {
     const options = crearOpcionesGrafica({ grouped: true });
     options.scales.x.ticks.autoSkip = false;
-    options.scales.x.ticks.maxRotation = 45;
+    options.scales.x.ticks.maxRotation = 90;
+    options.scales.x.ticks.font = context => ({ size: context.chart.width < 480 ? 8 : 11 });
+    options.layout.padding = { top: 12, right: 12, bottom: 48, left: 12 };
     options.plugins.tooltip.callbacks.footer = items => {
         if (!items.length) { return ''; }
         const chart = items[0].chart;
@@ -128,13 +130,18 @@ function inicializarGraficaMensualOportunidades() {
 
 // Prepara las tres barras globales por estado comercial.
 function inicializarGraficaGlobalOportunidades() {
+    const options = crearOpcionesGrafica();
+    options.scales.x.ticks.maxRotation = 90;
+    options.scales.x.ticks.minRotation = 0;
+    options.scales.x.ticks.font = context => ({ size: context.chart.width < 480 ? 9 : 11 });
+    options.layout.padding = { top: 12, right: 16, bottom: 48, left: 16 };
     dashboardCharts.opportunitiesGlobal = new Chart(document.getElementById('dashboard-oportunidades-globales'), {
         type: 'bar',
         data: { labels: ['En negociación', 'Ganadas', 'Canceladas / perdidas'], datasets: [{
             label: 'Oportunidades comerciales', data: [0, 0, 0],
             backgroundColor: ['#60a5fa', '#35c7b3', '#ef4444'], borderRadius: 6
         }] },
-        options: crearOpcionesGrafica()
+        options
     });
 }
 
